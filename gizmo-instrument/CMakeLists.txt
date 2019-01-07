@@ -2,7 +2,7 @@ set(LLVM_LINK_COMPONENTS
   Support
   )
 
-add_clang_library(crochetPatch
+add_clang_library(gizmo
 
   lib/ASTDiff.cpp
   lib/ASTPatch.cpp
