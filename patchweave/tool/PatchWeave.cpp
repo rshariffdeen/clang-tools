@@ -24,16 +24,14 @@ using namespace clang;
 using namespace clang::tooling;
 
 
-static cl::OptionCategory CrochetPatchCategory("patchweave-patch options");
-
+static cl::OptionCategory CrochetPatchCategory("patchweave options");
 
 static cl::opt<std::string> ScriptPath("script", cl::desc("<script>"), cl::Required, cl::cat(CrochetPatchCategory));
 static cl::opt<std::string> TargetPath("target", cl::desc("<target>"), cl::Required, cl::cat(CrochetPatchCategory));
 static cl::opt<std::string> SourcePath("source", cl::desc("<source>"), cl::Required, cl::cat(CrochetPatchCategory));
-static cl::opt<std::string> DestinationPath("destination", cl::desc("<destination>"), cl::Required, cl::cat(CrochetPatchCategory));
+static cl::opt<std::string> MapPath("map", cl::desc("<variable mapping>"), cl::Required, cl::cat(CrochetPatchCategory));
 
 static cl::opt<std::string> StopAfter("stop-diff-after", cl::desc("<topdown|bottomup>"), cl::Optional, cl::init(""), cl::cat(CrochetPatchCategory));
-
 static cl::opt<int> MaxSize("s", cl::desc("<maxsize>"), cl::Optional, cl::init(-1), cl::cat(CrochetPatchCategory));
 static cl::opt<float> MinSimilarity("min-sim", cl::desc("<minsimilarity>"), cl::Optional, cl::init(-1), cl::cat(CrochetPatchCategory));
 static cl::opt<std::string> BuildPath("p", cl::desc("Build path"), cl::init(""), cl::Optional, cl::cat(CrochetPatchCategory));
@@ -73,16 +71,10 @@ getCompilationDatabase(StringRef Filename) {
 }
 
 
-
-
-
-
 bool in_array(const std::string &value, const std::vector<std::string> &array)
 {
     return std::find(array.begin(), array.end(), value) != array.end();
 }
-
-
 
 
 
@@ -124,18 +116,11 @@ int main(int argc, const char **argv) {
   }
   
   addExtraArgs(CommonCompilations);
- 
-  
   std::unique_ptr<ASTUnit> Src = getAST(CommonCompilations, SourcePath);
-  // llvm::outs() << "Building AST for destination\n";
-  std::unique_ptr<ASTUnit> Dst = getAST(CommonCompilations, DestinationPath);
  
-  if (!Src || !Dst){
+  if (!Src){
     if (!Src)
       llvm::errs() << "Error: Could not build AST for source\n";
-    if (!Dst)
-      llvm::errs() << "Error: Could not build AST for destination\n";
-
     return 1;
   }
 
@@ -176,11 +161,10 @@ int main(int argc, const char **argv) {
   // llvm::outs() << "Creating synax trees\n";
 
   diff::SyntaxTree SrcTree(*Src);
-  diff::SyntaxTree DstTree(*Dst);
   diff::SyntaxTree TgtTree(*Tgt);
 
   
-  if (auto Err = diff::patch(TargetTool, SrcTree, DstTree, ScriptPath, Options)) {
+  if (auto Err = diff::patch(TargetTool, SrcTree, MapPath, ScriptPath, Options)) {
       llvm::handleAllErrors(
           std::move(Err),
           [](const diff::PatchingError &PE) { PE.log(llvm::errs()); },

@@ -42,7 +42,7 @@ private:
 };
 
 llvm::Error patch(tooling::RefactoringTool &TargetTool, SyntaxTree &Src,
-                  SyntaxTree &Dst, std::string ScriptFilePath, const ComparisonOptions &Options,
+                  std::string MapFilePath, std::string ScriptFilePath, const ComparisonOptions &Options,
                   bool Debug = false);
 
 } // end namespace diff
