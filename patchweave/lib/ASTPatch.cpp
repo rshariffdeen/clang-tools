@@ -47,7 +47,7 @@ namespace clang {
         }
 
         namespace {
-// This wraps a node from Patcher::Target or Patcher::Dst.
+// This wraps a node from Patcher::Target or Patcher::Src.
             class PatchedTreeNode {
                 NodeRef BaseNode;
 
@@ -111,7 +111,7 @@ namespace clang {
 
         namespace {
             class Patcher {
-                SyntaxTree &Target;
+                SyntaxTree &Src, &Target;
                 SourceManager &SM;
                 const LangOptions &LangOpts;
                 BeforeThanCompare <SourceLocation> Less;
@@ -120,10 +120,10 @@ namespace clang {
                 std::vector <PatchedTreeNode> PatchedTreeNodes;
                 std::map<NodeId, PatchedTreeNode *> InsertedNodes;
                 std::map<std::string, int> LocNodeMap; //mapping location to noderef id for program C
-                // Maps NodeId in Dst to a flag that is true if this node is
+                // Maps NodeId in Src to a flag that is true if this node is
                 // part of an inserted subtree.
                 std::vector<bool> AtomicInsertions;
-                std::map<std::string, std::string> varMap;
+                std::map <std::string, std::string> varMap;
 
             public:
                 Rewriter Rewrite;
@@ -132,24 +132,27 @@ namespace clang {
                 findPointOfInsertion(NodeRef N, PatchedTreeNode &TargetParent) const;
 
                 std::string translateVariables(NodeRef node, std::string statement);
+
                 void loadVariableMapping(std::string mapFilePath);
 
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
 
                 bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree);
+
                 bool updateCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
+
                 bool deleteCode(NodeRef deleteNode, bool isMove);
 
                 Patcher(SyntaxTree &Src, SyntaxTree &Target,
                         const ComparisonOptions &Options, RefactoringTool &TargetTool,
                         bool Debug)
-                        : Target(Target), SM(Target.getSourceManager()),
-                          LangOpts(Target.getLangOpts()), Less(SM), 
-                           TargetTool(TargetTool), Debug(Debug) {
+                        : Src(Src), Target(Target), SM(Target.getSourceManager()),
+                          LangOpts(Target.getLangOpts()), Less(SM),
+                          TargetTool(TargetTool), Debug(Debug) {
 
                     Rewrite.setSourceMgr(SM, LangOpts);
 //                    int count = 0;
-//                    for (diff::NodeRef node : Dst) {
+//                    for (diff::NodeRef node : Src) {
 //
 //                        if (node.getTypeLabel() == "VarDecl" || node.getTypeLabel() == "ParmVarDecl" ||
 //                            node.getTypeLabel() == "FieldDecl") {
@@ -157,7 +160,7 @@ namespace clang {
 //                            if (auto vardec = node.ASTNode.get<VarDecl>()) {
 //                                count++;
 //                                SourceLocation loc = vardec->getLocation();
-//                                std::string locId = loc.printToString(Dst.getSourceManager());
+//                                std::string locId = loc.printToString(Src.getSourceManager());
 //                                int nodeid = node.getId().Id;
 //                                // llvm::outs() << nodeid << "\n";
 //                                LocNodeMap[locId] = nodeid;
@@ -165,7 +168,7 @@ namespace clang {
 //                            } else if (auto pardec = node.ASTNode.get<ParmVarDecl>()) {
 //                                count++;
 //                                SourceLocation loc = pardec->getLocation();
-//                                std::string locId = loc.printToString(Dst.getSourceManager());
+//                                std::string locId = loc.printToString(Src.getSourceManager());
 //                                int nodeid = node.getId().Id;
 //                                // llvm::outs() << nodeid << "\n";
 //                                LocNodeMap[locId] = nodeid;
@@ -173,7 +176,7 @@ namespace clang {
 //                            } else if (auto fielddec = node.ASTNode.get<FieldDecl>()) {
 //                                count++;
 //                                SourceLocation loc = fielddec->getLocation();
-//                                std::string locId = loc.printToString(Dst.getSourceManager());
+//                                std::string locId = loc.printToString(Src.getSourceManager());
 //                                int nodeid = node.getId().Id;
 //                                // llvm::outs() << nodeid << "\n";
 //                                LocNodeMap[locId] = nodeid;
@@ -670,98 +673,65 @@ namespace clang {
             str.replace(start_pos, from.length(), to);
             return true;
         }
-//
-//        std::string Patcher::translateVariables(NodeRef node, std::string statement) {
-//
-//            unsigned childNodesInUpdateRange = node.getNumChildren();
-//            // llvm::errs() << "child count " << childNodesInUpdateRange << "\n";
-//
-//
-//            if (node.getTypeLabel() == "MemberExpr") {
-//
-//                // llvm::outs() << "translating member name \n";
-//                auto memNode = node.ASTNode.get<MemberExpr>();
-//                auto decNode = memNode->getMemberDecl();
-//                SourceLocation loc = decNode->getLocation();
-////                std::string locId = loc.printToString(Dst.getSourceManager());
-//                // llvm::errs() << locId << "\n";
-//                // llvm::outs() << node.getValue() << "\n";
-//
-//                if (LocNodeMap.find(locId) == LocNodeMap.end()) {
-//
-//                    llvm::errs() << "invalid key referenced: " << locId << "\n";
-//
-//                } else {
-//                    int nodeid = LocNodeMap.at(locId);
-//                    NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
-//
-//                    if (Diff.getMapped(nodeInDst) != NULL) {
-//                        NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
-//                        std::string variableNameInSource = *nodeInDst.getIdentifier();
-//                        // llvm::outs() << "before translation: " << variableNameInSource << "\n";
-//
-//                        if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-//                            NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-//                            // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
-//                            std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-//                            // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-//                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//                            // llvm::outs() << "after replacement: " << statement << "\n";
-//                        } else {
-//                            llvm::errs() << "mapping not found for member definition";
-//                        }
-//
-//                    }
-//
-//                }
-//
-//                return statement;
-//
-//
-//            } else if (node.getTypeLabel() == "VarDecl") {
-//
-//                // llvm::outs() << "translating variable definition \n";
-//                auto decNode = node.ASTNode.get<VarDecl>();
-//                SourceLocation loc = decNode->getLocation();
-//                std::string locId = loc.printToString(Dst.getSourceManager());
-//                // llvm::errs() << locId << "\n";
-//                // llvm::outs() << node.getValue() << "\n";
-//
-//                if (LocNodeMap.find(locId) == LocNodeMap.end()) {
-//
-//                    llvm::errs() << "invalid key referenced: " << locId << "\n";
-//
-//                } else {
-//                    // llvm::outs() << "found location\n" ;
-//                    int nodeid = LocNodeMap.at(locId);
-//                    NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
-//                    std::string variableNameInSource = *nodeInDst.getIdentifier();
-//                    // llvm::outs() << "before translation: " << variableNameInSource << "\n";
-//
-//                    if (Diff.getMapped(nodeInDst) != NULL) {
-//                        NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
-//
-//                        if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-//                            NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-//                            // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
-//                            std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-//                            // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-//                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//
-//                        }
-//
-//                    } //else {
-//                    //     std::string variableNameInTarget = variableNameInSource + "_crochet";
-//                    //     // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-//                    //     replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//                    // }
-//
-//                }
-//
-//                return statement;
-//
-//
-//            } else if (node.getTypeLabel() == "FieldDecl") {
+
+        std::string Patcher::translateVariables(NodeRef node, std::string statement) {
+            unsigned childNodesInUpdateRange = node.getNumChildren();
+             llvm::errs() << "child count " << childNodesInUpdateRange << "\n";
+            if (node.getTypeLabel() == "VarDecl") {
+                // llvm::outs() << "translating variable definition \n";
+                auto decNode = node.ASTNode.get<VarDecl>();
+                SourceLocation loc = decNode->getLocation();
+                std::string locId = loc.printToString(Src.getSourceManager());
+                // llvm::errs() << locId << "\n";
+                // llvm::outs() << node.getValue() << "\n";
+
+                if (LocNodeMap.find(locId) == LocNodeMap.end()) {
+                    llvm::errs() << "invalid key referenced: " << locId << "\n";
+                } else {
+                    // llvm::outs() << "found location\n" ;
+                    int nodeid = LocNodeMap.at(locId);
+                    NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
+                    std::string variableNameInSource = *nodeInDst.getIdentifier();
+                    // llvm::outs() << "before translation: " << variableNameInSource << "\n";
+                    std::string variableNameInTarget;
+                    if (varMap.find(variableNameInSource) != varMap.end()) {
+                        variableNameInTarget = varMap[variableNameInSource];
+                        replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                    }
+
+                }
+
+                return statement;
+
+
+            } else if (node.getTypeLabel() == "MemberExpr") {
+                 llvm::outs() << "translating member name \n";
+                auto memNode = node.ASTNode.get<MemberExpr>();
+                auto decNode = memNode->getMemberDecl();
+                SourceLocation loc = decNode->getLocation();
+                std::string locId = loc.printToString(Src.getSourceManager());
+//                 llvm::errs() << locId << "\n";
+//                 llvm::outs() << node.getValue() << "\n";
+                std::string nodeValue = node.getValue();
+                std::string prepend;
+//                unsigned numChildren = node.getNumChildren();
+                NodeRef visitNode(node);
+                NodeRef childNode = visitNode.getChild(0);
+                prepend = childNode.getValue() + "->";
+
+                std::string variableNameInSource = prepend + nodeValue.substr(nodeValue.find("::") + 2);
+                std::string variableNameInTarget;
+                if (varMap.find(variableNameInSource) != varMap.end()) {
+                    variableNameInTarget = varMap[variableNameInSource];
+                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                }
+
+                llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+
+                return statement;
+
+            }
+//            }  else if (node.getTypeLabel() == "FieldDecl") {
 //
 //                // llvm::outs() << "translating member definition \n";
 //                auto decNode = node.ASTNode.get<FieldDecl>();
@@ -806,58 +776,38 @@ namespace clang {
 //            }
 //
 //
-//            for (unsigned childIndex = 0; childIndex < childNodesInUpdateRange; childIndex++) {
-//                // llvm::errs() << "child " << childIndex << "\n";
-//                NodeRef childNode = node.getChild(childIndex);
-//                // llvm::outs() << "child " << childIndex << " type " << childNode.getTypeLabel() << "\n";
-//
-//                if (childNode.getTypeLabel() == "DeclRefExpr") {
-//
-//                    // llvm::outs() << "translating reference \n";
-//
-//                    auto decRefNode = childNode.ASTNode.get<DeclRefExpr>();
-//                    auto decNode = decRefNode->getDecl();
-//                    SourceLocation loc = decNode->getLocation();
-//                    std::string locId = loc.printToString(Dst.getSourceManager());
-//
-//                    if (LocNodeMap.find(locId) == LocNodeMap.end()) {
-//                        llvm::errs() << "invalid key referenced: " << locId << "\n";
-//
-//                    } else {
-//                        int nodeid = LocNodeMap.at(locId);
-//                        NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
-//                        std::string variableNameInSource = *nodeInDst.getIdentifier();
-//                        // llvm::outs() << "before translation: " << variableNameInSource << "\n";
-//                        if (Diff.getMapped(nodeInDst) != NULL) {
-//                            NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
-//
-//
-//                            if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-//                                NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-//                                std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-//                                // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-//                                replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//
-//                            }
-//
-//                        } //else {
-//                        //    std::string variableNameInTarget = variableNameInSource + "_crochet";
-//                        //    // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-//                        //    replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//                        // }
-//
-//                    }
-//
-//                }
-//
-//                if (childNode.getNumChildren() > 0) {
-//                    statement = translateVariables(childNode, statement);
-//                }
-//
-//            }
-//
-//            return statement;
-//        }
+            for (unsigned childIndex = 0; childIndex < childNodesInUpdateRange; childIndex++) {
+//                 llvm::errs() << "child " << childIndex << "\n";
+                NodeRef childNode = node.getChild(childIndex);
+//                 llvm::outs() << "child " << childIndex << " type " << childNode.getTypeLabel() << "\n";
+                if (childNode.getTypeLabel() == "DeclRefExpr") {
+                    // llvm::outs() << "translating reference \n";
+                    auto decRefNode = childNode.ASTNode.get<DeclRefExpr>();
+                    auto decNode = decRefNode->getDecl();
+                    SourceLocation loc = decNode->getLocation();
+                    std::string locId = loc.printToString(Src.getSourceManager());
+                    if (LocNodeMap.find(locId) == LocNodeMap.end()) {
+                        llvm::errs() << "invalid key referenced: " << locId << "\n";
+
+                    } else {
+                        int nodeid = LocNodeMap.at(locId);
+                        NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
+                        std::string variableNameInSource = *nodeInDst.getIdentifier();
+                         llvm::outs() << "before translation: " << variableNameInSource << "\n";
+                        std::string variableNameInTarget;
+                        if (varMap.find(variableNameInSource) != varMap.end()) {
+                            variableNameInTarget = varMap[variableNameInSource];
+                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                        }
+                    }
+                }
+
+                if (childNode.getNumChildren() > 0) {
+                    statement = translateVariables(childNode, statement);
+                }
+            }
+            return statement;
+        }
 
         CharSourceRange Patcher::expandRange(CharSourceRange range, SyntaxTree &Tree) {
 
@@ -958,9 +908,9 @@ namespace clang {
                                                    SourceTree.getLangOpts());
             insertStatement = " " + insertStatement + " ";
 
-            // llvm::outs() << insertStatement << "\n";
-//            insertStatement = translateVariables(insertNode, insertStatement);
-            // llvm::outs() << insertStatement << "\n";
+             llvm::outs() << insertStatement << "\n";
+            insertStatement = translateVariables(insertNode, insertStatement);
+             llvm::outs() << insertStatement << "\n";
 
 
 
@@ -1180,7 +1130,8 @@ namespace clang {
         }
 
 
-        bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
+        bool
+        Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
 
             bool modified = false;
             // llvm::outs() << "nodes matched\n";
@@ -1218,7 +1169,7 @@ namespace clang {
                 updateValue = updateValue.substr(1);
                 oldValue = oldValue.substr(1);
 
-            } 
+            }
 
 
             // llvm::outs() << updateValue << "\n";
@@ -1270,51 +1221,47 @@ namespace clang {
 
                 if (operation == "Insert") {
 
-                     llvm::outs() << "insert op\n";
-//                    std::string offset = line.substr(line.find(" at ") + 4);
-//                    int Offset = stoi(offset);
-//                    line = line.substr(0, line.find(" at "));
-//                    std::string nextChild, nextChildType, nextChildId;
-//                    std::string prevChild, prevChildType, prevChildId;
-//
-//
-//                    std::string nodeB = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
-//                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
-//                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
-//
-//                    std::string nodeC = line.substr(line.find(" into ") + 6);
-//                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
-//                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
+                    llvm::outs() << "insert op\n";
 
-                    // llvm::outs() << nodeC << "\n";
-                    // llvm::outs() << nodeIdC << "\n";
-                    // llvm::outs() << nodeTypeC << "\n";
+                    std::string offset = line.substr(line.find(" at ") + 4);
+                    int Offset = stoi(offset);
+                    line = line.substr(0, line.find(" at "));
 
-                    // llvm::outs() << nodeB << "\n";
-                    // llvm::outs() << nodeIdB << "\n";
-                    // llvm::outs() << nodeTypeB << "\n";
+                    std::string nodeB = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
+                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
+                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
 
-//                    NodeRef insertNode = Dst.getNode(NodeId(stoi(nodeIdB)));
-//                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
+                    std::string nodeC = line.substr(line.find(" into ") + 6);
+                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
+                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
+
+//                    llvm::outs() << nodeB << "\n";
+//                    llvm::outs() << nodeIdB << "\n";
+//                    llvm::outs() << nodeTypeB << "\n";
+//                    llvm::outs() << nodeC << "\n";
+//                    llvm::outs() << nodeIdC << "\n";
+//                    llvm::outs() << nodeTypeC << "\n";
+//                    llvm::outs() << Offset << "\n";
+
+                    NodeRef insertNode = Src.getNode(NodeId(stoi(nodeIdB)));
+                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
+
+//                    llvm::outs() << insertNode.getTypeLabel() << "\n";
+//                    llvm::outs() << targetNode.getTypeLabel() << "\n";
 
 
-                    // NodeRef targetParentNode = targetNode.getParent();
-                    // llvm::outs() << insertNode.getTypeLabel() << "\n";
-                    // llvm::outs() << targetNode.getTypeLabel() << "\n";
+                    if ((targetNode.getTypeLabel() == nodeTypeC) && (insertNode.getTypeLabel() == nodeTypeB)) {
+                        modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Src);
 
-//
-//                    if ((targetNode.getTypeLabel() == nodeTypeC) && (insertNode.getTypeLabel() == nodeTypeB)) {
-//                        modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Dst);
-//
-//                    } else {
-//                        llvm::errs() << "Error: wrong node type for given Id\n";
-//                        return error(patching_error::failed_to_apply_replacements);
-//
-//                    }
+                    } else {
+                        llvm::errs() << "Error: wrong node type for given Id\n";
+                        return error(patching_error::failed_to_apply_replacements);
+
+                    }
 
                 } else if (operation == "Move") {
 
-                     llvm::outs() << "move op\n";
+                    llvm::outs() << "move op\n";
 //                    std::string offset = line.substr(line.find(" at ") + 4);
 //                    int Offset = stoi(offset);
 //                    line = line.substr(0, line.find(" at "));
@@ -1362,7 +1309,7 @@ namespace clang {
 
                 } else if (operation == "Update") {
 
-                     llvm::outs() << "update op\n";
+                    llvm::outs() << "update op\n";
 
 //                    std::string nodeC = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
 //                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
@@ -1372,7 +1319,7 @@ namespace clang {
 //                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
 //                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
 //
-//                    NodeRef updateNode = Dst.getNode(NodeId(stoi(nodeIdB)));
+//                    NodeRef updateNode = Src.getNode(NodeId(stoi(nodeIdB)));
 //                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
 
@@ -1389,7 +1336,7 @@ namespace clang {
 
 
 //                    if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
-//                        modified = crochetPatcher.updateCode(updateNode, targetNode, Dst, Target);
+//                        modified = crochetPatcher.updateCode(updateNode, targetNode, Src, Target);
 //
 //                    } else {
 //                        llvm::errs() << "Error: wrong node type for given Id\n";
@@ -1400,7 +1347,7 @@ namespace clang {
 
                 } else if (operation == "Delete") {
 
-                     llvm::outs() << "delete op\n";
+                    llvm::outs() << "delete op\n";
 
 //                    std::string nodeType = line.substr(line.find(" ") + 1, line.find("(") - operation.length() - 1);
 //                    std::string nodeId = line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1);
@@ -1423,7 +1370,7 @@ namespace clang {
 
                 } else if (operation == "UpdateMove") {
 
-                     llvm::outs() << "move op\n";
+                    llvm::outs() << "move op\n";
 
                 } else {
                     llvm::errs() << "unknown op\n";
@@ -1440,7 +1387,7 @@ namespace clang {
                 llvm::outs() << std::string(RewriteBuf->begin(), RewriteBuf->end());
             // llvm::outs()  << "/* End Crochet Output */\n";
 
-            // return Patcher(Src, Dst, Target, Options, TargetTool, Debug).apply();
+            // return Patcher(Src, Src, Target, Options, TargetTool, Debug).apply();
             return Error::success();
         }
 
