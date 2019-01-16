@@ -1167,7 +1167,6 @@ namespace clang {
         }
 
         void Patcher::loadVariableMapping(std::string mapFilePath) {
-            llvm::outs() << "load variable mapping\n";
             std::ifstream mapFile(mapFilePath);
             std::string line;
             std::string var_a, var_c;
@@ -1175,7 +1174,7 @@ namespace clang {
             while (std::getline(mapFile, line)) {
                 var_a = line.substr(0, line.find(":"));
                 var_c = line.substr(line.find(":") + 1);
-                llvm::outs() << var_a << " : " << var_c << "\n";
+                varMap[var_a] = var_c;
             }
 
         }
