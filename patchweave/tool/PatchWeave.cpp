@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "crochet/ASTDiff.h"
-#include "crochet/ASTPatch.h"
+#include "patchweave/ASTDiff.h"
+#include "patchweave/ASTPatch.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
@@ -24,7 +24,7 @@ using namespace clang;
 using namespace clang::tooling;
 
 
-static cl::OptionCategory CrochetPatchCategory("crochet-patch options");
+static cl::OptionCategory CrochetPatchCategory("patchweave-patch options");
 
 
 static cl::opt<std::string> ScriptPath("script", cl::desc("<script>"), cl::Required, cl::cat(CrochetPatchCategory));

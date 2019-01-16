@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "crochet/ASTDiff.h"
+#include "patchweave/ASTDiff.h"
 
 #include "clang/AST/LexicallyOrderedRecursiveASTVisitor.h"
 #include "clang/Lex/Lexer.h"
@@ -436,7 +436,7 @@ static HashType hashNode(NodeRef N) {
   const LangOptions &LangOpts = N.getTree().getLangOpts();
   Token Tok;
   for (auto TokenLocation : N.getOwnedTokens()) {
-    // bool Failure = Lexer::getRawToken(TokenLocation, Tok, SM, LangOpts, /*IgnoreWhiteSpace=*/true);
+    // bool Failure = Lexer::getRawToken(TokenLocation, Tok, SM, LangOpts,/*IgnoreWhiteSpace=*/true);
     assert(!Failure);
     auto Range = CharSourceRange::getCharRange(TokenLocation, Tok.getEndLoc());
     // This is here to make CompoundStmt nodes compare equal, to make the tests
@@ -709,6 +709,7 @@ llvm::Optional<StringRef> Node::getIdentifier() const {
   return llvm::None;
 }
 
+
 static std::string getInitializerValue(const CXXCtorInitializer *Init, const PrintingPolicy &TypePP) {
   if (Init->isAnyMemberInitializer())
     return Init->getAnyMember()->getName();
@@ -750,15 +751,11 @@ std::string Node::getFileName() const {
   const SourceManager &SM = Tree.AST.getSourceManager();
   CharSourceRange Range = getSourceRange();
   SourceLocation EndLoc = Range.getEnd(); 
-  if (EndLoc.isValid()){
-    FileID fileID = SM.getFileID(EndLoc);
-    if (fileID.isValid()){
-      const FileEntry *fileEntry = SM.getFileEntryForID(fileID);
-      if (fileEntry->isValid())
-        return fileEntry->getName();
-    }
-  }
+  FileID fileID = SM.getFileID(EndLoc);
+  const FileEntry *fileEntry = SM.getFileEntryForID(fileID);
   
+  if (fileEntry->isValid())
+    return fileEntry->getName();
   return "";
 
 }
@@ -771,33 +768,23 @@ std::string Node::getValue() const {
     return getStmtValue(S);
   if (auto *D = ASTNode.get<Decl>())
     return getDeclValue(D);
+  if (auto *T = ASTNode.get<TypeLoc>())
+    return getTypeValue(T);
   if (auto *Init = ASTNode.get<CXXCtorInitializer>())
     return getInitializerValue(Init, Tree.TypePP);
-
   return "";
 
   llvm_unreachable("Fatal: unhandled AST node: \n" );
 
 }
 
-std::string Node::getRefType() const {
-  std::string refType;
-
-  if (getTypeLabel() == "DeclRefExpr"){
-    auto decRefNode = ASTNode.get<DeclRefExpr>();
-    auto decNode = decRefNode->getDecl();
-    if (auto *ref = dyn_cast<ParmVarDecl>(decNode))    
-      refType =  "ParmVarDecl";
-    if (auto *ref = dyn_cast<VarDecl>(decNode))    
-      refType = "VarDecl";
-    if (auto *ref = dyn_cast<FunctionDecl>(decNode))    
-      refType = "FunctionDecl";
-  }
-  return refType;
-
+std::string Node::getMacroValue() const {
+  return Lexer::getSourceText(getSourceRange(), Tree.AST.getSourceManager(),
+                                Tree.AST.getLangOpts());
+  
 }
 
-std::string Node::getMacroValue() const {
+std::string Node::getTypeValue(const TypeLoc *D) const {
   return Lexer::getSourceText(getSourceRange(), Tree.AST.getSourceManager(),
                                 Tree.AST.getLangOpts());
   
@@ -825,7 +812,6 @@ std::string Node::getDeclValue(const Decl *D) const {
   }
   return Value;
 }
-
 
 const DeclContext *Node::getEnclosingDeclContext(ASTContext &AST, const Stmt *S) const {
   while (S) {
@@ -1445,12 +1431,8 @@ static void dumpDstChange(raw_ostream &OS, const ASTDiff::Impl &Diff,
                           SyntaxTree::Impl &SrcTree, SyntaxTree::Impl &DstTree,
                           NodeRef Dst) {
   const Node *Src = Diff.getMapped(Dst);
-  // const Node *DstParent = Dst.getParent();
   ChangeKind Change = Diff.getNodeChange(Dst);
   printChangeKind(OS, Change);
-  // int offset;
-  // int numChildren;
-  
   switch (Change) {
   case NoChange:
     break;
@@ -1464,48 +1446,6 @@ static void dumpDstChange(raw_ostream &OS, const ASTDiff::Impl &Diff,
     OS << "\n";
     break;
   case Insert:
-    // offset = Dst.findPositionInParent();
-        
-    // // llvm::errs() << offset << "-" << numChildren << "\n";
-    // OS << " ";
-    // Dst.dump(OS);
-    // OS << " into ";
-    // if (!Dst.getParent())
-    //   OS << "None";
-    // else{
-    //   if (Diff.getMapped(*DstParent) != NULL){
-    //     Diff.getMapped(*DstParent)->dump(OS);
-    //     OS << " at " << Src->findPositionInParent() << "\n";
-    //     // numChildren = Diff.getMapped(*DstParent)->getNumChildren();
-    //     // if ((offset + 1) != numChildren){
-    //     //   OS << " before ";
-    //     //   NodeRef nextChild = Dst.getParent()->getChild(offset + 1);
-    //     //   if (Diff.getMapped(nextChild) != NULL){
-    //     //     Diff.getMapped(nextChild)->dump(OS);
-    //     //   } else {
-    //     //     nextChild.dump(OS); 
-    //     //   } 
-    //     // }
-    //     // if (offset  > 1){
-    //     //   NodeRef prevChild = Dst.getParent()->getChild(offset - 1);
-    //     //   OS << " after ";
-    //     //   if (Diff.getMapped(prevChild) != NULL){
-    //     //     Diff.getMapped(prevChild)->dump(OS);
-    //     //   } else {
-    //     //     prevChild.dump(OS); 
-    //     //   } 
-       
-    //     // }
-
-    //   }
-    //   else 
-    //     DstParent->dump(OS);
-    //     OS << " at " << Dst.findPositionInParent() << "\n";
-    // } 
-
-    // OS << "\n";    
-    // break;
-
   case Move:
   case UpdateMove:
     OS << " ";
