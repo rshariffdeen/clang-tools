@@ -123,6 +123,7 @@ namespace clang {
                 // Maps NodeId in Dst to a flag that is true if this node is
                 // part of an inserted subtree.
                 std::vector<bool> AtomicInsertions;
+                std::map<std::string, std::string> varMap;
 
             public:
                 Rewriter Rewrite;
@@ -131,6 +132,7 @@ namespace clang {
                 findPointOfInsertion(NodeRef N, PatchedTreeNode &TargetParent) const;
 
                 std::string translateVariables(NodeRef node, std::string statement);
+                void loadVariableMapping(std::string mapFilePath);
 
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
 
@@ -1164,6 +1166,21 @@ namespace clang {
             return modified;
         }
 
+        void Patcher::loadVariableMapping(std::string mapFilePath) {
+            llvm::outs() << "load variable mapping\n";
+            std::ifstream mapFile(mapFilePath);
+            std::string line;
+            std::string var_a, var_c;
+
+            while (std::getline(mapFile, line)) {
+                var_a = line.substr(0, line.find(":"));
+                var_c = line.substr(line.find(":") + 1);
+                llvm::outs() << var_a << " : " << var_c << "\n";
+            }
+
+        }
+
+
         bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
 
             bool modified = false;
@@ -1243,7 +1260,7 @@ namespace clang {
             SyntaxTree Target(*TargetASTs[0]);
 
             Patcher crochetPatcher(Src, Target, Options, TargetTool, Debug);
-
+            crochetPatcher.loadVariableMapping(MapFilePath);
             std::ifstream infile(ScriptFilePath);
             std::string line;
             bool modified = false;

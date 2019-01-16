@@ -10,9 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52d38e7a-9d03-4260-a479-10b9fb07fc81" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/patchweave/include/patchweave/ASTPatch.h" beforeDir="false" afterPath="$PROJECT_DIR$/patchweave/include/patchweave/ASTPatch.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/patchweave/lib/ASTPatch.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/patchweave/lib/ASTPatch.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/patchweave/tool/PatchWeave.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/patchweave/tool/PatchWeave.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -35,8 +33,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/patchweave/lib/ASTPatch.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="628" lean-forward="true" selection-start-line="434" selection-start-column="9" selection-end-line="628" />
+            <state relative-caret-position="355">
+              <caret line="1177" column="55" selection-start-line="1177" selection-start-column="55" selection-end-line="1177" selection-end-column="55" />
             </state>
           </provider>
         </entry>
@@ -57,6 +55,7 @@
       <find>dst</find>
       <find>ScriptFilePath</find>
       <find>ScriptPath</find>
+      <find>load</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -74,6 +73,7 @@
       </list>
     </option>
   </component>
+  <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="1280" />
     <option name="y" value="27" />
@@ -157,23 +157,23 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1547608238511</updated>
-      <workItem from="1547608240370" duration="1596000" />
+      <workItem from="1547608240370" duration="2634000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1596000" />
+    <option name="totallyTimeSpent" value="2634000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1280" y="27" width="1920" height="1053" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Database Changes" />
       <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Terminal" visible="true" weight="0.32894737" />
+      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.32894737" />
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="CMake" weight="0.32894737" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -230,8 +230,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/patchweave/lib/ASTPatch.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="628" lean-forward="true" selection-start-line="434" selection-start-column="9" selection-end-line="628" />
+        <state relative-caret-position="355">
+          <caret line="1177" column="55" selection-start-line="1177" selection-start-column="55" selection-end-line="1177" selection-end-column="55" />
         </state>
       </provider>
     </entry>
