@@ -8,6 +8,7 @@ add_clang_executable(gizmo
 
 target_link_libraries(gizmo
   PRIVATE
+  Gizmo
   clangBasic
   clangFrontend
   clangRewrite
