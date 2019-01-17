@@ -3,12 +3,11 @@ set(LLVM_LINK_COMPONENTS
   )
 
 add_clang_executable(gizmo
-  CrochetPatch.cpp
+  Gizmo.cpp
   )
 
 target_link_libraries(gizmo
   PRIVATE
-  crochetPatch
   clangBasic
   clangFrontend
   clangRewrite
@@ -16,5 +15,5 @@ target_link_libraries(gizmo
   clangToolingCore
   )
 
-install(TARGETS crochet-patch
+install(TARGETS gizmo
   RUNTIME DESTINATION bin)

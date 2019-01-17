@@ -24,7 +24,7 @@ using namespace clang;
 using namespace clang::tooling;
 
 
-static cl::OptionCategory CrochetPatchCategory("crochet-patch options");
+static cl::OptionCategory CrochetPatchCategory("gizmo-instrument-patch options");
 
 
 static cl::opt<std::string> ScriptPath("script", cl::desc("<script>"), cl::Required, cl::cat(CrochetPatchCategory));

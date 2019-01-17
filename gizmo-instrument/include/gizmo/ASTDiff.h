@@ -22,7 +22,7 @@
 
 
 #include "clang/Frontend/ASTUnit.h"
-#include "crochet/ASTDiffInternal.h"
+#include "gizmo/ASTDiffInternal.h"
 
 namespace clang {
 namespace diff {

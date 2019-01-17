@@ -24,19 +24,19 @@ using namespace clang;
 using namespace clang::tooling;
 
 
-static cl::OptionCategory CrochetPatchCategory("patchweave options");
+static cl::OptionCategory PatchWeaveCategory("patchweave options");
 
-static cl::opt<std::string> ScriptPath("script", cl::desc("<script>"), cl::Required, cl::cat(CrochetPatchCategory));
-static cl::opt<std::string> TargetPath("target", cl::desc("<target>"), cl::Required, cl::cat(CrochetPatchCategory));
-static cl::opt<std::string> SourcePath("source", cl::desc("<source>"), cl::Required, cl::cat(CrochetPatchCategory));
-static cl::opt<std::string> MapPath("map", cl::desc("<variable mapping>"), cl::Required, cl::cat(CrochetPatchCategory));
+static cl::opt<std::string> ScriptPath("script", cl::desc("<script>"), cl::Required, cl::cat(PatchWeaveCategory));
+static cl::opt<std::string> TargetPath("target", cl::desc("<target>"), cl::Required, cl::cat(PatchWeaveCategory));
+static cl::opt<std::string> SourcePath("source", cl::desc("<source>"), cl::Required, cl::cat(PatchWeaveCategory));
+static cl::opt<std::string> MapPath("map", cl::desc("<variable mapping>"), cl::Required, cl::cat(PatchWeaveCategory));
 
-static cl::opt<std::string> StopAfter("stop-diff-after", cl::desc("<topdown|bottomup>"), cl::Optional, cl::init(""), cl::cat(CrochetPatchCategory));
-static cl::opt<int> MaxSize("s", cl::desc("<maxsize>"), cl::Optional, cl::init(-1), cl::cat(CrochetPatchCategory));
-static cl::opt<float> MinSimilarity("min-sim", cl::desc("<minsimilarity>"), cl::Optional, cl::init(-1), cl::cat(CrochetPatchCategory));
-static cl::opt<std::string> BuildPath("p", cl::desc("Build path"), cl::init(""), cl::Optional, cl::cat(CrochetPatchCategory));
-static cl::list<std::string> ArgsAfter("extra-arg", cl::desc("Additional argument to append to the compiler command line"), cl::cat(CrochetPatchCategory));
-static cl::list<std::string> ArgsBefore("extra-arg-before", cl::desc("Additional argument to prepend to the compiler command line"), cl::cat(CrochetPatchCategory));
+static cl::opt<std::string> StopAfter("stop-diff-after", cl::desc("<topdown|bottomup>"), cl::Optional, cl::init(""), cl::cat(PatchWeaveCategory));
+static cl::opt<int> MaxSize("s", cl::desc("<maxsize>"), cl::Optional, cl::init(-1), cl::cat(PatchWeaveCategory));
+static cl::opt<float> MinSimilarity("min-sim", cl::desc("<minsimilarity>"), cl::Optional, cl::init(-1), cl::cat(PatchWeaveCategory));
+static cl::opt<std::string> BuildPath("p", cl::desc("Build path"), cl::init(""), cl::Optional, cl::cat(PatchWeaveCategory));
+static cl::list<std::string> ArgsAfter("extra-arg", cl::desc("Additional argument to append to the compiler command line"), cl::cat(PatchWeaveCategory));
+static cl::list<std::string> ArgsBefore("extra-arg-before", cl::desc("Additional argument to prepend to the compiler command line"), cl::cat(PatchWeaveCategory));
 
 static void addExtraArgs(std::unique_ptr<CompilationDatabase> &Compilations) {
   if (!Compilations)
@@ -109,7 +109,7 @@ int main(int argc, const char **argv) {
       FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
   if (!CommonCompilations && !ErrorMessage.empty())
     llvm::errs() << ErrorMessage;
-  cl::HideUnrelatedOptions(CrochetPatchCategory);
+  cl::HideUnrelatedOptions(PatchWeaveCategory);
   if (!cl::ParseCommandLineOptions(argc, argv)) {
     cl::PrintOptionValues();
     return 1;
@@ -154,7 +154,7 @@ int main(int argc, const char **argv) {
     llvm::errs() << "Error: Could not build AST for target\n";
     return 1;
   }
-    
+
 
   std::unique_ptr<ASTUnit> Tgt = std::move(TargetASTs[0]);
 

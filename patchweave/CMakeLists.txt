@@ -3,7 +3,6 @@ set(LLVM_LINK_COMPONENTS
   )
 
 add_clang_library(patchWeave
-
   lib/ASTDiff.cpp
   lib/ASTPatch.cpp
   LINK_LIBS

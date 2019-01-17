@@ -11,7 +11,7 @@
 #ifndef LLVM_CLANG_TOOLING_ASTDIFF_ASTPATCH_H
 #define LLVM_CLANG_TOOLING_ASTDIFF_ASTPATCH_H
 
-#include "crochet/ASTDiff.h"
+#include "gizmo/ASTDiff.h"
 #include "clang/Tooling/Refactoring.h"
 #include "llvm/Support/Error.h"
 
