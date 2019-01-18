@@ -156,12 +156,11 @@ int main(int argc, const char **argv) {
   }
 
 
-  std::unique_ptr<ASTUnit> Tgt = std::move(TargetASTs[0]);
 
   // llvm::outs() << "Creating synax trees\n";
 
   diff::SyntaxTree SrcTree(*Src);
-  diff::SyntaxTree TgtTree(*Tgt);
+//  diff::SyntaxTree TgtTree(*Tgt);
 
   
   if (auto Err = diff::patch(TargetTool, SrcTree, MapPath, ScriptPath, Options)) {

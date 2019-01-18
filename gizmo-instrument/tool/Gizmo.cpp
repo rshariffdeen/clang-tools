@@ -11,7 +11,11 @@
 // Tooling/ASTDiff.
 //
 //===----------------------------------------------------------------------===//
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <iostream>
+#include <list>
+#include <vector>
 #include "gizmo/ASTDiff.h"
 #include "gizmo/ASTPatch.h"
 #include "clang/Tooling/CommonOptionsParser.h"
@@ -29,6 +33,9 @@ static cl::opt<std::string> LineNumber("line-number", cl::desc("<line number in 
 static cl::opt<std::string> Transformation("transformation", cl::desc("<transformation type>"), cl::Required, cl::cat(GizmoCategory));
 static cl::opt<std::string> SourcePath("source", cl::desc("<source>"), cl::Required, cl::cat(GizmoCategory));
 
+std::list<std::string> variableNameList;
+std::list<std::string>::iterator it;
+int targetNodeId = 0;
 
 static std::unique_ptr<CompilationDatabase>
 getCompilationDatabase(StringRef Filename) {
@@ -47,35 +54,103 @@ getCompilationDatabase(StringRef Filename) {
 }
 
 
+void traverseNode(clang::diff::NodeRef node){
+  auto ChildBegin = node.begin(), ChildEnd = node.end();
+//  llvm::outs() << node.getTypeLabel() << "\n";
+  std::string nodeType = node.getTypeLabel();
+  int nodeId = node.getId();
+  auto startLoc = node.getSourceBeginLocation();
+  int locLineNumber = startLoc.first;
+  if(locLineNumber == stoi(LineNumber)){
+    targetNodeId = nodeId;
+    return;
+  }
 
-static std::unique_ptr<ASTUnit>
-getAST(const std::unique_ptr<CompilationDatabase> &CommonCompilations,
-       const StringRef Filename) {
-  std::array<std::string, 1> Files = {{Filename}};
-  std::unique_ptr<CompilationDatabase> FileCompilations;
-  if (!CommonCompilations)
-    FileCompilations = getCompilationDatabase(Filename);
-  ClangTool Tool(CommonCompilations ? *CommonCompilations : *FileCompilations,
-                 Files);
-  std::vector<std::unique_ptr<ASTUnit>> ASTs;
-  Tool.buildASTs(ASTs);
-  if (ASTs.size() == 0){
-    llvm::errs() << "Error: no AST built\n";
-    return NULL;
+
+
+  if (nodeType == "ParmVarDecl" || nodeType == "VarDecl"){
+    auto identifier = node.getIdentifier();
+    variableNameList.push_front(*identifier);
+  } else if (nodeType == "MemberExpr"){
+    std::string varName;
+    std::string nodeValue = node.getValue();
+    if (nodeValue == "")
+      return;
+
+    std::string identifier =  nodeValue.substr(nodeValue.find("::") + 2);
+    clang::diff::NodeRef childNode = *ChildBegin;
+    std::string childNodeType = childNode.getTypeLabel();
+    if (childNodeType != "DeclRefExpr")
+      return;
+
+    varName = childNode.getValue() + "->" + identifier;
+//    llvm::outs() << varName << "\n";
+
+
+    for (it=variableNameList.begin(); it!=variableNameList.end(); ++it)
+      if (*it == varName)
+        return;
+    variableNameList.push_front(varName);
+    return;
   }
-  if (ASTs.size() != Files.size()){    
-    llvm::errs() << "more than one tree was built\n";
+
+
+  if (ChildBegin != ChildEnd) {
+    traverseNode(*ChildBegin);
+    for (++ChildBegin; ChildBegin != ChildEnd; ++ChildBegin) {
+      traverseNode(*ChildBegin);
+    }
   }
-  
-  return std::move(ASTs[0]);
+
+
 }
 
+
+//void insertHeader(){
+//
+//  std::ifstream in(SourcePath);
+//  std::string contents((std::istreambuf_iterator<char>(in)),
+//                       std::istreambuf_iterator<char>());
+//  in.close();
+//  std::string includeHeader = "\n#include<klee/klee.h>\n";
+//  std::ofstream out(SourcePath);
+//  std::string fileContent = includeHeader + contents;
+//  out << fileContent;
+//  out.close();
+//  return;
+//}
+
+
+void insertCode(clang::diff::NodeRef targetNode, Rewriter &rewriter) {
+  std::string insertStatement;
+
+
+  clang::diff::NodeRef targetParentNode = *targetNode.getParent();
+  int offset = targetNode.findPositionInParent();
+  clang::diff::NodeRef nearestChildNode = targetParentNode.getChild(offset - 1);
+  SourceLocation insertLoc = nearestChildNode.getSourceRange().getEnd();
+
+
+  for (it=variableNameList.begin(); it!=variableNameList.end(); ++it){
+//    llvm::outs() << *it << "\n";
+    std::string varName = *it;
+    std::string codeToInsert = "\n";
+    codeToInsert = "klee_print_expr('[var-expr] " + varName + "', " + varName + ");\n";
+    insertStatement += codeToInsert;
+  }
+
+
+    if (rewriter.InsertTextAfterToken(insertLoc, insertStatement))
+      llvm::errs() << "error inserting\n";
+
+
+
+}
 
 
 int main(int argc, const char **argv) {
  
   std::string ErrorMessage;
-  bool modified = false;
   std::unique_ptr<CompilationDatabase> CommonCompilations =
       FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
   if (!CommonCompilations && !ErrorMessage.empty())
@@ -85,40 +160,65 @@ int main(int argc, const char **argv) {
     return 1;
   }
 
-  std::unique_ptr<ASTUnit> Src = getAST(CommonCompilations, SourcePath);
+  std::unique_ptr<CompilationDatabase> FileCompilations;
+  if (!CommonCompilations)
+    FileCompilations = getCompilationDatabase(SourcePath);
 
-  if (!Src){
-    llvm::errs() << "Error: Could not build AST for source\n";
+  std::array<std::string, 1> Files = {{SourcePath}};
+  RefactoringTool RefactorTool(CommonCompilations ? *CommonCompilations : *FileCompilations, Files);
+  std::vector<std::unique_ptr<ASTUnit>> SrcASTs;
+  RefactorTool.buildASTs(SrcASTs);
+
+  if (SrcASTs.size() == 0){
+    llvm::errs() << "Error: Could not build AST for target\n";
     return 1;
   }
 
-  clang::diff::SyntaxTree SrcTree(*Src);
-  Rewriter Rewrite;
-  SourceManager &SM = Src->getSourceManager();
-  const LangOptions &LangOpts = Src->getLangOpts();
-  Rewrite.setSourceMgr(SM, LangOpts);
-  const RewriteBuffer *RewriteBuf = Rewrite.getRewriteBufferFor(SM.getMainFileID());
+  clang::diff::SyntaxTree SrcTree(*SrcASTs[0]);
+//  clang::diff::NodeRef rootNode = SrcTree.getRoot();
+  Rewriter rewriter;
+  SourceManager &SM = SrcTree.getSourceManager();
+  const LangOptions &LangOpts = SrcTree.getLangOpts();
+  rewriter.setSourceMgr(SM, LangOpts);
+
   // llvm::outs()  << "/* Start Crochet Output */\n";
 
-  clang::diff::NodeRef rootNode = SrcTree.getRoot();
-  llvm::outs() << rootNode.getTypeLabel() << "\n";
+//  clang::diff::NodeRef rootNode = SrcTree.getRoot();
 
-  for (diff::NodeRef Node : SrcTree) {
-    auto StartLoc = Node.getSourceBeginLocation();
-    auto EndLoc = Node.getSourceEndLocation();
+  std::size_t found = SourcePath.find_last_of("/\\");
+  std::string sourceFileName = SourcePath.substr(found+1);
+
+  for (diff::NodeRef node : SrcTree) {
+    auto StartLoc = node.getSourceBeginLocation();
+    auto EndLoc = node.getSourceEndLocation();
     int startLine = StartLoc.first;
     int endLine = EndLoc.first;
     int lineNumber = stoi(LineNumber);
+    std::string nodeType = node.getTypeLabel();
     if (startLine <= lineNumber && endLine >= lineNumber){
-        llvm::outs() << Node.getTypeLabel() << "\n";
-        break;
-    }
+      if (nodeType == "FunctionDecl"){
+        std::string fileName = node.getFileName();
+        if (!fileName.empty()) {
+          if (fileName == sourceFileName){
+//            llvm::outs() << node.getValue() << "\n";
+            traverseNode(node);
+            break;
+          }
+        }
 
+      }
+
+    }
   }
 
-  if (modified)
-    llvm::outs() << std::string(RewriteBuf->begin(), RewriteBuf->end());
+//  llvm::outs() << targetNodeId << "\n";
+  clang::diff::NodeRef targetNode = SrcTree.getNode(targetNodeId);
+  insertCode(targetNode, rewriter);
 
+  const RewriteBuffer *rewriteBuf = rewriter.getRewriteBufferFor(SrcTree.getSourceManager().getMainFileID());
+  std::string includeHeader = "\n#include<klee/klee.h>\n";
+  llvm::outs() << includeHeader;
+  llvm::outs() << std::string(rewriteBuf->begin(), rewriteBuf->end());
 
   return 0;
 }
