@@ -410,7 +410,7 @@ namespace clang {
 //                Change = Diff.getNodeChange(DstNode);
 //                if (!(Change == Move || Change == UpdateMove || Change == Insert))
 //                    continue;
-//                NodeRef DstParent = *DstNode.getParent();
+    //                NodeRef DstParent = *DstNode.getParent();
 //                PatchedTreeNode *InsertionTarget, *NodeToInsert;
 //                SourceLocation InsertionLoc;
 //                if (Diff.getNodeChange(DstParent) == Insert) {
@@ -705,7 +705,7 @@ namespace clang {
 
 
             } else if (node.getTypeLabel() == "MemberExpr") {
-                 llvm::outs() << "translating member name \n";
+//                 llvm::outs() << "translating member name \n";
                 auto memNode = node.ASTNode.get<MemberExpr>();
                 auto decNode = memNode->getMemberDecl();
                 SourceLocation loc = decNode->getLocation();
@@ -726,7 +726,7 @@ namespace clang {
                     replaceSubString(statement, variableNameInSource, variableNameInTarget);
                 }
 
-                llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                llvm::outs() << "after translation: " << variableNameInTarget << "\n";
 
                 return statement;
 
@@ -793,7 +793,7 @@ namespace clang {
                         int nodeid = LocNodeMap.at(locId);
                         NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
                         std::string variableNameInSource = *nodeInDst.getIdentifier();
-                         llvm::outs() << "before translation: " << variableNameInSource << "\n";
+//                         llvm::outs() << "before translation: " << variableNameInSource << "\n";
                         std::string variableNameInTarget;
                         if (varMap.find(variableNameInSource) != varMap.end()) {
                             variableNameInTarget = varMap[variableNameInSource];
@@ -908,9 +908,9 @@ namespace clang {
                                                    SourceTree.getLangOpts());
             insertStatement = " " + insertStatement + " ";
 
-             llvm::outs() << insertStatement << "\n";
+//             llvm::outs() << insertStatement << "\n";
             insertStatement = translateVariables(insertNode, insertStatement);
-             llvm::outs() << insertStatement << "\n";
+//             llvm::outs() << insertStatement << "\n";
 
 
 
@@ -1221,7 +1221,7 @@ namespace clang {
 
                 if (operation == "Insert") {
 
-                    llvm::outs() << "insert op\n";
+//                    llvm::outs() << "insert op\n";
 
                     std::string offset = line.substr(line.find(" at ") + 4);
                     int Offset = stoi(offset);
@@ -1261,7 +1261,7 @@ namespace clang {
 
                 } else if (operation == "Move") {
 
-                    llvm::outs() << "move op\n";
+//                    llvm::outs() << "move op\n";
 //                    std::string offset = line.substr(line.find(" at ") + 4);
 //                    int Offset = stoi(offset);
 //                    line = line.substr(0, line.find(" at "));
@@ -1309,7 +1309,7 @@ namespace clang {
 
                 } else if (operation == "Update") {
 
-                    llvm::outs() << "update op\n";
+//                    llvm::outs() << "update op\n";
 
 //                    std::string nodeC = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
 //                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
@@ -1347,7 +1347,7 @@ namespace clang {
 
                 } else if (operation == "Delete") {
 
-                    llvm::outs() << "delete op\n";
+//                    llvm::outs() << "delete op\n";
 
 //                    std::string nodeType = line.substr(line.find(" ") + 1, line.find("(") - operation.length() - 1);
 //                    std::string nodeId = line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1);
@@ -1370,7 +1370,7 @@ namespace clang {
 
                 } else if (operation == "UpdateMove") {
 
-                    llvm::outs() << "move op\n";
+//                    llvm::outs() << "move op\n";
 
                 } else {
                     llvm::errs() << "unknown op\n";

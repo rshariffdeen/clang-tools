@@ -21,6 +21,7 @@
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Rewrite/Core/Rewriter.h"
 #include "clang/Tooling/Tooling.h"
+#include "clang/Frontend/FrontendActions.h"
 #include "llvm/Support/CommandLine.h"
 
 
@@ -54,7 +55,7 @@ getCompilationDatabase(StringRef Filename) {
 }
 
 
-void traverseNode(clang::diff::NodeRef node){
+int traverseNode(clang::diff::NodeRef node){
   auto ChildBegin = node.begin(), ChildEnd = node.end();
 //  llvm::outs() << node.getTypeLabel() << "\n";
   std::string nodeType = node.getTypeLabel();
@@ -63,7 +64,7 @@ void traverseNode(clang::diff::NodeRef node){
   int locLineNumber = startLoc.first;
   if(locLineNumber == stoi(LineNumber)){
     targetNodeId = nodeId;
-    return;
+    return 1;
   }
 
 
@@ -75,13 +76,13 @@ void traverseNode(clang::diff::NodeRef node){
     std::string varName;
     std::string nodeValue = node.getValue();
     if (nodeValue == "")
-      return;
+      return 0;
 
     std::string identifier =  nodeValue.substr(nodeValue.find("::") + 2);
     clang::diff::NodeRef childNode = *ChildBegin;
     std::string childNodeType = childNode.getTypeLabel();
     if (childNodeType != "DeclRefExpr")
-      return;
+      return 0;
 
     varName = childNode.getValue() + "->" + identifier;
 //    llvm::outs() << varName << "\n";
@@ -89,19 +90,22 @@ void traverseNode(clang::diff::NodeRef node){
 
     for (it=variableNameList.begin(); it!=variableNameList.end(); ++it)
       if (*it == varName)
-        return;
+        return 0;
     variableNameList.push_front(varName);
-    return;
+    return 0;
   }
 
 
   if (ChildBegin != ChildEnd) {
     traverseNode(*ChildBegin);
     for (++ChildBegin; ChildBegin != ChildEnd; ++ChildBegin) {
-      traverseNode(*ChildBegin);
+      int ret = traverseNode(*ChildBegin);
+      if (ret == 1)
+        return 1;
     }
   }
 
+  return 0;
 
 }
 
@@ -135,7 +139,7 @@ void insertCode(clang::diff::NodeRef targetNode, Rewriter &rewriter) {
 //    llvm::outs() << *it << "\n";
     std::string varName = *it;
     std::string codeToInsert = "\n";
-    codeToInsert = "klee_print_expr('[var-expr] " + varName + "', " + varName + ");\n";
+    codeToInsert = "klee_print_expr(\"[var-expr] " + varName + "\", " + varName + ");\n";
     insertStatement += codeToInsert;
   }
 
@@ -181,7 +185,7 @@ int main(int argc, const char **argv) {
   const LangOptions &LangOpts = SrcTree.getLangOpts();
   rewriter.setSourceMgr(SM, LangOpts);
 
-  // llvm::outs()  << "/* Start Crochet Output */\n";
+//   llvm::outs()  << "/* Start Crochet Output */\n";
 
 //  clang::diff::NodeRef rootNode = SrcTree.getRoot();
 
@@ -221,4 +225,5 @@ int main(int argc, const char **argv) {
   llvm::outs() << std::string(rewriteBuf->begin(), rewriteBuf->end());
 
   return 0;
+
 }
