@@ -1220,10 +1220,10 @@ namespace clang {
 
             std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
             std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
-
-            llvm::outs() << srcValue << "\n";
+//            llvm::outs() << targetValue << "\n";
+//            llvm::outs() << srcValue << "\n";
             srcValue = translateVariables(srcNode, srcValue);
-            llvm::outs() << srcValue << "\n";
+//            llvm::outs() << srcValue << "\n";
 
 
             if (!srcValue.empty()) {
@@ -1314,21 +1314,21 @@ namespace clang {
                     NodeRef updateNode = Src.getNode(NodeId(stoi(nodeIdB)));
                     NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
-
-                     llvm::outs() << nodeC << "\n";
-                     llvm::outs() << nodeIdC << "\n";
-                     llvm::outs() << nodeTypeC << "\n";
-
-                     llvm::outs() << nodeB << "\n";
-                     llvm::outs() << nodeIdB << "\n";
-                     llvm::outs() << nodeTypeB << "\n";
-
-                     llvm::outs() << updateNode.getTypeLabel() << "\n";
-                     llvm::outs() << targetNode.getTypeLabel() << "\n";
+//
+//                     llvm::outs() << nodeC << "\n";
+//                     llvm::outs() << nodeIdC << "\n";
+//                     llvm::outs() << nodeTypeC << "\n";
+//
+//                     llvm::outs() << nodeB << "\n";
+//                     llvm::outs() << nodeIdB << "\n";
+//                     llvm::outs() << nodeTypeB << "\n";
+//
+//                     llvm::outs() << updateNode.getTypeLabel() << "\n";
+//                     llvm::outs() << targetNode.getTypeLabel() << "\n";
 
 
                     if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
-                        modified = crochetPatcher.updateCode(updateNode, targetNode, Src, Target);
+                        modified = crochetPatcher.replaceCode(updateNode, targetNode, Src, Target);
 
                     } else {
                         llvm::errs() << "Error: wrong node type for given Id\n";
