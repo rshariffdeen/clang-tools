@@ -140,7 +140,7 @@ namespace clang {
                 bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree);
 
                 bool updateCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
-
+                bool replaceCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
                 bool deleteCode(NodeRef deleteNode, bool isMove);
 
                 Patcher(SyntaxTree &Src, SyntaxTree &Target,
@@ -1172,10 +1172,10 @@ namespace clang {
             }
 
 
-            // llvm::outs() << updateValue << "\n";
-//            updateValue = translateVariables(updateNode, updateValue);
+             llvm::outs() << updateValue << "\n";
+            updateValue = translateVariables(updateNode, updateValue);
 
-            // llvm::outs() << updateValue << "\n";
+             llvm::outs() << updateValue << "\n";
             // llvm::outs() << oldValue << "\n";
 
             if (!updateValue.empty()) {
@@ -1192,6 +1192,47 @@ namespace clang {
 
                 // llvm::outs() << "statement removed" << "\n";
                 if (Rewrite.InsertText(range.getBegin(), statement))
+                    modified = false;
+                // llvm::outs() << "statement updated" << "\n";
+            }
+
+            return modified;
+        }
+
+        bool
+        Patcher::replaceCode(NodeRef srcNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
+
+            bool modified = false;
+            CharSourceRange srcRange;
+            CharSourceRange targetRange;
+
+            targetRange = targetNode.getSourceRange();
+            srcRange = srcNode.getSourceRange();
+
+//            SourceLocation startLoc = range.getBegin();
+//            SourceLocation endLoc = range.getEnd();
+//
+//            if (startLoc.isMacroID()) {
+//                CharSourceRange expansionRange = Rewrite.getSourceMgr().getImmediateExpansionRange(startLoc);
+//                startLoc = expansionRange.getBegin();
+//                range.setBegin(startLoc);
+//            }
+
+            std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
+            std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
+
+            llvm::outs() << srcValue << "\n";
+            srcValue = translateVariables(srcNode, srcValue);
+            llvm::outs() << srcValue << "\n";
+
+
+            if (!srcValue.empty()) {
+                if (Rewrite.RemoveText(targetRange))
+                    modified = false;
+
+                modified = true;
+                // llvm::outs() << "statement removed" << "\n";
+                if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
                     modified = false;
                 // llvm::outs() << "statement updated" << "\n";
             }
@@ -1259,53 +1300,42 @@ namespace clang {
 
                     }
 
-                } else if (operation == "Move") {
+                } else if (operation == "Replace") {
 
-//                    llvm::outs() << "move op\n";
-//                    std::string offset = line.substr(line.find(" at ") + 4);
-//                    int Offset = stoi(offset);
-//                    line = line.substr(0, line.find(" at "));
-//                    std::string nodeB = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
-//                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
-//                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
-//
-//                    std::string nodeC = line.substr(line.find(" into ") + 6);
-//                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
-//                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
-//
-//                    NodeRef movingNode = Target.getNode(NodeId(stoi(nodeIdB)));
-//                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
-                    // NodeRef targetParentNode = targetNode.getParent();
+//                    llvm::outs() << "update op\n";
+                    std::string nodeC = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
+                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
+                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
+
+                    std::string nodeB = line.substr(line.find(" with ") + 6);
+                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
+                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
+
+                    NodeRef updateNode = Src.getNode(NodeId(stoi(nodeIdB)));
+                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
 
-                    // llvm::outs() << nodeC << "\n";
-                    // llvm::outs() << nodeIdC << "\n";
-                    // llvm::outs() << nodeTypeC << "\n";
+                     llvm::outs() << nodeC << "\n";
+                     llvm::outs() << nodeIdC << "\n";
+                     llvm::outs() << nodeTypeC << "\n";
 
-                    // llvm::outs() << nodeB << "\n";
-                    // llvm::outs() << nodeIdB << "\n";
-                    // llvm::outs() << nodeTypeB << "\n";
+                     llvm::outs() << nodeB << "\n";
+                     llvm::outs() << nodeIdB << "\n";
+                     llvm::outs() << nodeTypeB << "\n";
 
-                    // llvm::outs() << movingNode.getTypeLabel() << "\n";
-                    // llvm::outs() << targetNode.getTypeLabel() << "\n";
+                     llvm::outs() << updateNode.getTypeLabel() << "\n";
+                     llvm::outs() << targetNode.getTypeLabel() << "\n";
 
-//                    if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
-//
-//                        // llvm::outs() << "nodes matched\n";
-//                        if (crochetPatcher.deleteCode(movingNode, true)) {
-//                            modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target);
-//                        } else {
-//                            llvm::errs() << "Error: couldn't remove code for move\n";
-//                            return error(patching_error::failed_to_apply_replacements);
-//
-//                        }
-//
-//
-//                    } else {
-//                        llvm::errs() << "Error: wrong node type for given Id\n";
-//                        return error(patching_error::failed_to_apply_replacements);
-//
-//                    }
+
+                    if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
+                        modified = crochetPatcher.updateCode(updateNode, targetNode, Src, Target);
+
+                    } else {
+                        llvm::errs() << "Error: wrong node type for given Id\n";
+                        return error(patching_error::failed_to_apply_replacements);
+
+                    }
+
 
                 } else if (operation == "Update") {
 
