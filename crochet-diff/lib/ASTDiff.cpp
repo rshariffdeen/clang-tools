@@ -798,6 +798,7 @@ std::string Node::getRefType() const {
 }
 
 std::string Node::getMacroValue() const {
+
   return Lexer::getSourceText(getSourceRange(), Tree.AST.getSourceManager(),
                                 Tree.AST.getLangOpts());
   

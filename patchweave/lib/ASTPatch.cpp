@@ -132,7 +132,7 @@ namespace clang {
                 findPointOfInsertion(NodeRef N, PatchedTreeNode &TargetParent) const;
 
                 std::string translateVariables(NodeRef node, std::string statement);
-
+                std::string getNodeValue(NodeRef node);
                 void loadVariableMapping(std::string mapFilePath);
 
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
@@ -674,9 +674,58 @@ namespace clang {
             return true;
         }
 
+        std::string Patcher::getNodeValue(NodeRef node) {
+            std::string value;
+            if (node.getTypeLabel() == "MemberExpr") {
+                auto memNode = node.ASTNode.get<MemberExpr>();
+                auto decNode = memNode->getMemberDecl();
+                SourceLocation loc = decNode->getLocation();
+                std::string locId = loc.printToString(Src.getSourceManager());
+                std::string nodeValue = node.getValue();
+                value = nodeValue.substr(nodeValue.find("::") + 2);
+//                llvm::errs() << value;
+                unsigned numChildren = node.getNumChildren();
+                if (numChildren > 0){
+                    NodeRef childNode = node.getChild(0);
+                    std::string prepend = getNodeValue(childNode);
+                    if (childNode.getTypeLabel() == "ArraySubscriptExpr") {
+                        value = prepend + "." + value;
+//                        llvm::errs() << value;
+                    } else {
+                        value = prepend + "->" + value;
+//                        llvm::errs() << value;
+                    }
+
+                }
+
+
+            } else if (node.getTypeLabel() == "ArraySubscriptExpr") {
+
+                unsigned numChildren = node.getNumChildren();
+                if (numChildren > 0){
+                    NodeRef memNode = node.getChild(0);
+                    std::string prepend = getNodeValue(memNode);
+                    NodeRef indexNode = node.getChild(1);
+                    std::string indexValue = indexNode.getValue();
+                    if (varMap.find(indexValue) != varMap.end()) {
+                        std::string targetValue = varMap[indexValue];
+                        indexValue = targetValue;
+                    }
+                    value = prepend + "[" + indexValue + "]";
+                }
+
+
+
+            } else if (node.getTypeLabel() == "DeclRefExpr") {
+                value = node.getValue();
+//                llvm::errs() << value;
+            }
+            return value;
+        }
+
         std::string Patcher::translateVariables(NodeRef node, std::string statement) {
             unsigned childNodesInUpdateRange = node.getNumChildren();
-             llvm::errs() << "child count " << childNodesInUpdateRange << "\n";
+//             llvm::errs() << "child count " << childNodesInUpdateRange << "\n";
             if (node.getTypeLabel() == "VarDecl") {
                 // llvm::outs() << "translating variable definition \n";
                 auto decNode = node.ASTNode.get<VarDecl>();
@@ -705,21 +754,9 @@ namespace clang {
 
 
             } else if (node.getTypeLabel() == "MemberExpr") {
-//                 llvm::outs() << "translating member name \n";
-                auto memNode = node.ASTNode.get<MemberExpr>();
-                auto decNode = memNode->getMemberDecl();
-                SourceLocation loc = decNode->getLocation();
-                std::string locId = loc.printToString(Src.getSourceManager());
-//                 llvm::errs() << locId << "\n";
-//                 llvm::outs() << node.getValue() << "\n";
-                std::string nodeValue = node.getValue();
-                std::string prepend;
-//                unsigned numChildren = node.getNumChildren();
-                NodeRef visitNode(node);
-                NodeRef childNode = visitNode.getChild(0);
-                prepend = childNode.getValue() + "->";
 
-                std::string variableNameInSource = prepend + nodeValue.substr(nodeValue.find("::") + 2);
+                std::string variableNameInSource = getNodeValue(node);
+//                llvm::errs() << "var: " << variableNameInSource << "\n";
                 std::string variableNameInTarget;
                 if (varMap.find(variableNameInSource) != varMap.end()) {
                     variableNameInTarget = varMap[variableNameInSource];
