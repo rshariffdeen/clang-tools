@@ -758,7 +758,7 @@ std::string Node::getFileName() const {
         return fileEntry->getName();
     }
   }
-  
+
   return "";
 
 }
@@ -773,7 +773,8 @@ std::string Node::getValue() const {
     return getDeclValue(D);
   if (auto *Init = ASTNode.get<CXXCtorInitializer>())
     return getInitializerValue(Init, Tree.TypePP);
-
+  if (auto *T = ASTNode.get<TypeLoc>())
+    return getTypeLocValue(T);
   return "";
 
   llvm_unreachable("Fatal: unhandled AST node: \n" );
@@ -827,6 +828,18 @@ std::string Node::getDeclValue(const Decl *D) const {
   return Value;
 }
 
+
+std::string Node::getTypeLocValue(const TypeLoc *T) const {
+      std::string Value;
+      QualType Q = T->getType();
+      Value = Q.getAsString ();
+
+//       CharSourceRange Range(T->getSourceRange(), false);
+//       return Lexer::getSourceText(Range, Tree.AST.getSourceManager(),
+//                                    Tree.AST.getLangOpts());
+
+      return Value;
+}
 
 const DeclContext *Node::getEnclosingDeclContext(ASTContext &AST, const Stmt *S) const {
   while (S) {
