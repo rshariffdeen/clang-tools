@@ -124,7 +124,7 @@ namespace clang {
                 // part of an inserted subtree.
                 std::vector<bool> AtomicInsertions;
                 std::map <std::string, std::string> varMap;
-                std::list <int> skipList;
+                std::list <std::string> skipList;
 
             public:
                 Rewriter Rewrite;
@@ -133,6 +133,7 @@ namespace clang {
                 findPointOfInsertion(NodeRef N, PatchedTreeNode &TargetParent) const;
 
                 std::string translateVariables(NodeRef node, std::string statement);
+                std::string filterStatements(NodeRef node, std::string statement, SyntaxTree &SourceTree);
                 std::string getNodeValue(NodeRef node);
                 void loadVariableMapping(std::string mapFilePath);
                 void loadSkipList(std::string skipList);
@@ -724,6 +725,39 @@ namespace clang {
             return value;
         }
 
+        std::string Patcher::filterStatements(NodeRef node, std::string statement, SyntaxTree &SourceTree) {
+            unsigned childNodesInUpdateRange = node.getNumChildren();
+
+            if (node.getTypeLabel() == "CallExpr") {
+                auto callNode = node.ASTNode.get<CallExpr>();
+                SourceLocation beingLoc = callNode->getBeginLoc();
+                SourceLocation endLoc = callNode->getEndLoc();
+                std::string locId = beingLoc.printToString(Src.getSourceManager());
+                std::string filter_filename = locId.substr(locId.find(":") + 1);
+                std::string line_number = filter_filename.substr(0, filter_filename.find(":"));
+                for (std::string num : skipList) {
+                    if(num == line_number){
+                        CharSourceRange extractRange;
+                        extractRange.setBegin(beingLoc);
+                        extractRange.setEnd(endLoc);
+                        std::string remove_statement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
+                                                                                  SourceTree.getLangOpts());
+                        remove_statement = remove_statement + ");";
+                        replaceSubString(statement, remove_statement, "");
+                    }
+                }
+
+            }
+
+            for (unsigned childIndex = 0; childIndex < childNodesInUpdateRange; childIndex++) {
+                NodeRef childNode = node.getChild(childIndex);
+                if (childNode.getNumChildren() > 0) {
+                    statement = filterStatements(childNode, statement, SourceTree);
+                }
+            }
+            return statement;
+        }
+
         std::string Patcher::translateVariables(NodeRef node, std::string statement) {
             unsigned childNodesInUpdateRange = node.getNumChildren();
 //             llvm::errs() << "child count " << childNodesInUpdateRange << "\n";
@@ -947,6 +981,7 @@ namespace clang {
             insertStatement = " " + insertStatement + " ";
 
 //             llvm::outs() << insertStatement << "\n";
+            insertStatement = filterStatements(insertNode, insertStatement, SourceTree);
             insertStatement = translateVariables(insertNode, insertStatement);
 //             llvm::outs() << insertStatement << "\n";
 
@@ -1171,8 +1206,8 @@ namespace clang {
             std::ifstream mapFile(skipListPath);
             std::string line;
             while (std::getline(mapFile, line)) {
-                int lineNumber = stoi(line);
-                skipList.push_back(lineNumber);
+//                int lineNumber = stoi(line);
+                skipList.push_back(line);
             }
 
         }
