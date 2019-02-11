@@ -30,6 +30,7 @@ static cl::opt<std::string> ScriptPath("script", cl::desc("<script>"), cl::Requi
 static cl::opt<std::string> TargetPath("target", cl::desc("<target>"), cl::Required, cl::cat(PatchWeaveCategory));
 static cl::opt<std::string> SourcePath("source", cl::desc("<source>"), cl::Required, cl::cat(PatchWeaveCategory));
 static cl::opt<std::string> MapPath("map", cl::desc("<variable mapping>"), cl::Required, cl::cat(PatchWeaveCategory));
+static cl::opt<std::string> SkipList("skip-list", cl::desc("<lines to skip in transplantation"), cl::Required, cl::cat(PatchWeaveCategory));
 
 static cl::opt<std::string> StopAfter("stop-diff-after", cl::desc("<topdown|bottomup>"), cl::Optional, cl::init(""), cl::cat(PatchWeaveCategory));
 static cl::opt<int> MaxSize("s", cl::desc("<maxsize>"), cl::Optional, cl::init(-1), cl::cat(PatchWeaveCategory));
@@ -163,7 +164,7 @@ int main(int argc, const char **argv) {
 //  diff::SyntaxTree TgtTree(*Tgt);
 
   
-  if (auto Err = diff::patch(TargetTool, SrcTree, MapPath, ScriptPath, Options)) {
+  if (auto Err = diff::patch(TargetTool, SrcTree, MapPath, SkipList, ScriptPath, Options)) {
       llvm::handleAllErrors(
           std::move(Err),
           [](const diff::PatchingError &PE) { PE.log(llvm::errs()); },

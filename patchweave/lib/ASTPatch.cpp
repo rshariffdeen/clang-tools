@@ -124,6 +124,7 @@ namespace clang {
                 // part of an inserted subtree.
                 std::vector<bool> AtomicInsertions;
                 std::map <std::string, std::string> varMap;
+                std::list <int> skipList;
 
             public:
                 Rewriter Rewrite;
@@ -134,7 +135,7 @@ namespace clang {
                 std::string translateVariables(NodeRef node, std::string statement);
                 std::string getNodeValue(NodeRef node);
                 void loadVariableMapping(std::string mapFilePath);
-
+                void loadSkipList(std::string skipList);
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
 
                 bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree);
@@ -1166,6 +1167,16 @@ namespace clang {
 
         }
 
+        void Patcher::loadSkipList(std::string skipListPath) {
+            std::ifstream mapFile(skipListPath);
+            std::string line;
+            while (std::getline(mapFile, line)) {
+                int lineNumber = stoi(line);
+                skipList.push_back(lineNumber);
+            }
+
+        }
+
 
         bool
         Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
@@ -1277,7 +1288,7 @@ namespace clang {
             return modified;
         }
 
-        Error patch(RefactoringTool &TargetTool, SyntaxTree &Src, std::string MapFilePath, std::string ScriptFilePath,
+        Error patch(RefactoringTool &TargetTool, SyntaxTree &Src, std::string MapFilePath, std::string SkipList, std::string ScriptFilePath,
                     const ComparisonOptions &Options, bool Debug) {
 
             std::vector <std::unique_ptr<ASTUnit>> TargetASTs;
@@ -1289,6 +1300,7 @@ namespace clang {
 
             Patcher crochetPatcher(Src, Target, Options, TargetTool, Debug);
             crochetPatcher.loadVariableMapping(MapFilePath);
+            crochetPatcher.loadSkipList(SkipList);
             std::ifstream infile(ScriptFilePath);
             std::string line;
             bool modified = false;
