@@ -959,7 +959,7 @@ namespace clang {
 
             CharSourceRange range = targetNode.getSourceRange();
             CharSourceRange extractRange = insertNode.getSourceRange();
-            SourceLocation insertLoc = range.getBegin();
+            SourceLocation insertLoc = range.getEnd();
             std::string insertStatement;
 
 
@@ -970,7 +970,7 @@ namespace clang {
                 CharSourceRange expansionRange = Rewrite.getSourceMgr().getImmediateExpansionRange(
                         insertLoc);
                 // We're just interested in the start location
-                insertLoc = expansionRange.getBegin();
+                insertLoc = expansionRange.getEnd();
                 range.setBegin(insertLoc);
 
             }
@@ -1006,7 +1006,7 @@ namespace clang {
 
                     } else {
 
-                        NodeRef nearestChildNode = targetNode.getChild(Offset - 1);
+                        NodeRef nearestChildNode = targetNode.getChild(Offset);
                         insertLoc = nearestChildNode.getSourceRange().getEnd();
 
                         if (Rewrite.InsertTextAfterToken(insertLoc, insertStatement))
@@ -1158,7 +1158,7 @@ namespace clang {
                             // llvm::outs() <<"if leg\n";
                             NodeRef nearestChildNode = targetNode.getChild(Offset);
                             // llvm::outs() <<"got child\n";
-                            insertLoc = nearestChildNode.getSourceRange().getBegin();
+                            insertLoc = nearestChildNode.getSourceRange().getEnd();
                             // llvm::outs() <<"got loc\n";
                             // if (insertLoc.isValid())
                             //  llvm::outs() <<"valid\n";
