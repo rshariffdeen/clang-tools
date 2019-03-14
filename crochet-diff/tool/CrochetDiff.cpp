@@ -368,6 +368,15 @@ static void printNodeAttributes(raw_ostream &OS, diff::SyntaxTree &Tree,
     } 
   }
 
+  if (Node.getTypeLabel() == "DeclRefExpr"){
+    if (Node.getRefType() == "VarDecl"){
+      std::string DataType = Node.getDataType();
+      OS << R"(,"data_type":")";
+      printJsonString(OS, DataType);
+      OS << R"(")";
+    }
+  }
+
 
   auto Offsets = Node.getSourceRangeOffsets();  
   auto StartLoc = Node.getSourceBeginLocation();   
