@@ -367,14 +367,11 @@ static void printNodeAttributes(raw_ostream &OS, diff::SyntaxTree &Tree,
       OS << '"';
     } 
   }
-
-  if (Node.getTypeLabel() == "DeclRefExpr"){
-    if (Node.getRefType() == "VarDecl"){
-      std::string DataType = Node.getDataType();
+  std::string DataType = Node.getDataType();
+  if (DataType != ""){
       OS << R"(,"data_type":")";
       printJsonString(OS, DataType);
       OS << R"(")";
-    }
   }
 
 
