@@ -359,7 +359,7 @@ static void printNodeAttributes(raw_ostream &OS, diff::SyntaxTree &Tree,
   OS << R"("id":)" << int(Node.getId());
   OS << R"(,"type":")" << Node.getTypeLabel() << '"';
 
-  if (Node.getTypeLabel() == "FunctionDecl"){
+  if (Node.getTypeLabel() == "FunctionDecl" || Node.getTypeLabel() == "TypedefDecl" ){
     std::string fileName = Node.getFileName();
       if (!fileName.empty()) {
       OS << R"(,"file":")";
