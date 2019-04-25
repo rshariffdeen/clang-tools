@@ -358,7 +358,7 @@ static void printNodeAttributes(raw_ostream &OS, diff::SyntaxTree &Tree,
 
   OS << R"("id":)" << int(Node.getId());
   if(Node.getParent())
-    OS << R"(,"parent_id":)" << int(Node.getParent()->getId()) << '"';
+    OS << R"(,"parent_id":)" << int(Node.getParent()->getId());
   OS << R"(,"type":")" << Node.getTypeLabel() << '"';
 
   if (Node.getTypeLabel() == "FunctionDecl" || Node.getTypeLabel() == "TypedefDecl" ){
