@@ -1016,6 +1016,31 @@ namespace clang {
 
                     }
 
+                } else if (targetNode.getTypeLabel() == "CaseStmt") {
+
+                    if (Offset == 0) {
+                        auto ifNode = targetNode.ASTNode.get<IfStmt>();
+                        auto condNode = ifNode->getCond();
+                        insertLoc = condNode->getExprLoc();
+                        //std::string locId = insertLoc.printToString(Target.getSourceManager());
+                        // llvm::outs() << locId << "\n";
+
+                        if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+                        modified = true;
+
+                    } else {
+
+                        NodeRef nearestChildNode = targetNode.getChild(Offset);
+                        insertLoc = nearestChildNode.getSourceRange().getBegin();
+
+                        if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+                        modified = true;
+
+
+                    }
+
                 } else if (targetNode.getTypeLabel() == "IfStmt") {
 
                     if (Offset == 0) {
