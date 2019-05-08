@@ -680,21 +680,23 @@ namespace clang {
             std::string value;
             if (node.getTypeLabel() == "MemberExpr") {
                 auto memNode = node.ASTNode.get<MemberExpr>();
+
                 auto decNode = memNode->getMemberDecl();
                 SourceLocation loc = decNode->getLocation();
                 std::string locId = loc.printToString(Src.getSourceManager());
                 std::string nodeValue = node.getValue();
                 value = nodeValue.substr(nodeValue.find("::") + 2);
 //                llvm::errs() << value;
+//                llvm::errs() << memNode->isArrow();
                 unsigned numChildren = node.getNumChildren();
                 if (numChildren > 0){
                     NodeRef childNode = node.getChild(0);
                     std::string prepend = getNodeValue(childNode);
-                    if (childNode.getTypeLabel() == "ArraySubscriptExpr") {
-                        value = prepend + "." + value;
+                    if (memNode->isArrow()) {
+                        value = prepend + "->" + value;
 //                        llvm::errs() << value;
                     } else {
-                        value = prepend + "->" + value;
+                        value = prepend + "." + value;
 //                        llvm::errs() << value;
                     }
 
@@ -762,12 +764,12 @@ namespace clang {
             unsigned childNodesInUpdateRange = node.getNumChildren();
 //             llvm::errs() << "child count " << childNodesInUpdateRange << "\n";
             if (node.getTypeLabel() == "VarDecl") {
-                // llvm::outs() << "translating variable definition \n";
+                 llvm::outs() << "translating variable definition \n";
                 auto decNode = node.ASTNode.get<VarDecl>();
                 SourceLocation loc = decNode->getLocation();
                 std::string locId = loc.printToString(Src.getSourceManager());
-                // llvm::errs() << locId << "\n";
-                // llvm::outs() << node.getValue() << "\n";
+                 llvm::errs() << locId << "\n";
+                 llvm::outs() << node.getValue() << "\n";
 
                 if (LocNodeMap.find(locId) == LocNodeMap.end()) {
                     llvm::errs() << "invalid key referenced: " << locId << "\n";
@@ -776,7 +778,7 @@ namespace clang {
                     int nodeid = LocNodeMap.at(locId);
                     NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
                     std::string variableNameInSource = *nodeInDst.getIdentifier();
-                    // llvm::outs() << "before translation: " << variableNameInSource << "\n";
+                     llvm::outs() << "before translation: " << variableNameInSource << "\n";
                     std::string variableNameInTarget;
                     if (varMap.find(variableNameInSource) != varMap.end()) {
                         variableNameInTarget = varMap[variableNameInSource];
@@ -789,16 +791,16 @@ namespace clang {
 
 
             } else if (node.getTypeLabel() == "MemberExpr") {
-
+                llvm::outs() << "translating variable definition \n";
                 std::string variableNameInSource = getNodeValue(node);
-//                llvm::errs() << "var: " << variableNameInSource << "\n";
+                llvm::outs() << "var: " << variableNameInSource << "\n";
                 std::string variableNameInTarget;
                 if (varMap.find(variableNameInSource) != varMap.end()) {
                     variableNameInTarget = varMap[variableNameInSource];
                     replaceSubString(statement, variableNameInSource, variableNameInTarget);
                 }
 
-//                llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+                llvm::outs() << "after translation: " << variableNameInTarget << "\n";
 
                 return statement;
 
