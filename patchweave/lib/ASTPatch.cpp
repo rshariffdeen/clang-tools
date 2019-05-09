@@ -16,6 +16,8 @@
 #include <sstream>
 #include <string.h>
 #include <map>
+#include <algorithm>
+#include <string>
 
 using namespace llvm;
 using namespace clang;
@@ -124,7 +126,10 @@ namespace clang {
                 // part of an inserted subtree.
                 std::vector<bool> AtomicInsertions;
                 std::map <std::string, std::string> varMap;
+                std::list <std::string> usedVar;
                 std::list <std::string> skipList;
+
+
 
             public:
                 Rewriter Rewrite;
@@ -135,6 +140,7 @@ namespace clang {
                 std::string translateVariables(NodeRef node, std::string statement);
                 std::string filterStatements(NodeRef node, std::string statement, SyntaxTree &SourceTree);
                 std::string getNodeValue(NodeRef node);
+                bool replaceSubString(std::string &str, const std::string &from, const std::string &to);
                 void loadVariableMapping(std::string mapFilePath);
                 void loadSkipList(std::string skipList);
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
@@ -668,11 +674,34 @@ namespace clang {
 //            return {-1, true};
 //        }
 
-        bool replaceSubString(std::string &str, const std::string &from, const std::string &to) {
+        bool Patcher::replaceSubString(std::string &str, const std::string &from, const std::string &to) {
             size_t start_pos = str.find(from);
+            size_t length = str.length();
+
+            for (std::string var : usedVar) {
+                if(from == var){
+                    return true;
+                }
+
+            }
+
+            usedVar.push_back(from);
+
             if (start_pos == std::string::npos)
                 return false;
-            str.replace(start_pos, from.length(), to);
+//            str.replace(start_pos, from.length(), to);
+            // Repeat till end is reached
+//            llvm::errs() << str.size() << " - " << start_pos << "\n";
+            while((start_pos != std::string::npos) && start_pos < length)
+            {
+                // Replace this occurrence of Sub String
+                str.replace(start_pos, from.length(), to);
+                // Get the next occurrence from the current position
+//                pos =data.find(toSearch, pos + replaceStr.size());
+                start_pos = str.find(from, start_pos + to.length());
+//                llvm::errs() << str.size() << " - " << start_pos << "\n";
+            }
+
             return true;
         }
 
@@ -764,12 +793,12 @@ namespace clang {
             unsigned childNodesInUpdateRange = node.getNumChildren();
 //             llvm::errs() << "child count " << childNodesInUpdateRange << "\n";
             if (node.getTypeLabel() == "VarDecl") {
-                 llvm::outs() << "translating variable definition \n";
+//                llvm::outs() << "translating variable definition \n";
                 auto decNode = node.ASTNode.get<VarDecl>();
                 SourceLocation loc = decNode->getLocation();
                 std::string locId = loc.printToString(Src.getSourceManager());
-                 llvm::errs() << locId << "\n";
-                 llvm::outs() << node.getValue() << "\n";
+//                 llvm::errs() << locId << "\n";
+//                 llvm::outs() << node.getValue() << "\n";
 
                 if (LocNodeMap.find(locId) == LocNodeMap.end()) {
                     llvm::errs() << "invalid key referenced: " << locId << "\n";
@@ -778,7 +807,7 @@ namespace clang {
                     int nodeid = LocNodeMap.at(locId);
                     NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
                     std::string variableNameInSource = *nodeInDst.getIdentifier();
-                     llvm::outs() << "before translation: " << variableNameInSource << "\n";
+//                    llvm::outs() << "before translation: " << variableNameInSource << "\n";
                     std::string variableNameInTarget;
                     if (varMap.find(variableNameInSource) != varMap.end()) {
                         variableNameInTarget = varMap[variableNameInSource];
@@ -791,20 +820,37 @@ namespace clang {
 
 
             } else if (node.getTypeLabel() == "MemberExpr") {
-                llvm::outs() << "translating variable definition \n";
+//                llvm::outs() << "translating variable definition \n";
                 std::string variableNameInSource = getNodeValue(node);
-                llvm::outs() << "var: " << variableNameInSource << "\n";
+//                llvm::outs() << "var: " << variableNameInSource << "\n";
                 std::string variableNameInTarget;
                 if (varMap.find(variableNameInSource) != varMap.end()) {
                     variableNameInTarget = varMap[variableNameInSource];
                     replaceSubString(statement, variableNameInSource, variableNameInTarget);
                 }
 
-                llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+
+                return statement;
+
+            } else if (node.getTypeLabel() == "DeclRefExpr") {
+//                llvm::outs() << "translating variable definition \n";
+//                auto decRefNode = node.ASTNode.get<DeclRefExpr>();
+//                auto decNode = decRefNode->getDecl();
+                std::string variableNameInSource = getNodeValue(node);
+//                llvm::outs() << "var: " << variableNameInSource << "\n";
+                std::string variableNameInTarget;
+                if (varMap.find(variableNameInSource) != varMap.end()) {
+                    variableNameInTarget = varMap[variableNameInSource];
+                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                }
+
+//                llvm::outs() << "after translation: " << variableNameInTarget << "\n";
 
                 return statement;
 
             }
+
 //            }  else if (node.getTypeLabel() == "FieldDecl") {
 //
 //                // llvm::outs() << "translating member definition \n";
@@ -855,25 +901,45 @@ namespace clang {
                 NodeRef childNode = node.getChild(childIndex);
 //                 llvm::outs() << "child " << childIndex << " type " << childNode.getTypeLabel() << "\n";
                 if (childNode.getTypeLabel() == "DeclRefExpr") {
-                    // llvm::outs() << "translating reference \n";
-                    auto decRefNode = childNode.ASTNode.get<DeclRefExpr>();
-                    auto decNode = decRefNode->getDecl();
-                    SourceLocation loc = decNode->getLocation();
-                    std::string locId = loc.printToString(Src.getSourceManager());
-                    if (LocNodeMap.find(locId) == LocNodeMap.end()) {
-                        llvm::errs() << "invalid key referenced: " << locId << "\n";
 
-                    } else {
-                        int nodeid = LocNodeMap.at(locId);
-                        NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
-                        std::string variableNameInSource = *nodeInDst.getIdentifier();
-//                         llvm::outs() << "before translation: " << variableNameInSource << "\n";
-                        std::string variableNameInTarget;
-                        if (varMap.find(variableNameInSource) != varMap.end()) {
-                            variableNameInTarget = varMap[variableNameInSource];
-                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                        }
+//                    llvm::outs() << "translating declref variable definition \n";
+//                auto decRefNode = node.ASTNode.get<DeclRefExpr>();
+//                auto decNode = decRefNode->getDecl();
+                    std::string variableNameInSource = getNodeValue(childNode);
+//                    llvm::outs() << "var: " << variableNameInSource << "\n";
+                    std::string variableNameInTarget;
+                    if (varMap.find(variableNameInSource) != varMap.end()) {
+                        variableNameInTarget = varMap[variableNameInSource];
+                        replaceSubString(statement, variableNameInSource, variableNameInTarget);
                     }
+
+//                    llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                    llvm::outs() << "statement: " << statement << "\n";
+                    return statement;
+//
+//
+////                     llvm::outs() << "translating reference \n";
+////                    auto decRefNode = childNode.ASTNode.get<DeclRefExpr>();
+////                    auto decNode = decRefNode->getDecl();
+////                    SourceLocation loc = decNode->getLocation();
+////                    std::string locId = loc.printToString(Src.getSourceManager());
+////                    llvm::outs() << locId << "\n";
+////
+////                    if (LocNodeMap.find(locId) == LocNodeMap.end()) {
+////                        llvm::errs() << "invalid key referenced: " << locId << "\n";
+////
+////                    } else {
+////                        int nodeid = LocNodeMap.at(locId);
+////                        NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
+////                        std::string variableNameInSource = *nodeInDst.getIdentifier();
+////                        llvm::outs() << "before translation: " << variableNameInSource << "\n";
+////                        std::string variableNameInTarget;
+////                        if (varMap.find(variableNameInSource) != varMap.end()) {
+////                            variableNameInTarget = varMap[variableNameInSource];
+////                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
+////                        }
+////                        llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+////                    }
                 }
 
                 if (childNode.getNumChildren() > 0) {
