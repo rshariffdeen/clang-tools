@@ -369,6 +369,16 @@ static void printNodeAttributes(raw_ostream &OS, diff::SyntaxTree &Tree,
       OS << '"';
     } 
   }
+
+  if (Node.getTypeLabel() == "MemberExpr"){
+    auto memNode = Node.ASTNode.get<MemberExpr>();
+    if (memNode->isArrow()) {
+      OS << R"(,"isArrow":")";
+      printJsonString(OS, "yes");
+      OS << '"';
+    }
+  }
+
   std::string DataType = Node.getDataType();
   if (DataType != ""){
       OS << R"(,"data_type":")";
