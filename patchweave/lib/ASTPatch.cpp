@@ -915,7 +915,9 @@ namespace clang {
 
 //                    llvm::outs() << "after translation: " << variableNameInTarget << "\n";
 //                    llvm::outs() << "statement: " << statement << "\n";
-                    return statement;
+
+                    if (auto *VD = childNode.ASTNode.get<VarDecl>())
+                        return statement;
 //
 //
 ////                     llvm::outs() << "translating reference \n";
