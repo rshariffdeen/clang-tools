@@ -1026,7 +1026,7 @@ namespace clang {
             bool modified = false;
 
             // llvm::outs() << "nodes matched\n";
-
+            usedVar.clear();
             CharSourceRange range = targetNode.getSourceRange();
             CharSourceRange extractRange = insertNode.getSourceRange();
             SourceLocation insertLoc = range.getEnd();
