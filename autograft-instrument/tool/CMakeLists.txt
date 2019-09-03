@@ -2,17 +2,17 @@ set(LLVM_LINK_COMPONENTS
   Support
   )
 
-add_clang_executable(AutoGraft
+add_clang_executable(autograft
         AutoGraft.cpp
   )
 
-target_link_libraries(AutoGraft
+target_link_libraries(autograft
   PRIVATE
   AutoGraft
   clangBasic
   clangFrontend
   clangRewrite
-  clangTooling 
+  clangTooling
   clangToolingCore
   )
 
