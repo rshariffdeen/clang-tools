@@ -66,19 +66,46 @@ int instrumentCode(clang::diff::NodeRef node, Rewriter &rewriter){
     auto ifNode = node.ASTNode.get<IfStmt>();
     auto condNode = ifNode->getCond();
     auto thenNode = ifNode->getThen();
-    std::string instrumentFirst = "flip_callback( ";
-    std::string instrumentSecond = ")";
+    SourceLocation condLocStart = condNode->getLocStart();
+    SourceLocation condLocEnd = condNode->getLocEnd();
+    SourceLocation thenLocStart = thenNode->getLocStart();
+    bool invalid;
+    CharSourceRange extractRange = CharSourceRange::getTokenRange(condLocStart, condLocEnd);
+    CharSourceRange deleteRange = CharSourceRange::getTokenRange(condLocStart, thenLocStart);
+//    SourceRange conditionRange = SourceRange(condLocStart, condLocEnd);
+    StringRef originalCondition = Lexer::getSourceText(extractRange, rewriter.getSourceMgr(), rewriter.getLangOpts(), &invalid);
+    StringRef deleteText = Lexer::getSourceText(deleteRange, rewriter.getSourceMgr(), rewriter.getLangOpts(), &invalid);
 //    clang::diff::NodeRef condNode = node.getChild(0);
 //    int numChildren = condNode.getNumChildren();
 //    llvm::outs() << condNode.getTypeLabel() << "\n";
+    std::string instrumentFirst = "flip_callback( ";
+    std::string instrumentSecond = " ," + std::to_string(rand()) + "))";
+    std::string instrumentedCondition = instrumentFirst + originalCondition.str()  + instrumentSecond;
 
-    SourceLocation insertLocStart = condNode->getLocStart();
-    SourceLocation insertLocEnd = thenNode->getLocStart();
-//    llvm::outs() << insertLoc.printToString(rewriter.getSourceMgr()) << "\n";
-    if (rewriter.InsertTextBefore(insertLocEnd, instrumentSecond))
-      llvm::errs() << "error inserting second\n";
-    if (rewriter.InsertTextBefore(insertLocStart, instrumentFirst))
-      llvm::errs() << "error inserting first\n";
+
+
+    if (rewriter.RemoveText(deleteRange)) {
+      llvm::errs() << condLocStart.printToString(rewriter.getSourceMgr()) << " - " << condLocEnd.printToString(rewriter.getSourceMgr()) <<"\n";
+    } else{
+//      llvm::outs() << condLocStart.printToString(rewriter.getSourceMgr()) << "\n";
+//      llvm::outs() << condLocEnd.printToString(rewriter.getSourceMgr()) << "\n";
+//      llvm::outs() << rewriter.getRewrittenText(conditionRange) << "\n";
+      if (deleteText.str().find("{") > 0) {
+        instrumentedCondition += "{";
+      }
+
+      if (rewriter.InsertText(condLocStart, instrumentedCondition))
+        llvm::errs() << "error instrumenting at " << condLocStart.printToString(rewriter.getSourceMgr()) << "\n";
+
+    }
+//    if (rewriter.ReplaceText(conditionRange, instrumentedCondition))
+//      llvm::errs() << "error instrumenting at " << condLoc.printToString(rewriter.getSourceMgr()) << "\n";
+
+//    } else{
+//      if (rewriter.InsertTextBefore(insertLocEnd, instrumentSecond)) {
+//        llvm::errs() << "error inserting second\n";
+//      }
+//    }
 
 
 //
@@ -177,6 +204,8 @@ int main(int argc, const char **argv) {
 
 
   const RewriteBuffer *rewriteBuf = rewriter.getRewriteBufferFor(SrcTree.getSourceManager().getMainFileID());
+  std::string includeHeader = "\n#include <stdbool.h>\n  #include <stdint.h>\n extern bool flip_callback(bool b, uint32_t id);\n";
+  llvm::outs() << includeHeader;
   llvm::outs() << std::string(rewriteBuf->begin(), rewriteBuf->end());
 
   return 0;
