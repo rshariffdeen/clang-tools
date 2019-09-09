@@ -1409,6 +1409,41 @@ namespace clang {
 
                 } else if (operation == "UpdateMove") {
 
+
+                    std::string nodeC = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
+                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
+                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
+
+                    std::string nodeB = line.substr(line.find(" to ") + 4);
+                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
+                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
+
+                    NodeRef updateNode = Dst.getNode(NodeId(stoi(nodeIdB)));
+                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
+
+
+                    // llvm::outs() << nodeC << "\n";
+                    // llvm::outs() << nodeIdC << "\n";
+                    // llvm::outs() << nodeTypeC << "\n";
+
+                    // llvm::outs() << nodeB << "\n";
+                    // llvm::outs() << nodeIdB << "\n";
+                    // llvm::outs() << nodeTypeB << "\n";
+
+                    // llvm::outs() << updateNode.getTypeLabel() << "\n";
+                    // llvm::outs() << targetNode.getTypeLabel() << "\n";
+
+
+                    if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
+                        modified = crochetPatcher.updateCode(updateNode, targetNode, Dst, Target);
+
+                    } else {
+                        llvm::errs() << "Error: wrong node type for given Id\n";
+                        return error(patching_error::failed_to_apply_replacements);
+
+                    }
+
+
                     // llvm::outs() << "move op\n";
 
                 } else {
