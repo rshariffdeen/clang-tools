@@ -1622,21 +1622,12 @@ namespace clang {
                     OS << " at " << Dst.findPositionInParent() << "\n";
                     break;
                 case UpdateMove:
-                    OS << "Delete";
+                    OS << "Update";
                     OS << " ";
-                    Src->getParent()->getChild(Src->findPositionInParent()).dump(OS);
-                    OS << "\n";
-
-
-                    OS << "Insert";
-                    OS << " ";
+                    Src->dump(OS);
+                    OS << " to ";
                     Dst.dump(OS);
-                    OS << " into ";
-                    if (!Dst.getParent())
-                        OS << "None";
-                    else
-                        Dst.getParent()->dump(OS);
-                    OS << " at " << Dst.findPositionInParent() << "\n";
+                    OS << "\n";
                     break;
 
             }
