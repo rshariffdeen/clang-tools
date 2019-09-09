@@ -477,7 +477,7 @@ namespace clang {
             const LangOptions &LangOpts = N.getTree().getLangOpts();
             Token Tok;
             for (auto TokenLocation : N.getOwnedTokens()) {
-                // bool Failure = Lexer::getRawToken(TokenLocation, Tok, SM, LangOpts, /*IgnoreWhiteSpace=*/true);
+                bool Failure = Lexer::getRawToken(TokenLocation, Tok, SM, LangOpts, /*IgnoreWhiteSpace=*/true);
                 assert(!Failure);
                 auto Range = CharSourceRange::getCharRange(TokenLocation, Tok.getEndLoc());
                 // This is here to make CompoundStmt nodes compare equal, to make the tests
