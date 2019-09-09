@@ -1548,16 +1548,19 @@ namespace clang {
             const Node *Src = Diff.getMapped(Dst);
             // const Node *DstParent = Dst.getParent();
             ChangeKind Change = Diff.getNodeChange(Dst);
-            printChangeKind(OS, Change);
+//            printChangeKind(OS, Change);
             // int offset;
             // int numChildren;
 
             switch (Change) {
                 case NoChange:
+                    printChangeKind(OS, Change);
                     break;
                 case Delete:
+                    printChangeKind(OS, Change);
                     llvm_unreachable("The destination tree can't have deletions.");
                 case Update:
+                    printChangeKind(OS, Change);
                     OS << " ";
                     Src->dump(OS);
                     OS << " to ";
@@ -1608,7 +1611,7 @@ namespace clang {
                     // break;
 
                 case Move:
-                case UpdateMove:
+                    printChangeKind(OS, Change);
                     OS << " ";
                     Dst.dump(OS);
                     OS << " into ";
@@ -1618,6 +1621,24 @@ namespace clang {
                         Dst.getParent()->dump(OS);
                     OS << " at " << Dst.findPositionInParent() << "\n";
                     break;
+                case UpdateMove:
+                    OS << "Delete";
+                    OS << " ";
+                    Src->getParent()->getChild(Src->findPositionInParent()).dump(OS);
+                    OS << "\n";
+
+
+                    OS << "Insert";
+                    OS << " ";
+                    Dst.dump(OS);
+                    OS << " into ";
+                    if (!Dst.getParent())
+                        OS << "None";
+                    else
+                        Dst.getParent()->dump(OS);
+                    OS << " at " << Dst.findPositionInParent() << "\n";
+                    break;
+
             }
         }
 
