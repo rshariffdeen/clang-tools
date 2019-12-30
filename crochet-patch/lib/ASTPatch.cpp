@@ -911,12 +911,18 @@ namespace clang {
                 std::string binOp = binOpNode->getOpcodeStr();
                 Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
 
-            } else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro" ||
-                       deleteNode.getTypeLabel() == "MemberExpr") {
+            } else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro" ) {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
                 Rewrite.RemoveText(range, delRangeOpts);
+
+            } else if (deleteNode.getTypeLabel() == "MemberExpr"){
+                Rewriter::RewriteOptions delRangeOpts;
+                delRangeOpts.RemoveLineIfEmpty = true;
+                range = deleteNode.findRangeForDeletion();
+                Rewrite.RemoveText(range, delRangeOpts);
+
             } else {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
