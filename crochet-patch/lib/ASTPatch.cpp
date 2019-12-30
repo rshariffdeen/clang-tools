@@ -918,9 +918,11 @@ namespace clang {
                 Rewrite.RemoveText(range, delRangeOpts);
 
             } else if (deleteNode.getTypeLabel() == "MemberExpr"){
+                auto memExpNode = deleteNode.ASTNode.get<MemberExpr>();
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
                 range = deleteNode.findRangeForDeletion();
+                range.setBegin(memExpNode.getOperatorLoc());
                 Rewrite.RemoveText(range, delRangeOpts);
 
             } else {
