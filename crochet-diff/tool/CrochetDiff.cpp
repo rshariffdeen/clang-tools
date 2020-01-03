@@ -51,6 +51,10 @@ static cl::opt<std::string> DestinationPath(cl::Positional,
                                             cl::Optional,
                                             cl::cat(ClangDiffCategory));
 
+static cl::opt<int> ASTIndex("i", cl::desc("<AST index>"), cl::Optional,
+                            cl::init(-1), cl::cat(ClangDiffCategory));
+
+
 static cl::opt<std::string> StopAfter("stop-diff-after",
                                       cl::desc("<topdown|bottomup>"),
                                       cl::Optional, cl::init(""),
@@ -116,7 +120,7 @@ getAST(const std::unique_ptr<CompilationDatabase> &CommonCompilations,
   Tool.buildASTs(ASTs);
   if (ASTs.size() == 0)
     return nullptr;
-  return std::move(ASTs[0]);
+  return std::move(ASTs[ASTIndex]);
 }
 
 static char hexdigit(int N) { return N &= 0xf, N + (N < 10 ? '0' : 'a' - 10); }
