@@ -120,7 +120,7 @@ getAST(const std::unique_ptr<CompilationDatabase> &CommonCompilations,
   Tool.buildASTs(ASTs);
   if (ASTs.size() == 0)
     return nullptr;
-  return std::move(ASTs[ASTIndex]);
+  return std::move(ASTs[0]);
 }
 
 static char hexdigit(int N) { return N &= 0xf, N + (N < 10 ? '0' : 'a' - 10); }
