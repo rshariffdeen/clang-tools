@@ -922,7 +922,7 @@ namespace clang {
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
                 range = deleteNode.findRangeForDeletion();
-                range.setBegin(memExpNode.getOperatorLoc());
+                range.setBegin(memExpNode->getOperatorLoc());
                 Rewrite.RemoveText(range, delRangeOpts);
 
             } else {
