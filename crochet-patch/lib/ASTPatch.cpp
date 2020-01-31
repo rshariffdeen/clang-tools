@@ -718,47 +718,47 @@ namespace clang {
                 return statement;
 
 
-            } else if (node.getTypeLabel() == "VarDecl") {
-
-                // llvm::outs() << "translating variable definition \n";
-                auto decNode = node.ASTNode.get<VarDecl>();
-                SourceLocation loc = decNode->getLocation();
-                std::string locId = loc.printToString(Dst.getSourceManager());
-                // llvm::errs() << locId << "\n";
-                // llvm::outs() << node.getValue() << "\n";
-
-//                if (LocNodeMap.find(locId) == LocNodeMap.end()) {
+//            } else if (node.getTypeLabel() == "VarDecl") {
 //
-//                    llvm::errs() << "invalid key referenced: " << locId << "\n";
+//                // llvm::outs() << "translating variable definition \n";
+//                auto decNode = node.ASTNode.get<VarDecl>();
+//                SourceLocation loc = decNode->getLocation();
+//                std::string locId = loc.printToString(Dst.getSourceManager());
+//                // llvm::errs() << locId << "\n";
+//                // llvm::outs() << node.getValue() << "\n";
 //
-//                } else {
-//                    // llvm::outs() << "found location\n" ;
-//                    int nodeid = LocNodeMap.at(locId);
-//                    NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
-//                    std::string variableNameInSource = *nodeInDst.getIdentifier();
-//                    // llvm::outs() << "before translation: " << variableNameInSource << "\n";
+////                if (LocNodeMap.find(locId) == LocNodeMap.end()) {
+////
+////                    llvm::errs() << "invalid key referenced: " << locId << "\n";
+////
+////                } else {
+////                    // llvm::outs() << "found location\n" ;
+////                    int nodeid = LocNodeMap.at(locId);
+////                    NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
+////                    std::string variableNameInSource = *nodeInDst.getIdentifier();
+////                    // llvm::outs() << "before translation: " << variableNameInSource << "\n";
+////
+////                    if (Diff.getMapped(nodeInDst) != NULL) {
+////                        NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
+////
+////                        if (TargetDiff.getMapped(nodeInSrc) != NULL) {
+////                            NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
+////                            // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
+////                            std::string variableNameInTarget = *nodeInTarget.getIdentifier();
+////                            // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+////                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
+////
+////                        }
+////
+////                    } //else {
+//                    //     std::string variableNameInTarget = variableNameInSource + "_crochet";
+//                    //     // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                    //     replaceSubString(statement, variableNameInSource, variableNameInTarget);
+//                    // }
 //
-//                    if (Diff.getMapped(nodeInDst) != NULL) {
-//                        NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
+//                }
 //
-//                        if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-//                            NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-//                            // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
-//                            std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-//                            // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-//                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//
-//                        }
-//
-//                    } //else {
-                    //     std::string variableNameInTarget = variableNameInSource + "_crochet";
-                    //     // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-                    //     replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                    // }
-
-                }
-
-                return statement;
+//                return statement;
 
 
             } else if (node.getTypeLabel() == "FieldDecl") {
