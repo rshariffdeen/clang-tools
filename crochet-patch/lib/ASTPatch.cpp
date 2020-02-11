@@ -1098,12 +1098,12 @@ namespace clang {
                     // llvm::outs() << insertStatement << "\n";
                     // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
                     // auto EnumDeclNode = targetNode.ASTNode.get<EnumDecl>();
-                    NodeRef neighbor = targetNode.getChild(Offset);
-//                    auto EnumConstNode = neighbor.ASTNode.get<EnumConstantDecl>();
-                    CharSourceRange neighborRange = neighbor.getSourceRange();
+
 
 
                     if (Offset < numChildren) {
+                        NodeRef neighbor = targetNode.getChild(Offset);
+                        CharSourceRange neighborRange = neighbor.getSourceRange();
                         insertLoc = neighborRange.getBegin();
                         insertStatement = insertStatement + ", ";
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
@@ -1112,6 +1112,8 @@ namespace clang {
                             llvm::errs() << "error inserting\n";
 
                     } else {
+                        NodeRef neighbor = targetNode.getChild(numChildren - 1);
+                        CharSourceRange neighborRange = neighbor.getSourceRange();
                         insertLoc = neighborRange.getEnd();
                         insertStatement = ", " + insertStatement ;
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
