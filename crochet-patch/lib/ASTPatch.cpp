@@ -1083,30 +1083,28 @@ namespace clang {
 
                     modified = true;
 
-                } else if (targetNode.getTypeLabel() == "MemberExpr") {
+                } else if (targetNode.getTypeLabel() == "EnumDecl") {
 
+                    int numChildren = targetNode.getNumChildren();
                     extractRange = insertNode.getSourceRange();
                     insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
                                                            SourceTree.getLangOpts());
-                    insertStatement = translateVariables(insertNode, insertStatement);
+
                     // llvm::outs() << insertStatement << "\n";
                     // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
-                    auto memberNode = targetNode.ASTNode.get<MemberExpr>();
+                    auto EnumDeclNode = targetNode.ASTNode.get<EnumDecl>();
 
-                    if (Offset == 0) {
-                        // insertStatement = insertStatement + "->";
-                        insertLoc = memberNode->getLocStart();
+                    if (Offset < numChildren) {
+                        insertStatement = insertStatement + ", ";
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
-
                         if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
 
                     } else {
-                        insertLoc = memberNode->getMemberLoc();
+                        insertStatement = ", " + insertStatement ;
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
-
                         if (Rewrite.InsertText(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
                     }
