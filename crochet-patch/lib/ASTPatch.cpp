@@ -1117,7 +1117,7 @@ namespace clang {
 
                     modified = true;
 
-                } else if (targetNode.getTypeLabel() == "FieldDecl") {
+                } else if (targetNode.getTypeLabel() == "RecordDecl") {
 
                     int numChildren = targetNode.getNumChildren();
                     extractRange = insertNode.getSourceRange();
