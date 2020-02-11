@@ -1094,8 +1094,8 @@ namespace clang {
                     // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
                     // auto EnumDeclNode = targetNode.ASTNode.get<EnumDecl>();
                     NodeRef neighbor = targetNode.getChild(Offset);
-                    auto EnumConstNode = neighbor.ASTNode.get<EnumConstantDecl>();
-                    CharSourceRange neighborRange = EnumConstNode.getSourceRange();
+//                    auto EnumConstNode = neighbor.ASTNode.get<EnumConstantDecl>();
+                    CharSourceRange neighborRange = neighbor.getSourceRange();
 
 
                     if (Offset < numChildren) {
