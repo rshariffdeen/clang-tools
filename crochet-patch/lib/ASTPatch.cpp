@@ -1117,6 +1117,39 @@ namespace clang {
 
                     modified = true;
 
+                } else if (targetNode.getTypeLabel() == "FieldDecl") {
+
+                    int numChildren = targetNode.getNumChildren();
+                    extractRange = insertNode.getSourceRange();
+                    insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
+                                                           SourceTree.getLangOpts());
+
+                    // llvm::outs() << insertStatement << "\n";
+                    // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
+                    // auto EnumDeclNode = targetNode.ASTNode.get<EnumDecl>();
+                    NodeRef neighbor = targetNode.getChild(Offset);
+//                    auto EnumConstNode = neighbor.ASTNode.get<EnumConstantDecl>();
+                    CharSourceRange neighborRange = neighbor.getSourceRange();
+                    insertStatement = insertStatement + " \n";
+
+
+                    if (Offset < numChildren) {
+                        insertLoc = neighborRange.getBegin();
+                        //std::string locId = insertLoc.printToString(Target.getSourceManager());
+                        // llvm::outs() << locId << "\n";
+                        if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+
+                    } else {
+                        insertLoc = neighborRange.getEnd();
+                        //std::string locId = insertLoc.printToString(Target.getSourceManager());
+                        // llvm::outs() << locId << "\n";
+                        if (Rewrite.InsertTextAfter(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+                    }
+
+                    modified = true;
+
                 } else {
 
                     if (Offset == 0) {
