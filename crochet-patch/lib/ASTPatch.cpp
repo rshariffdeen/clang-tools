@@ -1099,7 +1099,7 @@ namespace clang {
 
 
                     if (Offset < numChildren) {
-                        insertLoc = range.getBegin();
+                        insertLoc = neighborRange.getBegin();
                         insertStatement = insertStatement + ", ";
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
@@ -1107,7 +1107,7 @@ namespace clang {
                             llvm::errs() << "error inserting\n";
 
                     } else {
-                        insertLoc = range.getEnd();
+                        insertLoc = neighborRange.getEnd();
                         insertStatement = ", " + insertStatement ;
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
