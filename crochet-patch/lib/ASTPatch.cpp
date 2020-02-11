@@ -970,6 +970,11 @@ namespace clang {
             insertStatement = translateVariables(insertNode, insertStatement);
             // llvm::outs() << insertStatement << "\n";
 
+            if (insertNode.getTypeLabel() == "FunctionDecl") {
+
+                insertStatement = insertStatement + " \n";
+            }
+
 
 
             if (!insertStatement.empty()) {
