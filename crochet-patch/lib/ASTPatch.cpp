@@ -1142,7 +1142,7 @@ namespace clang {
                             llvm::errs() << "error inserting\n";
 
                     } else {
-                        insertStatement = "\n" + insertStatement + " \n";
+                        insertStatement = "\n" + insertStatement ;
                         NodeRef neighbor = targetNode.getChild(numChildren - 1);
                         CharSourceRange neighborRange = neighbor.getSourceRange();
                         insertLoc = neighborRange.getEnd();
