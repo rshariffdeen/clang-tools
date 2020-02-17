@@ -1131,16 +1131,10 @@ namespace clang {
                     insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
                                                            SourceTree.getLangOpts());
 
-                    // llvm::outs() << insertStatement << "\n";
-                    // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
-                    // auto EnumDeclNode = targetNode.ASTNode.get<EnumDecl>();
-                    NodeRef neighbor = targetNode.getChild(Offset);
-//                    auto EnumConstNode = neighbor.ASTNode.get<EnumConstantDecl>();
-                    CharSourceRange neighborRange = neighbor.getSourceRange();
-                    insertStatement = insertStatement + " \n";
-
-
                     if (Offset < numChildren) {
+                        insertStatement = insertStatement + " \n";
+                        NodeRef neighbor = targetNode.getChild(Offset);
+                        CharSourceRange neighborRange = neighbor.getSourceRange();
                         insertLoc = neighborRange.getBegin();
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
@@ -1148,6 +1142,9 @@ namespace clang {
                             llvm::errs() << "error inserting\n";
 
                     } else {
+                        insertStatement = "\n" + insertStatement ;
+                        NodeRef neighbor = targetNode.getChild(numChildren - 1);
+                        CharSourceRange neighborRange = neighbor.getSourceRange();
                         insertLoc = neighborRange.getEnd();
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
