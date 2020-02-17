@@ -365,7 +365,7 @@ static void printNodeAttributes(raw_ostream &OS, diff::SyntaxTree &Tree,
     OS << R"(,"parent_id":)" << int(Node.getParent()->getId());
   OS << R"(,"type":")" << Node.getTypeLabel() << '"';
 
-  if (Node.getTypeLabel() == "FunctionDecl" || Node.getTypeLabel() == "TypedefDecl" || Node.getTypeLabel() == "RecordDecl"
+  if (Node.getTypeLabel() == "FunctionDecl" || Node.getTypeLabel() == "TypedefDecl" || Node.getTypeLabel() == "RecordDecl" || Node.getTypeLabel() == "InitListExpr"
       || Node.getTypeLabel() == "EnumDecl" || Node.getTypeLabel() == "EnumConstantDecl" || Node.getTypeLabel() == "Macro" || Node.getTypeLabel() == "TypedefDecl" || Node.getTypeLabel() == "VarDecl" ){
     std::string fileName = Node.getFileName();
       if (!fileName.empty()) {
