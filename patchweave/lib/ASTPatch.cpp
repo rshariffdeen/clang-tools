@@ -1141,6 +1141,9 @@ namespace clang {
                     // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
                     auto binaryNode = targetNode.ASTNode.get<BinaryOperator>();
                     insertLoc = binaryNode->getOperatorLoc();
+                    if (insertNode.getTypeLabel() == "CStyleCastExpr") {
+                        insertLoc = binaryNode->getBeginLoc();
+                    }
                     //std::string locId = insertLoc.printToString(Target.getSourceManager());
                     // llvm::outs() << locId << "\n";
 
