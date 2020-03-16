@@ -893,7 +893,7 @@ static SourceRange getSourceRangeImpl(NodeRef N) {
     if (!isa<CXXTemporaryObjectExpr>(CE))
       return CE->getParenOrBraceRange();
   } else if (auto *ThisExpr = DTN.get<CStyleCastExpr>()) {
-    return {ThisExpr.getBeginLoc(), ThisExpr.getEndLoc()};
+    return {ThisExpr->getBeginLoc(), ThisExpr->getRParenLoc()};
   } else if (DTN.get<ParmVarDecl>()) {
     return TokenToCharRange(Range);
   } else if (DTN.get<DeclStmt>() || DTN.get<FieldDecl>() ||
