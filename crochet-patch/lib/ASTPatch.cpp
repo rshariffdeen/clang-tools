@@ -1154,6 +1154,42 @@ namespace clang {
 
                     modified = true;
 
+                } else if (targetNode.getTypeLabel() == "InitListExpr") {
+
+                    int numChildren = targetNode.getNumChildren();
+                    extractRange = insertNode.getSourceRange();
+                    insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
+                                                           SourceTree.getLangOpts());
+
+                    // llvm::outs() << insertStatement << "\n";
+                    // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
+                    // auto EnumDeclNode = targetNode.ASTNode.get<EnumDecl>();
+
+
+
+                    if (Offset < numChildren) {
+                        NodeRef neighbor = targetNode.getChild(Offset);
+                        CharSourceRange neighborRange = neighbor.getSourceRange();
+                        insertLoc = neighborRange.getBegin();
+                        insertStatement = insertStatement + ",\n";
+                        //std::string locId = insertLoc.printToString(Target.getSourceManager());
+                        // llvm::outs() << locId << "\n";
+                        if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+
+                    } else {
+                        NodeRef neighbor = targetNode.getChild(numChildren - 1);
+                        CharSourceRange neighborRange = neighbor.getSourceRange();
+                        insertLoc = neighborRange.getEnd();
+                        insertStatement = ", " + insertStatement ;
+                        //std::string locId = insertLoc.printToString(Target.getSourceManager());
+                        // llvm::outs() << locId << "\n";
+                        if (Rewrite.InsertText(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+                    }
+
+                    modified = true;
+
                 } else {
 
                     if (Offset == 0) {
