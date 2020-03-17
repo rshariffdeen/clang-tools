@@ -1010,10 +1010,10 @@ namespace clang {
                 delRangeOpts.RemoveLineIfEmpty = true;
                 Rewrite.RemoveText(range, delRangeOpts);
             } else if (deleteNode.getTypeLabel() == "DeclRefExpr") {
-                NodeRef parentNode = deleteNode.getParent();
+                const Node *parentNode = deleteNode.getParent();
                 range = expandRange(range, Target);
-                if (deleteNode.getTypeLabel() == "CallExpr"){
-                    int numChildren = parentNode.getNumChildren();
+                if (parentNode->getTypeLabel() == "CallExpr"){
+                    int numChildren = parentNode->getNumChildren();
                     int position = deleteNode.findPositionInParent();
                     if (position == numChildren -1){
                         range.setEnd(deleteNode.getSourceRange().getEnd());
