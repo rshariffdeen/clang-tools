@@ -1009,6 +1009,20 @@ namespace clang {
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
                 Rewrite.RemoveText(range, delRangeOpts);
+            } else if (deleteNode.getTypeLabel() == "DeclRefExpr") {
+                NodeRef parentNode = deleteNode.getParent();
+                range = expandRange(range, Target);
+                if (deleteNode.getTypeLabel() == "CallExpr"){
+                    int numChildren = parentNode.getNumChildren();
+                    int position = deleteNode.findPositionInParent();
+                    if (position == numChildren -1){
+                        range.setEnd(deleteNode.getSourceRange().getEnd());
+                    }
+                }
+
+                Rewriter::RewriteOptions delRangeOpts;
+                delRangeOpts.RemoveLineIfEmpty = true;
+                Rewrite.RemoveText(range, delRangeOpts);
             } else {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
