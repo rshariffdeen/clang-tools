@@ -1561,23 +1561,23 @@ namespace clang {
 
 //                    llvm::outs() << "delete op\n";
 
-//                    std::string nodeType = line.substr(line.find(" ") + 1, line.find("(") - operation.length() - 1);
-//                    std::string nodeId = line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1);
-//
-//                    NodeRef deleteNode = Target.getNode(NodeId(stoi(nodeId)));
-//
-//                    // llvm::outs() << deleteNode.getTypeLabel() << "\n";
-//                    // llvm::outs() << "type: " << nodeType << "\n";
-//                    // llvm::outs() << "id: " << nodeId << "\n";
-//
-//                    if (deleteNode.getTypeLabel() == nodeType) {
-//                        modified = crochetPatcher.deleteCode(deleteNode, false);
-//
-//                    } else {
-//                        llvm::errs() << "Error: wrong node type for given Id\n";
-//                        return error(patching_error::failed_to_apply_replacements);
-//
-//                    }
+                    std::string nodeType = line.substr(line.find(" ") + 1, line.find("(") - operation.length() - 1);
+                    std::string nodeId = line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1);
+
+                    NodeRef deleteNode = Target.getNode(NodeId(stoi(nodeId)));
+
+                    // llvm::outs() << deleteNode.getTypeLabel() << "\n";
+                    // llvm::outs() << "type: " << nodeType << "\n";
+                    // llvm::outs() << "id: " << nodeId << "\n";
+
+                    if (deleteNode.getTypeLabel() == nodeType) {
+                        modified = crochetPatcher.deleteCode(deleteNode, false);
+
+                    } else {
+                        llvm::errs() << "Error: wrong node type for given Id\n";
+                        return error(patching_error::failed_to_apply_replacements);
+
+                    }
 
 
                 } else if (operation == "UpdateMove") {
