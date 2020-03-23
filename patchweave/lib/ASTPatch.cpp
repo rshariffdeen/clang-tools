@@ -1102,7 +1102,7 @@ namespace clang {
                             //auto nextNode = nextChildNode.ASTNode.get<BinaryOperator>();
                             range =  grandChildNode.getSourceRange();
                             range = expandRange(range, Target);
-                            llvm::outs() << grandChildNode.getTypeLabel() << "\n";
+//                            llvm::outs() << grandChildNode.getTypeLabel() << "\n";
                              insertLoc = range.getEnd();
                          }
 
