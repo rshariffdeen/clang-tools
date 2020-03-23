@@ -1091,7 +1091,21 @@ namespace clang {
                     } else {
 
                         NodeRef nearestChildNode = targetNode.getChild(Offset);
-                        insertLoc = nearestChildNode.getSourceRange().getEnd();
+//                        insertLoc = nearestChildNode.getSourceRange().getEnd();
+
+                        CharSourceRange range = nearestChildNode.getSourceRange();
+                        range = expandRange(range, Target);
+                        insertLoc = range.getEnd();
+//                        llvm::outs() << nearestChildNode.getTypeLabel() << "\n";
+                        if (nearestChildNode.getTypeLabel() == "CStyleCastExpr"){
+                            NodeRef grandChildNode = nearestChildNode.getChild(1);
+                            //auto nextNode = nextChildNode.ASTNode.get<BinaryOperator>();
+                            range =  grandChildNode.getSourceRange();
+                            range = expandRange(range, Target);
+                            llvm::outs() << grandChildNode.getTypeLabel() << "\n";
+                             insertLoc = range.getEnd();
+                         }
+
 
                         if (Rewrite.InsertTextAfterToken(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
