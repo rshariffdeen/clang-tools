@@ -1059,6 +1059,7 @@ namespace clang {
 
             }
 
+
             extractRange = expandRange(extractRange, SourceTree);
             insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
                                                    SourceTree.getLangOpts());
@@ -1162,11 +1163,15 @@ namespace clang {
                     // llvm::outs() << locId << "\n";
 
                     if (Offset == 0) {
+                        if (insertNode.getTypeLabel() == "BinaryOperator")
+                            deleteCode(targetNode.getChild(0), false);
                         if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
 
 
                     } else {
+                        if (insertNode.getTypeLabel() == "BinaryOperator")
+                            deleteCode(targetNode.getChild(1), false);
                         if (Rewrite.InsertTextAfterToken(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
                     }
