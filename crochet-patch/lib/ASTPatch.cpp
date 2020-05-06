@@ -1314,6 +1314,33 @@ namespace clang {
                 if (Rewrite.InsertText(range.getBegin(), statement))
                     modified = false;
                 // llvm::outs() << "statement updated" << "\n";
+            } else  {
+                CharSourceRange sourceRange = updateNode.getSourceRange();;
+                CharSourceRange targetRange = range;
+
+
+
+                std::string oldstatement = Lexer::getSourceText(range, Target.getSourceManager(),
+                                                                Target.getLangOpts());
+
+                // llvm::outs() << "old statement" << "\n";
+                // llvm::outs() << oldstatement << "\n";
+
+                std::string newstatement = Lexer::getSourceText(sourceRange, SourceTree.getSourceManager(),
+                                                                SourceTree.getLangOpts());
+
+                // llvm::outs() << "new statement" << "\n";
+                // llvm::outs() << newstatement << "\n";
+
+                if (Rewrite.RemoveText(range))
+                    modified = false;
+
+                modified = true;
+
+                // llvm::outs() << "statement removed" << "\n";
+                if (Rewrite.InsertText(range.getBegin(), newstatement))
+                    modified = false;
+                // llvm::outs() << "statement updated" << "\n";
             }
 
             return modified;
