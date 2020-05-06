@@ -1060,19 +1060,21 @@ namespace clang {
                     int numArgs = callerNode->getNumArgs();
 
                     if (numArgs == 0 or Offset == 1) {
-                        insertStatement = insertStatement + ", ";
+                        if (insertStatement.find(',') == std::string::npos)
+                            insertStatement = insertStatement + ", ";
 
                     } else {
-                        insertStatement = ", " + insertStatement;
+                        if (insertStatement.find(',') == std::string::npos)
+                            insertStatement = ", " + insertStatement;
                     }
 
                     // llvm::outs() << insertStatement << "\n";
 
                     if (Offset == 1) {
-                        insertLoc = callerNode->getLParenLoc();
+                        insertLoc = callerNode->getArg(Offset-1)->getExprLoc();
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
-                        if (Rewrite.InsertTextAfter(insertLoc, insertStatement))
+                        if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
 
                     } else if (Offset >= numArgs) {
