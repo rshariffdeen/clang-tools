@@ -1059,7 +1059,7 @@ namespace clang {
                     auto callerNode = targetNode.ASTNode.get<CallExpr>();
                     int numArgs = callerNode->getNumArgs();
 
-                    if (numArgs == 0) {
+                    if (numArgs == 0 or Offset == 1) {
                         insertStatement = insertStatement + ", ";
 
                     } else {
@@ -1068,8 +1068,14 @@ namespace clang {
 
                     // llvm::outs() << insertStatement << "\n";
 
+                    if (Offset == 1) {
+                        insertLoc = callerNode->getLParenLoc();
+                        //std::string locId = insertLoc.printToString(Target.getSourceManager());
+                        // llvm::outs() << locId << "\n";
+                        if (Rewrite.InsertTextAfter(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
 
-                    if (Offset >= numArgs) {
+                    } else if (Offset >= numArgs) {
                         insertLoc = callerNode->getRParenLoc();
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
