@@ -137,16 +137,20 @@ namespace clang {
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
 
                 bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree);
+
                 bool updateCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
+
                 bool replaceCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
+
                 bool deleteCode(NodeRef deleteNode, bool isMove);
 
                 Patcher(SyntaxTree &Src, SyntaxTree &Dst, SyntaxTree &Target,
                         const ComparisonOptions &Options, RefactoringTool &TargetTool,
                         bool Debug)
                         : Dst(Dst), Target(Target), SM(Target.getSourceManager()),
-                          LangOpts(Target.getLangOpts()), Less(SM), 
-                           TargetTool(TargetTool), Debug(Debug), Diff(Src, Dst, Options), TargetDiff(Src, Target, Options){
+                          LangOpts(Target.getLangOpts()), Less(SM),
+                          TargetTool(TargetTool), Debug(Debug), Diff(Src, Dst, Options),
+                          TargetDiff(Src, Target, Options) {
 
                     Rewrite.setSourceMgr(SM, LangOpts);
                     int count = 0;
@@ -612,7 +616,7 @@ namespace clang {
             auto MySourceRanges = PatchedNode.getOwnedSourceRanges();
             BeforeThanCompare <SourceLocation> MyLess(Tree.getSourceManager());
             for (auto &MySubRange : MySourceRanges) {
-                SourceLocation ChildBegin;                
+                SourceLocation ChildBegin;
                 while (ChildIndex < NumChildren &&
                        ((ChildBegin = ChildrenLocations[ChildIndex]).isInvalid() ||
                         wantToInsertBefore(ChildBegin, MySubRange.getEnd(), MyLess))) {
@@ -912,13 +916,13 @@ namespace clang {
                 std::string binOp = binOpNode->getOpcodeStr();
                 Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
 
-            } else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro" ) {
+            } else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro") {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
                 Rewrite.RemoveText(range, delRangeOpts);
 
-            } else if (deleteNode.getTypeLabel() == "MemberExpr"){
+            } else if (deleteNode.getTypeLabel() == "MemberExpr") {
                 auto memExpNode = deleteNode.ASTNode.get<MemberExpr>();
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
@@ -975,7 +979,6 @@ namespace clang {
 
                 insertStatement = insertStatement + " \n";
             }
-
 
 
             if (!insertStatement.empty()) {
@@ -1072,7 +1075,7 @@ namespace clang {
                     // llvm::outs() << insertStatement << "\n";
 
                     if (Offset == 1) {
-                        insertLoc = callerNode->getArg(Offset-1)->getExprLoc();
+                        insertLoc = callerNode->getArg(Offset - 1)->getExprLoc();
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
                         if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
@@ -1124,7 +1127,7 @@ namespace clang {
                         NodeRef neighbor = targetNode.getChild(numChildren - 1);
                         CharSourceRange neighborRange = neighbor.getSourceRange();
                         insertLoc = neighborRange.getEnd();
-                        insertStatement = ", " + insertStatement ;
+                        insertStatement = ", " + insertStatement;
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
                         if (Rewrite.InsertText(insertLoc, insertStatement))
@@ -1151,7 +1154,7 @@ namespace clang {
                             llvm::errs() << "error inserting\n";
 
                     } else {
-                        insertStatement = "\n" + insertStatement ;
+                        insertStatement = "\n" + insertStatement;
                         NodeRef neighbor = targetNode.getChild(numChildren - 1);
                         CharSourceRange neighborRange = neighbor.getSourceRange();
                         insertLoc = neighborRange.getEnd();
@@ -1190,7 +1193,7 @@ namespace clang {
                         NodeRef neighbor = targetNode.getChild(numChildren - 1);
                         CharSourceRange neighborRange = neighbor.getSourceRange();
                         insertLoc = neighborRange.getEnd();
-                        insertStatement = ", " + insertStatement ;
+                        insertStatement = ", " + insertStatement;
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
                         if (Rewrite.InsertText(insertLoc, insertStatement))
@@ -1260,7 +1263,7 @@ namespace clang {
             return modified;
         }
 
-        Patcher::replaceCode(NodeRef srcNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
+        bool Patcher::replaceCode(NodeRef srcNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
 
         bool modified = false;
         CharSourceRange srcRange;
@@ -1278,7 +1281,8 @@ namespace clang {
 //                range.setBegin(startLoc);
 //            }
 
-        std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
+        std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(),
+                                                       TargetTree.getLangOpts());
         std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
@@ -1286,197 +1290,209 @@ namespace clang {
 //            llvm::outs() << srcValue << "\n";
 
 
-        if (!srcValue.empty()) {
-        if (Rewrite.RemoveText(targetRange))
+        if (!srcValue.
+
+        empty()
+
+        ) {
+        if (Rewrite.
+        RemoveText(targetRange)
+        )
         modified = false;
 
         modified = true;
         // llvm::outs() << "statement removed" << "\n";
-        if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
+        if (Rewrite.
+        InsertText(targetRange
+        .
+
+        getBegin(), srcValue
+
+        ))
         modified = false;
+        // llvm::outs() << "statement updated" << "\n";
+    }
+
+    return
+    modified;
+}
+
+
+bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
+
+    bool modified = false;
+    // llvm::outs() << "nodes matched\n";
+    CharSourceRange range;
+
+    if (targetNode.getTypeLabel() == "BinaryOperator") {
+
+        SourceRange r = targetNode.ASTNode.getSourceRange();
+        range.setBegin(r.getBegin());
+        range.setEnd(r.getEnd());
+
+    } else {
+        range = targetNode.getSourceRange();
+    }
+
+    SourceLocation startLoc = range.getBegin();
+    // SourceLocation endLoc = range.getEnd();
+
+    if (startLoc.isMacroID()) {
+        // llvm::outs() << "Macro identified\n";
+        // Get the start/end expansion locations
+        CharSourceRange expansionRange = Rewrite.getSourceMgr().getImmediateExpansionRange(
+                startLoc);
+        // We're just interested in the start location
+        startLoc = expansionRange.getBegin();
+        range.setBegin(startLoc);
+    }
+
+    std::string updateValue = updateNode.getValue();
+    std::string oldValue = targetNode.getValue();
+
+
+    if (targetNode.getTypeLabel() == "MemberExpr") {
+
+        updateValue = updateValue.substr(1);
+        oldValue = oldValue.substr(1);
+
+    }
+
+
+    // llvm::outs() << updateValue << "\n";
+    updateValue = translateVariables(updateNode, updateValue);
+
+    // llvm::outs() << updateValue << "\n";
+    // llvm::outs() << oldValue << "\n";
+
+    if (!updateValue.empty()) {
+        std::string statement = Lexer::getSourceText(range, Target.getSourceManager(),
+                                                     Target.getLangOpts());
+
+        // llvm::outs() << statement << "\n";
+        replaceSubString(statement, oldValue, updateValue);
+        // llvm::outs() << statement << "\n";
+        if (Rewrite.RemoveText(range))
+            modified = false;
+
+        modified = true;
+
+        // llvm::outs() << "statement removed" << "\n";
+        if (Rewrite.InsertText(range.getBegin(), statement))
+            modified = false;
+        // llvm::outs() << "statement updated" << "\n";
+    } else {
+        CharSourceRange sourceRange = updateNode.getSourceRange();;
+        CharSourceRange targetRange = range;
+
+
+        std::string oldstatement = Lexer::getSourceText(range, Target.getSourceManager(),
+                                                        Target.getLangOpts());
+
+        // llvm::outs() << "old statement" << "\n";
+        // llvm::outs() << oldstatement << "\n";
+
+        std::string newstatement = Lexer::getSourceText(sourceRange, SourceTree.getSourceManager(),
+                                                        SourceTree.getLangOpts());
+
+        // llvm::outs() << "new statement" << "\n";
+        // llvm::outs() << newstatement << "\n";
+
+        if (Rewrite.RemoveText(range))
+            modified = false;
+
+        modified = true;
+
+        // llvm::outs() << "statement removed" << "\n";
+        if (Rewrite.InsertText(range.getBegin(), newstatement))
+            modified = false;
         // llvm::outs() << "statement updated" << "\n";
     }
 
     return modified;
 }
 
+Error patch(RefactoringTool &TargetTool, SyntaxTree &Src, SyntaxTree &Dst, std::string ScriptFilePath,
+            const ComparisonOptions &Options, bool Debug) {
 
-bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
+    std::vector <std::unique_ptr<ASTUnit>> TargetASTs;
+    TargetTool.buildASTs(TargetASTs);
 
-            bool modified = false;
-            // llvm::outs() << "nodes matched\n";
-            CharSourceRange range;
+    if (TargetASTs.size() == 0)
+        return error(patching_error::failed_to_build_AST);
+    SyntaxTree Target(*TargetASTs[0]);
 
-            if (targetNode.getTypeLabel() == "BinaryOperator") {
+    Patcher crochetPatcher(Src, Dst, Target, Options, TargetTool, Debug);
 
-                SourceRange r = targetNode.ASTNode.getSourceRange();
-                range.setBegin(r.getBegin());
-                range.setEnd(r.getEnd());
+    std::ifstream infile(ScriptFilePath);
+    std::string line;
+    bool modified = false;
+
+    while (std::getline(infile, line)) {
+        std::string operation = line.substr(0, line.find(" "));
+        // llvm::outs() << operation << "\n";
+
+        if (operation == "Insert") {
+
+            // llvm::outs() << "insert op\n";
+            std::string offset = line.substr(line.find(" at ") + 4);
+            int Offset = stoi(offset);
+            line = line.substr(0, line.find(" at "));
+            std::string nextChild, nextChildType, nextChildId;
+            std::string prevChild, prevChildType, prevChildId;
+
+
+            std::string nodeB = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
+            std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
+            std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
+
+            std::string nodeC = line.substr(line.find(" into ") + 6);
+            std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
+            std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
+
+            // llvm::outs() << nodeC << "\n";
+            // llvm::outs() << nodeIdC << "\n";
+            // llvm::outs() << nodeTypeC << "\n";
+
+            // llvm::outs() << nodeB << "\n";
+            // llvm::outs() << nodeIdB << "\n";
+            // llvm::outs() << nodeTypeB << "\n";
+
+            NodeRef insertNode = Dst.getNode(NodeId(stoi(nodeIdB)));
+            NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
+
+
+            // NodeRef targetParentNode = targetNode.getParent();
+            // llvm::outs() << insertNode.getTypeLabel() << "\n";
+            // llvm::outs() << targetNode.getTypeLabel() << "\n";
+
+
+            if ((targetNode.getTypeLabel() == nodeTypeC) && (insertNode.getTypeLabel() == nodeTypeB)) {
+                modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Dst);
 
             } else {
-                range = targetNode.getSourceRange();
+                llvm::errs() << "Error: wrong node type for given Id\n";
+                return error(patching_error::failed_to_apply_replacements);
+
             }
 
-            SourceLocation startLoc = range.getBegin();
-            // SourceLocation endLoc = range.getEnd();
+        } else if (operation == "Move") {
 
-            if (startLoc.isMacroID()) {
-                // llvm::outs() << "Macro identified\n";
-                // Get the start/end expansion locations
-                CharSourceRange expansionRange = Rewrite.getSourceMgr().getImmediateExpansionRange(
-                        startLoc);
-                // We're just interested in the start location
-                startLoc = expansionRange.getBegin();
-                range.setBegin(startLoc);
-            }
+            // llvm::outs() << "move op\n";
+            std::string offset = line.substr(line.find(" at ") + 4);
+            int Offset = stoi(offset);
+            line = line.substr(0, line.find(" at "));
+            std::string nodeB = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
+            std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
+            std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
 
-            std::string updateValue = updateNode.getValue();
-            std::string oldValue = targetNode.getValue();
+            std::string nodeC = line.substr(line.find(" into ") + 6);
+            std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
+            std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
 
-
-            if (targetNode.getTypeLabel() == "MemberExpr") {
-
-                updateValue = updateValue.substr(1);
-                oldValue = oldValue.substr(1);
-
-            } 
-
-
-            // llvm::outs() << updateValue << "\n";
-            updateValue = translateVariables(updateNode, updateValue);
-
-            // llvm::outs() << updateValue << "\n";
-            // llvm::outs() << oldValue << "\n";
-
-            if (!updateValue.empty()) {
-                std::string statement = Lexer::getSourceText(range, Target.getSourceManager(),
-                                                             Target.getLangOpts());
-
-                // llvm::outs() << statement << "\n";
-                replaceSubString(statement, oldValue, updateValue);
-                // llvm::outs() << statement << "\n";
-                if (Rewrite.RemoveText(range))
-                    modified = false;
-
-                modified = true;
-
-                // llvm::outs() << "statement removed" << "\n";
-                if (Rewrite.InsertText(range.getBegin(), statement))
-                    modified = false;
-                // llvm::outs() << "statement updated" << "\n";
-            } else  {
-                CharSourceRange sourceRange = updateNode.getSourceRange();;
-                CharSourceRange targetRange = range;
-
-
-
-                std::string oldstatement = Lexer::getSourceText(range, Target.getSourceManager(),
-                                                                Target.getLangOpts());
-
-                // llvm::outs() << "old statement" << "\n";
-                // llvm::outs() << oldstatement << "\n";
-
-                std::string newstatement = Lexer::getSourceText(sourceRange, SourceTree.getSourceManager(),
-                                                                SourceTree.getLangOpts());
-
-                // llvm::outs() << "new statement" << "\n";
-                // llvm::outs() << newstatement << "\n";
-
-                if (Rewrite.RemoveText(range))
-                    modified = false;
-
-                modified = true;
-
-                // llvm::outs() << "statement removed" << "\n";
-                if (Rewrite.InsertText(range.getBegin(), newstatement))
-                    modified = false;
-                // llvm::outs() << "statement updated" << "\n";
-            }
-
-            return modified;
-        }
-
-        Error patch(RefactoringTool &TargetTool, SyntaxTree &Src, SyntaxTree &Dst, std::string ScriptFilePath,
-                    const ComparisonOptions &Options, bool Debug) {
-
-            std::vector <std::unique_ptr<ASTUnit>> TargetASTs;
-            TargetTool.buildASTs(TargetASTs);
-
-            if (TargetASTs.size() == 0)
-                return error(patching_error::failed_to_build_AST);
-            SyntaxTree Target(*TargetASTs[0]);
-
-            Patcher crochetPatcher(Src, Dst, Target, Options, TargetTool, Debug);
-
-            std::ifstream infile(ScriptFilePath);
-            std::string line;
-            bool modified = false;
-
-            while (std::getline(infile, line)) {
-                std::string operation = line.substr(0, line.find(" "));
-                // llvm::outs() << operation << "\n";
-
-                if (operation == "Insert") {
-
-                    // llvm::outs() << "insert op\n";
-                    std::string offset = line.substr(line.find(" at ") + 4);
-                    int Offset = stoi(offset);
-                    line = line.substr(0, line.find(" at "));
-                    std::string nextChild, nextChildType, nextChildId;
-                    std::string prevChild, prevChildType, prevChildId;
-
-
-                    std::string nodeB = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
-                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
-                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
-
-                    std::string nodeC = line.substr(line.find(" into ") + 6);
-                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
-                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
-
-                    // llvm::outs() << nodeC << "\n";
-                    // llvm::outs() << nodeIdC << "\n";
-                    // llvm::outs() << nodeTypeC << "\n";
-
-                    // llvm::outs() << nodeB << "\n";
-                    // llvm::outs() << nodeIdB << "\n";
-                    // llvm::outs() << nodeTypeB << "\n";
-
-                    NodeRef insertNode = Dst.getNode(NodeId(stoi(nodeIdB)));
-                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
-
-
-                    // NodeRef targetParentNode = targetNode.getParent();
-                    // llvm::outs() << insertNode.getTypeLabel() << "\n";
-                    // llvm::outs() << targetNode.getTypeLabel() << "\n";
-
-
-                    if ((targetNode.getTypeLabel() == nodeTypeC) && (insertNode.getTypeLabel() == nodeTypeB)) {
-                        modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Dst);
-
-                    } else {
-                        llvm::errs() << "Error: wrong node type for given Id\n";
-                        return error(patching_error::failed_to_apply_replacements);
-
-                    }
-
-                } else if (operation == "Move") {
-
-                    // llvm::outs() << "move op\n";
-                    std::string offset = line.substr(line.find(" at ") + 4);
-                    int Offset = stoi(offset);
-                    line = line.substr(0, line.find(" at "));
-                    std::string nodeB = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
-                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
-                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
-
-                    std::string nodeC = line.substr(line.find(" into ") + 6);
-                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
-                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
-
-                    NodeRef movingNode = Target.getNode(NodeId(stoi(nodeIdB)));
-                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
-                    // NodeRef targetParentNode = targetNode.getParent();
+            NodeRef movingNode = Target.getNode(NodeId(stoi(nodeIdB)));
+            NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
+            // NodeRef targetParentNode = targetNode.getParent();
 
 //
 //                     llvm::outs() << nodeC << "\n";
@@ -1491,37 +1507,37 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 //                     llvm::outs() << targetNode.getTypeLabel() << "\n";
 //                     llvm::outs() << movingNode.getValue() << "\n";
 //                     llvm::outs() << targetNode.getValue() << "\n";
-                    if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
+            if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
 
-                        // llvm::outs() << "nodes matched\n";
-                        if (crochetPatcher.deleteCode(movingNode, true)) {
-                            modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target);
-                        } else {
-                            llvm::errs() << "Error: couldn't remove code for move\n";
-                            return error(patching_error::failed_to_apply_replacements);
+                // llvm::outs() << "nodes matched\n";
+                if (crochetPatcher.deleteCode(movingNode, true)) {
+                    modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target);
+                } else {
+                    llvm::errs() << "Error: couldn't remove code for move\n";
+                    return error(patching_error::failed_to_apply_replacements);
 
-                        }
+                }
 
 
-                    } else {
-                        llvm::errs() << "Error: wrong node type for given Id\n";
-                        return error(patching_error::failed_to_apply_replacements);
+            } else {
+                llvm::errs() << "Error: wrong node type for given Id\n";
+                return error(patching_error::failed_to_apply_replacements);
 
-                    }
+            }
 
-                } else if (operation == "Replace") {
+        } else if (operation == "Replace") {
 
 //                    llvm::outs() << "update op\n";
-                    std::string nodeC = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
-                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
-                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
+            std::string nodeC = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
+            std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
+            std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
 
-                    std::string nodeB = line.substr(line.find(" with ") + 6);
-                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
-                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
+            std::string nodeB = line.substr(line.find(" with ") + 6);
+            std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
+            std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
 
-                    NodeRef updateNode = Src.getNode(NodeId(stoi(nodeIdB)));
-                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
+            NodeRef updateNode = Src.getNode(NodeId(stoi(nodeIdB)));
+            NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
 //
 //                     llvm::outs() << nodeC << "\n";
@@ -1536,80 +1552,80 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 //                     llvm::outs() << targetNode.getTypeLabel() << "\n";
 
 
-                    if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
-                        modified = crochetPatcher.replaceCode(updateNode, targetNode, Src, Target);
+            if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
+                modified = crochetPatcher.replaceCode(updateNode, targetNode, Src, Target);
 
-                    } else {
-                        llvm::errs() << "Error: wrong node type for given Id\n";
-                        return error(patching_error::failed_to_apply_replacements);
+            } else {
+                llvm::errs() << "Error: wrong node type for given Id\n";
+                return error(patching_error::failed_to_apply_replacements);
 
-                    }
-
-
-                } else if (operation == "Update") {
-
-                    // llvm::outs() << "update op\n";
-
-                    std::string nodeC = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
-                    std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
-                    std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
-
-                    std::string nodeB = line.substr(line.find(" to ") + 4);
-                    std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
-                    std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
-
-                    NodeRef updateNode = Dst.getNode(NodeId(stoi(nodeIdB)));
-                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
+            }
 
 
-                    // llvm::outs() << nodeC << "\n";
-                    // llvm::outs() << nodeIdC << "\n";
-                    // llvm::outs() << nodeTypeC << "\n";
+        } else if (operation == "Update") {
 
-                    // llvm::outs() << nodeB << "\n";
-                    // llvm::outs() << nodeIdB << "\n";
-                    // llvm::outs() << nodeTypeB << "\n";
+            // llvm::outs() << "update op\n";
 
-                    // llvm::outs() << updateNode.getTypeLabel() << "\n";
-                    // llvm::outs() << targetNode.getTypeLabel() << "\n";
+            std::string nodeC = line.substr(line.find(" ") + 1, line.find(")") - line.find(" "));
+            std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
+            std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
 
+            std::string nodeB = line.substr(line.find(" to ") + 4);
+            std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
+            std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
 
-                    if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
-                        modified = crochetPatcher.updateCode(updateNode, targetNode, Dst, Target);
-
-                    } else {
-                        llvm::errs() << "Error: wrong node type for given Id\n";
-                        return error(patching_error::failed_to_apply_replacements);
-
-                    }
+            NodeRef updateNode = Dst.getNode(NodeId(stoi(nodeIdB)));
+            NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
 
-                } else if (operation == "Delete") {
+            // llvm::outs() << nodeC << "\n";
+            // llvm::outs() << nodeIdC << "\n";
+            // llvm::outs() << nodeTypeC << "\n";
 
-                    // llvm::outs() << "delete op\n";
+            // llvm::outs() << nodeB << "\n";
+            // llvm::outs() << nodeIdB << "\n";
+            // llvm::outs() << nodeTypeB << "\n";
 
-                    std::string nodeType = line.substr(line.find(" ") + 1, line.find("(") - operation.length() - 1);
-                    std::string nodeId = line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1);
-
-                    NodeRef deleteNode = Target.getNode(NodeId(stoi(nodeId)));
-
-                    // llvm::outs() << deleteNode.getTypeLabel() << "\n";
-                    // llvm::outs() << "type: " << nodeType << "\n";
-                    // llvm::outs() << "id: " << nodeId << "\n";
-
-                    if (deleteNode.getTypeLabel() == nodeType) {
-                        modified = crochetPatcher.deleteCode(deleteNode, false);
-
-                    } else {
-                        llvm::errs() << "Error: wrong node type for given Id\n";
-                        return error(patching_error::failed_to_apply_replacements);
-
-                    }
+            // llvm::outs() << updateNode.getTypeLabel() << "\n";
+            // llvm::outs() << targetNode.getTypeLabel() << "\n";
 
 
-                } else if (operation == "UpdateMove") {
+            if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
+                modified = crochetPatcher.updateCode(updateNode, targetNode, Dst, Target);
 
-                    // llvm::outs() << "move op\n";
+            } else {
+                llvm::errs() << "Error: wrong node type for given Id\n";
+                return error(patching_error::failed_to_apply_replacements);
+
+            }
+
+
+        } else if (operation == "Delete") {
+
+            // llvm::outs() << "delete op\n";
+
+            std::string nodeType = line.substr(line.find(" ") + 1, line.find("(") - operation.length() - 1);
+            std::string nodeId = line.substr(line.find("(") + 1, line.find(")") - line.find("(") - 1);
+
+            NodeRef deleteNode = Target.getNode(NodeId(stoi(nodeId)));
+
+            // llvm::outs() << deleteNode.getTypeLabel() << "\n";
+            // llvm::outs() << "type: " << nodeType << "\n";
+            // llvm::outs() << "id: " << nodeId << "\n";
+
+            if (deleteNode.getTypeLabel() == nodeType) {
+                modified = crochetPatcher.deleteCode(deleteNode, false);
+
+            } else {
+                llvm::errs() << "Error: wrong node type for given Id\n";
+                return error(patching_error::failed_to_apply_replacements);
+
+            }
+
+
+        } else if (operation == "UpdateMove") {
+
+            // llvm::outs() << "move op\n";
 //                    std::string offset = line.substr(line.find(" at ") + 4);
 //                    int Offset = stoi(offset);
 //                    line = line.substr(0, line.find(" at "));
@@ -1623,7 +1639,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 //
 //                    NodeRef movingNode = Dst.getNode(NodeId(stoi(nodeIdB)));
 //                    NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
-                    // NodeRef targetParentNode = targetNode.getParent();
+            // NodeRef targetParentNode = targetNode.getParent();
 
 //
 //                    llvm::outs() << nodeC << "\n";
@@ -1644,37 +1660,37 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
 
 
-                } else {
-                    llvm::errs() << "unknown op\n";
-                    return error(patching_error::failed_to_apply_replacements);
-                }
-
-
-            }
-
-            const RewriteBuffer *RewriteBuf = crochetPatcher.Rewrite.getRewriteBufferFor(
-                    Target.getSourceManager().getMainFileID());
-            // llvm::outs()  << "/* Start Crochet Output */\n";
-            if (modified)
-                llvm::outs() << std::string(RewriteBuf->begin(), RewriteBuf->end());
-            // llvm::outs()  << "/* End Crochet Output */\n";
-
-            // return Patcher(Src, Dst, Target, Options, TargetTool, Debug).apply();
-            return Error::success();
+        } else {
+            llvm::errs() << "unknown op\n";
+            return error(patching_error::failed_to_apply_replacements);
         }
 
-        std::string PatchingError::message() const {
-            switch (Err) {
-                case patching_error::failed_to_build_AST:
-                    return "Failed to build AST.\n";
-                case patching_error::failed_to_apply_replacements:
-                    return "Failed to apply replacements.\n";
-                case patching_error::failed_to_overwrite_files:
-                    return "Failed to overwrite some file(s).\n";
-            };
-        }
 
-        char PatchingError::ID = 1;
+    }
 
-    } // end namespace diff
+    const RewriteBuffer *RewriteBuf = crochetPatcher.Rewrite.getRewriteBufferFor(
+            Target.getSourceManager().getMainFileID());
+    // llvm::outs()  << "/* Start Crochet Output */\n";
+    if (modified)
+        llvm::outs() << std::string(RewriteBuf->begin(), RewriteBuf->end());
+    // llvm::outs()  << "/* End Crochet Output */\n";
+
+    // return Patcher(Src, Dst, Target, Options, TargetTool, Debug).apply();
+    return Error::success();
+}
+
+std::string PatchingError::message() const {
+    switch (Err) {
+        case patching_error::failed_to_build_AST:
+            return "Failed to build AST.\n";
+        case patching_error::failed_to_apply_replacements:
+            return "Failed to apply replacements.\n";
+        case patching_error::failed_to_overwrite_files:
+            return "Failed to overwrite some file(s).\n";
+    };
+}
+
+char PatchingError::ID = 1;
+
+} // end namespace diff
 } // end namespace clang
