@@ -1281,8 +1281,7 @@ namespace clang {
 //                range.setBegin(startLoc);
 //            }
 
-        std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(),
-                                                       TargetTree.getLangOpts());
+        std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
         std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
@@ -1290,31 +1289,17 @@ namespace clang {
 //            llvm::outs() << srcValue << "\n";
 
 
-        if (!srcValue.
-
-        empty()
-
-        ) {
-        if (Rewrite.
-        RemoveText(targetRange)
-        )
-        modified = false;
-
+        if (!srcValue.empty() ) {
+            if (Rewrite.RemoveText(targetRange))
+                modified = false;
         modified = true;
         // llvm::outs() << "statement removed" << "\n";
-        if (Rewrite.
-        InsertText(targetRange
-        .
-
-        getBegin(), srcValue
-
-        ))
+        if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
         modified = false;
         // llvm::outs() << "statement updated" << "\n";
     }
 
-    return
-    modified;
+    return modified;
 }
 
 
@@ -1536,7 +1521,7 @@ Error patch(RefactoringTool &TargetTool, SyntaxTree &Src, SyntaxTree &Dst, std::
             std::string nodeTypeB = nodeB.substr(0, nodeB.find("("));
             std::string nodeIdB = nodeB.substr(nodeB.find("(") + 1, nodeB.find(")") - nodeB.find("(") - 1);
 
-            NodeRef updateNode = Src.getNode(NodeId(stoi(nodeIdB)));
+            NodeRef updateNode = Dst.getNode(NodeId(stoi(nodeIdB)));
             NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
 //
@@ -1553,7 +1538,7 @@ Error patch(RefactoringTool &TargetTool, SyntaxTree &Src, SyntaxTree &Dst, std::
 
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
-                modified = crochetPatcher.replaceCode(updateNode, targetNode, Src, Target);
+                modified = crochetPatcher.replaceCode(updateNode, targetNode, Dst, Target);
 
             } else {
                 llvm::errs() << "Error: wrong node type for given Id\n";
