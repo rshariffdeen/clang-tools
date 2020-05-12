@@ -676,6 +676,11 @@ namespace clang {
             return true;
         }
 
+        bool transformSpace(std::string &str) {
+            std::replace( str.begin(), str.end(), ' ', '_'); // replace all spaces to '_'
+            return true;
+        }
+
         std::string Patcher::translateVariables(NodeRef node, std::string statement) {
 
             unsigned childNodesInUpdateRange = node.getNumChildren();
@@ -1345,7 +1350,9 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
 
     // llvm::outs() << updateValue << "\n";
+    updateValue.erase(std::remove(updateValue.begin(), updateValue.end(), '\n'), updateValue.end()); // replace all new lines to null
     updateValue = translateVariables(updateNode, updateValue);
+    std::replace( oldValue.begin(), oldValue.end(), ' ', '_'); // replace all spaces to '_'
 
     // llvm::outs() << updateValue << "\n";
     // llvm::outs() << oldValue << "\n";
@@ -1354,6 +1361,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         std::string statement = Lexer::getSourceText(range, Target.getSourceManager(),
                                                      Target.getLangOpts());
 
+        std::replace( statement.begin(), statement.end(), ' ', '_');
         // llvm::outs() << statement << "\n";
         replaceSubString(statement, oldValue, updateValue);
         // llvm::outs() << statement << "\n";
