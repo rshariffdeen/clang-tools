@@ -1321,9 +1321,9 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         range.setBegin(binOpNode->getOperatorLoc());
 //        std::string binOp = binOpNode->getOpcodeStr();
 //        Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
-
 //        range.setBegin(r.getBegin());
-        range.setEnd(binOpNode->getLHS()->getExprLoc());
+        range.setEnd(binOpNode->getRHS()->getExprLoc());
+
 
     } else {
         range = targetNode.getSourceRange();
@@ -1377,6 +1377,12 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         // llvm::outs() << statement << "\n";
         replaceSubString(statement, oldValue, updateValue);
         // llvm::outs() << statement << "\n";
+
+        if (targetNode.getTypeLabel() == "BinaryOperator") {
+            modified = Rewrite.ReplaceText(range.getBegin(), statement);
+            return modified;
+        }
+
         if (Rewrite.RemoveText(range))
             modified = false;
 
@@ -1389,17 +1395,13 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     } else {
         CharSourceRange sourceRange = updateNode.getSourceRange();;
         CharSourceRange targetRange = range;
-
-
         std::string oldstatement = Lexer::getSourceText(range, Target.getSourceManager(),
                                                         Target.getLangOpts());
 
         // llvm::outs() << "old statement" << "\n";
         // llvm::outs() << oldstatement << "\n";
-
         std::string newstatement = Lexer::getSourceText(sourceRange, SourceTree.getSourceManager(),
                                                         SourceTree.getLangOpts());
-
         // llvm::outs() << "new statement" << "\n";
         // llvm::outs() << newstatement << "\n";
 
@@ -1407,7 +1409,6 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
             modified = false;
 
         modified = true;
-
         // llvm::outs() << "statement removed" << "\n";
         if (Rewrite.InsertText(range.getBegin(), newstatement))
             modified = false;
