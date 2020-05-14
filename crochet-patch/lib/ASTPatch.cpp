@@ -1317,8 +1317,6 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     if (targetNode.getTypeLabel() == "BinaryOperator") {
 
         SourceRange r = targetNode.ASTNode.getSourceRange();
-
-
         auto binOpNode = targetNode.ASTNode.get<BinaryOperator>();
         range.setBegin(binOpNode->getOperatorLoc());
 //        std::string binOp = binOpNode->getOpcodeStr();
@@ -1365,6 +1363,9 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
     // llvm::outs() << updateValue << "\n";
     // llvm::outs() << oldValue << "\n";
+
+    if (updateValue == oldValue)
+        return modified;
 
     if (!updateValue.empty()) {
 
