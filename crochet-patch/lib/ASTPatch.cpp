@@ -1290,7 +1290,7 @@ namespace clang {
         std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
-        srcValue = translateVariables(srcNode, srcValue);
+//        srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
 
 
