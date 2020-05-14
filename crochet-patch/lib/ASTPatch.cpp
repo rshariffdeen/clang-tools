@@ -1317,8 +1317,15 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     if (targetNode.getTypeLabel() == "BinaryOperator") {
 
         SourceRange r = targetNode.ASTNode.getSourceRange();
-        range.setBegin(r.getBegin());
-        range.setEnd(r.getEnd());
+
+
+        auto binOpNode = targetNode.ASTNode.get<BinaryOperator>();
+        range.setBegin(binOpNode->getOperatorLoc());
+//        std::string binOp = binOpNode->getOpcodeStr();
+//        Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
+
+//        range.setBegin(r.getBegin());
+        range.setEnd(binOpNode->getLHS()->getExprLoc());
 
     } else {
         range = targetNode.getSourceRange();
@@ -1360,6 +1367,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     // llvm::outs() << oldValue << "\n";
 
     if (!updateValue.empty()) {
+
         std::string statement = Lexer::getSourceText(range, Target.getSourceManager(),
                                                      Target.getLangOpts());
 
