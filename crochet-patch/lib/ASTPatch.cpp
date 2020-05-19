@@ -1351,6 +1351,13 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         updateValue = updateValue.substr(1);
         oldValue = oldValue.substr(1);
 
+    } else if (targetNode.getTypeLabel() == "IntegerLiteral") {
+
+        updateValue = Lexer::getSourceText(updateNode.getSourceRange(), SourceTree.getSourceManager(),
+                                           SourceTree.getLangOpts());
+        oldValue = Lexer::getSourceText(targetNode.getSourceRange(), TargetTree.getSourceManager(),
+                                        TargetTree.getLangOpts());
+
     }
 
 
