@@ -703,23 +703,34 @@ namespace clang {
                     llvm::errs() << "invalid key referenced: " << locId << "\n";
 
                 } else {
+
                     int nodeid = LocNodeMap.at(locId);
-                    NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
+                    NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
+                    std::string variableNameInSource = *nodeInDst.getIdentifier();
+//                    llvm::outs() << "before translation: " << variableNameInSource << "\n";
+                    std::string variableNameInTarget;
+                    if (varMap.find(variableNameInSource) != varMap.end()) {
+                        variableNameInTarget = varMap[variableNameInSource];
+                        replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                    } else {
 
-                    if (Diff.getMapped(nodeInDst) != NULL) {
-                        NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
-                        std::string variableNameInSource = *nodeInDst.getIdentifier();
-                        // llvm::outs() << "before translation: " << variableNameInSource << "\n";
+                        NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
+                        if (Diff.getMapped(nodeInDst) != NULL) {
+                            NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
+                            std::string variableNameInSource = *nodeInDst.getIdentifier();
+                            // llvm::outs() << "before translation: " << variableNameInSource << "\n";
 
-                        if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-                            NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-                            // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
-                            std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-                            // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                            // llvm::outs() << "after replacement: " << statement << "\n";
-                        } else {
-                            llvm::errs() << "mapping not found for member definition";
+                            if (TargetDiff.getMapped(nodeInSrc) != NULL) {
+                                NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
+                                // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
+                                std::string variableNameInTarget = *nodeInTarget.getIdentifier();
+                                // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+                                replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                                // llvm::outs() << "after replacement: " << statement << "\n";
+                            } else {
+                                llvm::errs() << "mapping not found for member definition";
+                            }
+
                         }
 
                     }
