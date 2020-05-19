@@ -124,6 +124,7 @@ namespace clang {
                 // Maps NodeId in Dst to a flag that is true if this node is
                 // part of an inserted subtree.
                 std::vector<bool> AtomicInsertions;
+                std::map <std::string, std::string> varMap;
 
             public:
                 Rewriter Rewrite;
@@ -137,7 +138,7 @@ namespace clang {
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
 
                 bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree);
-
+                void loadVariableMapping(std::string mapFilePath);
                 bool updateCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
 
                 bool replaceCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
@@ -1308,6 +1309,18 @@ namespace clang {
 }
 
 
+        void Patcher::loadVariableMapping(std::string mapFilePath) {
+            std::ifstream mapFile(mapFilePath);
+            std::string line;
+            std::string var_a, var_c;
+
+            while (std::getline(mapFile, line)) {
+                var_a = line.substr(0, line.find(":"));
+                var_c = line.substr(line.find(":") + 1);
+                varMap[var_a] = var_c;
+            }
+
+        }
 bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
 
     bool modified = false;
@@ -1371,8 +1384,8 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     // llvm::outs() << updateValue << "\n";
     // llvm::outs() << oldValue << "\n";
 
-    if (updateValue == oldValue)
-        return modified;
+//    if (updateValue == oldValue)
+//        return modified;
 
     if (!updateValue.empty()) {
 
@@ -1425,7 +1438,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     return modified;
 }
 
-Error patch(RefactoringTool &TargetTool, SyntaxTree &Src, SyntaxTree &Dst, std::string ScriptFilePath,
+Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src, SyntaxTree &Dst, std::string ScriptFilePath,
             const ComparisonOptions &Options, bool Debug) {
 
     std::vector <std::unique_ptr<ASTUnit>> TargetASTs;
@@ -1436,6 +1449,7 @@ Error patch(RefactoringTool &TargetTool, SyntaxTree &Src, SyntaxTree &Dst, std::
     SyntaxTree Target(*TargetASTs[0]);
 
     Patcher crochetPatcher(Src, Dst, Target, Options, TargetTool, Debug);
+    crochetPatcher.loadVariableMapping(MapFilePath);
 
     std::ifstream infile(ScriptFilePath);
     std::string line;

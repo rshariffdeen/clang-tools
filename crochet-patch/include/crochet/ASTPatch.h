@@ -41,7 +41,7 @@ private:
   patching_error Err;
 };
 
-llvm::Error patch(tooling::RefactoringTool &TargetTool, SyntaxTree &Src,
+llvm::Error patch(tooling::RefactoringTool &TargetTool, std::string MapFilePath, SyntaxTree &Src,
                   SyntaxTree &Dst, std::string ScriptFilePath, const ComparisonOptions &Options,
                   bool Debug = false);
 
