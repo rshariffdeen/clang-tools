@@ -31,7 +31,7 @@ static cl::opt<std::string> ScriptPath("script", cl::desc("<script>"), cl::Requi
 static cl::opt<std::string> TargetPath("target", cl::desc("<target>"), cl::Required, cl::cat(CrochetPatchCategory));
 static cl::opt<std::string> SourcePath("source", cl::desc("<source>"), cl::Required, cl::cat(CrochetPatchCategory));
 static cl::opt<std::string> DestinationPath("destination", cl::desc("<destination>"), cl::Required, cl::cat(CrochetPatchCategory));
-static cl::opt<std::string> MapPath("map", cl::desc("<variable mapping>"), cl::Required, cl::cat(PatchWeaveCategory));
+static cl::opt<std::string> MapPath("map", cl::desc("<variable mapping>"), cl::Required, cl::cat(CrochetPatchCategory));
 static cl::opt<std::string> StopAfter("stop-diff-after", cl::desc("<topdown|bottomup>"), cl::Optional, cl::init(""), cl::cat(CrochetPatchCategory));
 
 static cl::opt<int> MaxSize("s", cl::desc("<maxsize>"), cl::Optional, cl::init(-1), cl::cat(CrochetPatchCategory));
