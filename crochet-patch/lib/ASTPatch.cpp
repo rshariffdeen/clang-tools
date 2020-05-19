@@ -112,7 +112,7 @@ namespace clang {
 
         namespace {
             class Patcher {
-                SyntaxTree &Dst, &Target;
+                SyntaxTree &Dst, &Target, &Src;
                 SourceManager &SM;
                 const LangOptions &LangOpts;
                 BeforeThanCompare <SourceLocation> Less;
@@ -148,7 +148,7 @@ namespace clang {
                 Patcher(SyntaxTree &Src, SyntaxTree &Dst, SyntaxTree &Target,
                         const ComparisonOptions &Options, RefactoringTool &TargetTool,
                         bool Debug)
-                        : Dst(Dst), Target(Target), SM(Target.getSourceManager()),
+                        : Dst(Dst), Src(Src), Target(Target), SM(Target.getSourceManager()),
                           LangOpts(Target.getLangOpts()), Less(SM),
                           TargetTool(TargetTool), Debug(Debug), Diff(Src, Dst, Options),
                           TargetDiff(Src, Target, Options) {
