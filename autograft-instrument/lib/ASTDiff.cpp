@@ -307,8 +307,8 @@ struct PreorderVisitor
     return true;
   }
   bool TraverseStmt(Stmt *S) {
-    if (S)
-      S = S->IgnoreImplicit();
+    if (auto *E = dyn_cast_or_null<Expr>(S))
+      S = E->IgnoreImplicit();
     if (isNodeExcluded(Tree.AST, S))
       return true;
     auto SavedState = PreTraverse(*S);

@@ -1037,7 +1037,7 @@ namespace clang {
 
                     if (Offset == 0) {
                         // insertStatement = insertStatement + "->";
-                        insertLoc = memberNode->getLocStart();
+                        insertLoc = memberNode->getBeginLoc();
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
 
