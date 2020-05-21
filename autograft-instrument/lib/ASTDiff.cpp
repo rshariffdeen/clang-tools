@@ -437,7 +437,7 @@ static HashType hashNode(NodeRef N) {
   Token Tok;
   for (auto TokenLocation : N.getOwnedTokens()) {
     // bool Failure = Lexer::getRawToken(TokenLocation, Tok, SM, LangOpts,/*IgnoreWhiteSpace=*/true);
-    assert(!Failure);
+//    assert(!Failure);
     auto Range = CharSourceRange::getCharRange(TokenLocation, Tok.getEndLoc());
     // This is here to make CompoundStmt nodes compare equal, to make the tests
     // pass. It should be changed to include changes to comments.
