@@ -43,7 +43,7 @@ static void addExtraArgs(std::unique_ptr<CompilationDatabase> &Compilations) {
   if (!Compilations)
     return;
   auto AdjustingCompilations =
-      llvm::make_unique<ArgumentsAdjustingCompilations>(
+      std::make_unique<ArgumentsAdjustingCompilations>(
           std::move(Compilations));
   AdjustingCompilations->appendArgumentsAdjuster(
       getInsertArgumentAdjuster(ArgsBefore, ArgumentInsertPosition::BEGIN));
@@ -64,7 +64,7 @@ getCompilationDatabase(StringRef Filename) {
         << "Error while trying to load a compilation database, running "
            "without flags.\n"
         << ErrorMessage;
-    Compilations = llvm::make_unique<clang::tooling::FixedCompilationDatabase>(
+    Compilations = std::make_unique<clang::tooling::FixedCompilationDatabase>(
         ".", std::vector<std::string>());
   }
   addExtraArgs(Compilations);

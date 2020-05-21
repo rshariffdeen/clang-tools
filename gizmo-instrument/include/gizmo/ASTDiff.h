@@ -82,7 +82,7 @@ public:
   /// Constructs a tree from any AST node.
   template <class T>
   SyntaxTree(T *Node, ASTUnit &AST)
-      : TreeImpl(llvm::make_unique<Impl>(this, Node, AST)) {}
+      : TreeImpl(std::make_unique<Impl>(this, Node, AST)) {}
   SyntaxTree(SyntaxTree &&Other) = default;
   SyntaxTree &operator=(SyntaxTree &&Other) = default;
   ~SyntaxTree();

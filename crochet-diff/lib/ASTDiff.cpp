@@ -592,13 +592,13 @@ namespace clang {
         public:
             ZhangShashaMatcher(const ASTDiff::Impl &DiffImpl, NodeRef N1, NodeRef N2)
                     : DiffImpl(DiffImpl), S1(N1), S2(N2) {
-                TreeDist = llvm::make_unique<std::unique_ptr<double[]>[]>(
+                TreeDist = std::make_unique<std::unique_ptr<double[]>[]>(
                         size_t(S1.getSize()) + 1);
-                ForestDist = llvm::make_unique<std::unique_ptr<double[]>[]>(
+                ForestDist = std::make_unique<std::unique_ptr<double[]>[]>(
                         size_t(S1.getSize()) + 1);
                 for (int I = 0, E = S1.getSize() + 1; I < E; ++I) {
-                    TreeDist[I] = llvm::make_unique<double[]>(size_t(S2.getSize()) + 1);
-                    ForestDist[I] = llvm::make_unique<double[]>(size_t(S2.getSize()) + 1);
+                    TreeDist[I] = std::make_unique<double[]>(size_t(S2.getSize()) + 1);
+                    ForestDist[I] = std::make_unique<double[]>(size_t(S2.getSize()) + 1);
                 }
             }
 
@@ -1422,8 +1422,8 @@ namespace clang {
                             const ComparisonOptions &Options)
                 : T1(T1), T2(T2), Options(Options) {
             int Size = T1.getSize() + T2.getSize();
-            SrcToDst = llvm::make_unique<NodeId[]>(Size);
-            DstToSrc = llvm::make_unique<NodeId[]>(Size);
+            SrcToDst = std::make_unique<NodeId[]>(Size);
+            DstToSrc = std::make_unique<NodeId[]>(Size);
             computeMapping();
             computeChangeKinds();
         }
@@ -1530,7 +1530,7 @@ namespace clang {
 
         ASTDiff::ASTDiff(SyntaxTree &T1, SyntaxTree &T2,
                          const ComparisonOptions &Options)
-                : DiffImpl(llvm::make_unique<Impl>(*T1.TreeImpl, *T2.TreeImpl, Options)) {}
+                : DiffImpl(std::make_unique<Impl>(*T1.TreeImpl, *T2.TreeImpl, Options)) {}
 
         ASTDiff::~ASTDiff() = default;
 
@@ -1659,7 +1659,7 @@ namespace clang {
         }
 
         SyntaxTree::SyntaxTree(ASTUnit &AST)
-                : TreeImpl(llvm::make_unique<SyntaxTree::Impl>(
+                : TreeImpl(std::make_unique<SyntaxTree::Impl>(
                 this, AST.getASTContext().getTranslationUnitDecl(), AST)) {}
 
         SyntaxTree::~SyntaxTree() = default;
