@@ -67,7 +67,7 @@ int instrumentCode(clang::diff::NodeRef node, Rewriter &rewriter){
     auto condNode = ifNode->getCond();
     auto thenNode = ifNode->getThen();
     SourceLocation condLocStart = condNode->getBeginLoc();
-    SourceLocation condLocEnd = condNode->getLocEnd();
+    SourceLocation condLocEnd = condNode->getEndLoc();
     SourceLocation thenLocStart = thenNode->getBeginLoc();
     bool invalid;
     CharSourceRange extractRange = CharSourceRange::getTokenRange(condLocStart, condLocEnd);
