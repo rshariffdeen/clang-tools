@@ -714,24 +714,24 @@ namespace clang {
                         replaceSubString(statement, variableNameInSource, variableNameInTarget);
                     } else {
 
-                        NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
-                        if (Diff.getMapped(nodeInDst) != NULL) {
-                            NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
-                            std::string variableNameInSource = *nodeInDst.getIdentifier();
-                            // llvm::outs() << "before translation: " << variableNameInSource << "\n";
-
-                            if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-                                NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-                                // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
-                                std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-                                // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-                                replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                                // llvm::outs() << "after replacement: " << statement << "\n";
-                            } else {
-                                llvm::errs() << "mapping not found for member definition";
-                            }
-
-                        }
+//                        NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
+//                        if (Diff.getMapped(nodeInDst) != NULL) {
+//                            NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
+//                            std::string variableNameInSource = *nodeInDst.getIdentifier();
+//                            // llvm::outs() << "before translation: " << variableNameInSource << "\n";
+//
+//                            if (TargetDiff.getMapped(nodeInSrc) != NULL) {
+//                                NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
+//                                // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
+//                                std::string variableNameInTarget = *nodeInTarget.getIdentifier();
+//                                // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                                replaceSubString(statement, variableNameInSource, variableNameInTarget);
+//                                // llvm::outs() << "after replacement: " << statement << "\n";
+//                            } else {
+//                                llvm::errs() << "mapping not found for member definition";
+//                            }
+//
+//                        }
 
                     }
 
@@ -808,28 +808,28 @@ namespace clang {
                         replaceSubString(statement, variableNameInSource, variableNameInTarget);
                     } else {
                         // llvm::outs() << "found location\n" ;
-                        int nodeid = LocNodeMap.at(locId);
-                        NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
-                        std::string variableNameInSource = *nodeInDst.getIdentifier();
-                        // llvm::outs() << "before translation: " << variableNameInSource << "\n";
-
-                        if (Diff.getMapped(nodeInDst) != NULL) {
-                            NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
-
-                            if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-                                NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-                                // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
-                                std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-                                // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-                                replaceSubString(statement, variableNameInSource, variableNameInTarget);
-
-                            }
-
-                        } //else {
-                        //     std::string variableNameInTarget = variableNameInSource + "_crochet";
-                        //     // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-                        //     replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                        // }
+//                        int nodeid = LocNodeMap.at(locId);
+//                        NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
+//                        std::string variableNameInSource = *nodeInDst.getIdentifier();
+//                        // llvm::outs() << "before translation: " << variableNameInSource << "\n";
+//
+//                        if (Diff.getMapped(nodeInDst) != NULL) {
+//                            NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
+//
+//                            if (TargetDiff.getMapped(nodeInSrc) != NULL) {
+//                                NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
+//                                // llvm::outs() << "mapped node: " << nodeInTarget.getValue() << "\n";
+//                                std::string variableNameInTarget = *nodeInTarget.getIdentifier();
+//                                // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                                replaceSubString(statement, variableNameInSource, variableNameInTarget);
+//
+//                            }
+//
+//                        } //else {
+//                        //     std::string variableNameInTarget = variableNameInSource + "_crochet";
+//                        //     // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                        //     replaceSubString(statement, variableNameInSource, variableNameInTarget);
+//                        // }
                     }
 
                 }
@@ -867,27 +867,27 @@ namespace clang {
                             variableNameInTarget = varMap[variableNameInSource];
                             replaceSubString(statement, variableNameInSource, variableNameInTarget);
                         } else {
-                            int nodeid = LocNodeMap.at(locId);
-                            NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
-                            std::string variableNameInSource = *nodeInDst.getIdentifier();
-                            // llvm::outs() << "before translation: " << variableNameInSource << "\n";
-                            if (Diff.getMapped(nodeInDst) != NULL) {
-                                NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
-
-
-                                if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-                                    NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-                                    std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-                                    // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-                                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
-
-                                }
-
-                            } //else {
-                            //    std::string variableNameInTarget = variableNameInSource + "_crochet";
-                            //    // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-                            //    replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                            // }
+//                            int nodeid = LocNodeMap.at(locId);
+//                            NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
+//                            std::string variableNameInSource = *nodeInDst.getIdentifier();
+//                            // llvm::outs() << "before translation: " << variableNameInSource << "\n";
+//                            if (Diff.getMapped(nodeInDst) != NULL) {
+//                                NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
+//
+//
+//                                if (TargetDiff.getMapped(nodeInSrc) != NULL) {
+//                                    NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
+//                                    std::string variableNameInTarget = *nodeInTarget.getIdentifier();
+//                                    // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
+//
+//                                }
+//
+//                            } //else {
+//                            //    std::string variableNameInTarget = variableNameInSource + "_crochet";
+//                            //    // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
+//                            //    replaceSubString(statement, variableNameInSource, variableNameInTarget);
+//                            // }
 
                         }
 
