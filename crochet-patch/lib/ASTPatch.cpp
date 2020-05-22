@@ -712,7 +712,9 @@ namespace clang {
                     if (varMap.find(variableNameInSource) != varMap.end()) {
                         variableNameInTarget = varMap[variableNameInSource];
                         replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                    } else {
+                    }
+
+//                    else {
 
 //                        NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
 //                        if (Diff.getMapped(nodeInDst) != NULL) {
@@ -733,7 +735,7 @@ namespace clang {
 //
 //                        }
 
-                    }
+//                    }
 
                 }
 
@@ -806,7 +808,9 @@ namespace clang {
                     if (varMap.find(variableNameInSource) != varMap.end()) {
                         variableNameInTarget = varMap[variableNameInSource];
                         replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                    } else {
+                    }
+
+//                    else {
                         // llvm::outs() << "found location\n" ;
 //                        int nodeid = LocNodeMap.at(locId);
 //                        NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
@@ -830,7 +834,7 @@ namespace clang {
 //                        //     // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
 //                        //     replaceSubString(statement, variableNameInSource, variableNameInTarget);
 //                        // }
-                    }
+//                    }
 
                 }
 
@@ -866,7 +870,9 @@ namespace clang {
                         if (varMap.find(variableNameInSource) != varMap.end()) {
                             variableNameInTarget = varMap[variableNameInSource];
                             replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                        } else {
+                        }
+
+//                        else {
 //                            int nodeid = LocNodeMap.at(locId);
 //                            NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
 //                            std::string variableNameInSource = *nodeInDst.getIdentifier();
@@ -889,7 +895,7 @@ namespace clang {
 //                            //    replaceSubString(statement, variableNameInSource, variableNameInTarget);
 //                            // }
 
-                        }
+//                        }
 
                     }
 
