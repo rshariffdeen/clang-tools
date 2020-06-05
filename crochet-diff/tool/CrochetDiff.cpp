@@ -88,13 +88,25 @@ static cl::list <std::string> ArgsBeforeC(
 
 
 static void addExtraArgs(std::unique_ptr <CompilationDatabase> &Compilations,
-                         cl::list <std::string> ArgsBefore, cl::list <std::string> ArgsAfter) {
+                         std::string reference) {
 
     if (!Compilations)
         return;
     auto AdjustingCompilations =
             std::make_unique<ArgumentsAdjustingCompilations>(
                     std::move(Compilations));
+
+    static cl::list <std::string> ArgsAfter;
+    static cl::list <std::string> ArgsBefore;
+
+    if (reference == "A"){
+        ArgsAfter = ArgsAfterA;
+        ArgsBfore = ArgsBeforeA;
+    } else{
+        ArgsAfter = ArgsAfterC;
+        ArgsBfore = ArgsBeforeC;
+    }
+
     AdjustingCompilations->appendArgumentsAdjuster(
             getInsertArgumentAdjuster(ArgsBefore, ArgumentInsertPosition::BEGIN));
     AdjustingCompilations->appendArgumentsAdjuster(
@@ -117,9 +129,9 @@ getCompilationDatabase(StringRef Filename) {
                 ".", std::vector<std::string>());
     }
     if (Filename == SourcePath)
-        addExtraArgs(Compilations,  ArgsBeforeA, ArgsAfterA);
+        addExtraArgs(Compilations, "A");
     else
-        addExtraArgs(Compilations,  ArgsBeforeC, ArgsAfterC);
+        addExtraArgs(Compilations, "C");
     return Compilations;
 }
 
@@ -492,8 +504,8 @@ int main(int argc, const char **argv) {
         return 1;
     }
 
-    addExtraArgs(CommonCompilationsA, ArgsBeforeA, ArgsAfterA);
-    addExtraArgs(CommonCompilationsC, ArgsBeforeC, ArgsAfterC);
+    addExtraArgs(CommonCompilationsA, "A");
+    addExtraArgs(CommonCompilationsC, "C");
 
     if (ASTDump || ASTDumpJson) {
         if (!DestinationPath.empty()) {
