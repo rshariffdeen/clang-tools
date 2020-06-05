@@ -1028,7 +1028,7 @@ namespace clang {
 
                     if (insertNode.getTypeLabel() == "BinaryOperator") {
                         size_t start_pos = insertStatement.find(";");
-                        if (start_pos != std::string::npos)
+                        if (start_pos == std::string::npos)
                             insertStatement = insertStatement + ";" ;
                     }
 
