@@ -96,21 +96,19 @@ static void addExtraArgs(std::unique_ptr <CompilationDatabase> &Compilations,
             std::make_unique<ArgumentsAdjustingCompilations>(
                     std::move(Compilations));
 
-    static cl::list <std::string> ArgsAfter;
-    static cl::list <std::string> ArgsBefore;
 
     if (reference == "A"){
-        ArgsAfter = ArgsAfterA;
-        ArgsBfore = ArgsBeforeA;
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsBeforeA, ArgumentInsertPosition::BEGIN));
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsAfteAr, ArgumentInsertPosition::END));
     } else{
-        ArgsAfter = ArgsAfterC;
-        ArgsBfore = ArgsBeforeC;
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsBeforeC, ArgumentInsertPosition::BEGIN));
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsAfterC, ArgumentInsertPosition::END));
     }
 
-    AdjustingCompilations->appendArgumentsAdjuster(
-            getInsertArgumentAdjuster(ArgsBefore, ArgumentInsertPosition::BEGIN));
-    AdjustingCompilations->appendArgumentsAdjuster(
-            getInsertArgumentAdjuster(ArgsAfter, ArgumentInsertPosition::END));
     Compilations = std::move(AdjustingCompilations);
 }
 
