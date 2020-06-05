@@ -116,7 +116,7 @@ getCompilationDatabase(StringRef Filename) {
         Compilations = std::make_unique<clang::tooling::FixedCompilationDatabase>(
                 ".", std::vector<std::string>());
     }
-    if (FileName == SourcePath)
+    if (Filename == SourcePath)
         addExtraArgs(Compilations,  ArgsBeforeA, ArgsAfterA);
     else
         addExtraArgs(Compilations,  ArgsBeforeC, ArgsAfterC);
