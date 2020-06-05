@@ -101,7 +101,7 @@ static void addExtraArgs(std::unique_ptr <CompilationDatabase> &Compilations,
         AdjustingCompilations->appendArgumentsAdjuster(
                 getInsertArgumentAdjuster(ArgsBeforeA, ArgumentInsertPosition::BEGIN));
         AdjustingCompilations->appendArgumentsAdjuster(
-                getInsertArgumentAdjuster(ArgsAfteA, ArgumentInsertPosition::END));
+                getInsertArgumentAdjuster(ArgsAfterA, ArgumentInsertPosition::END));
     } else{
         AdjustingCompilations->appendArgumentsAdjuster(
                 getInsertArgumentAdjuster(ArgsBeforeC, ArgumentInsertPosition::BEGIN));
