@@ -1114,7 +1114,7 @@ namespace clang {
                             insertStatement = insertStatement + ", ";
 
                     } else if (numArgs == Offset + 1){
-                        std::replace( insertStatement.begin(), insertStatement.end(), ',', '');
+                        std::replace( insertStatement.begin(), insertStatement.end(), ',', ' ');
                         insertStatement = ", " + insertStatement;
                     } else {
                         if (insertStatement.find(',') == std::string::npos)
