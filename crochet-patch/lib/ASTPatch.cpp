@@ -1102,7 +1102,7 @@ namespace clang {
                     modified = true;
 
                 } else if (targetNode.getTypeLabel() == "VarDecl") {
-                    std::replace( insertStatement.begin(), insertStatement.end(), ';', ' ');
+
                     if (insertNode.getTypeLabel() == "InitListExpr") {
                         insertStatement = "= " + insertStatement;
                     }
@@ -1114,7 +1114,7 @@ namespace clang {
 
                     } else {
                         insertLoc = range.getEnd();
-                        if (Rewrite.InsertTextAfterToken(insertLoc, insertStatement))
+                        if (Rewrite.InsertTextToken(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
                     }
 
