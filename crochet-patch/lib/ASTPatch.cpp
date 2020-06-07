@@ -1102,7 +1102,7 @@ namespace clang {
                     modified = true;
 
                 } else if (targetNode.getTypeLabel() == "VarDecl") {
-
+                    std::replace( insertStatement.begin(), insertStatement.end(), ';', ' ');
                     if (insertNode.getTypeLabel() == "InitListExpr") {
                         insertStatement = "= " + insertStatement;
                     }
