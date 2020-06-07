@@ -1101,6 +1101,25 @@ namespace clang {
 
                     modified = true;
 
+                } else if (targetNode.getTypeLabel() == "VarDecl") {
+
+                    if (insertNode.getTypeLabel() == "InitListExpr") {
+                        insertStatement = "= " + insertStatement;
+                    }
+
+                    if (Offset == 0) {
+                        if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+
+
+                    } else {
+                        insertLoc = range.getEnd();
+                        if (Rewrite.InsertTextAfterToken(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+                    }
+
+                    modified = true;
+
                 } else if (targetNode.getTypeLabel() == "CallExpr") {
 
 
