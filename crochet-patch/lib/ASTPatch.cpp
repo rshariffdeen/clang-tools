@@ -1117,7 +1117,7 @@ namespace clang {
 
                     } else {
                         insertLoc = range.getEnd();
-                        if (Rewrite.InsertTextToken(insertLoc, insertStatement))
+                        if (Rewrite.InsertTextAfter(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
                     }
 
