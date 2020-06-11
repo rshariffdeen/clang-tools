@@ -974,8 +974,8 @@ namespace clang {
                 auto parentExpNode = deleteNode.ASTNode.get<ParenExpr>();
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
-                Rewrite.RemoveText(parentExpNode->getLparen(),1, delRangeOpts);
-                Rewrite.RemoveText(parentExpNode->getRparen(),1, delRangeOpts);
+                Rewrite.RemoveText(parentExpNode->getLParen(),1, delRangeOpts);
+                Rewrite.RemoveText(parentExpNode->getRParen(),1, delRangeOpts);
 
             } else {
                 range = expandRange(range, Target);
