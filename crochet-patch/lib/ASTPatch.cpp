@@ -970,6 +970,13 @@ namespace clang {
                 range.setBegin(memExpNode->getOperatorLoc());
                 Rewrite.RemoveText(range, delRangeOpts);
 
+            } else if (deleteNode.getTypeLabel() == "ParenExpr") {
+                auto parentExpNode = deleteNode.ASTNode.get<ParenExpr>();
+                Rewriter::RewriteOptions delRangeOpts;
+                delRangeOpts.RemoveLineIfEmpty = true;
+                Rewrite.RemoveText(parentExpNode->getLparen(),1, delRangeOpts);
+                Rewrite.RemoveText(parentExpNode->getRparen(),1, delRangeOpts);
+
             } else {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
