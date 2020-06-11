@@ -1071,6 +1071,9 @@ namespace clang {
 
                     } else {
 
+                        if (Offset > 1)
+                            insertStatement = "else " + insertStatement;
+
                         NodeRef nearestChildNode = targetNode.getChild(Offset - 1);
                         insertLoc = nearestChildNode.getSourceRange().getEnd();
 
