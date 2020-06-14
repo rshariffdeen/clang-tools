@@ -1370,11 +1370,20 @@ namespace clang {
         if (!srcValue.empty() ) {
             if (Rewrite.RemoveText(targetRange))
                 modified = false;
-        modified = true;
+            if (!modified){
+                targetRange = targetNode.getParent()->getSourceRange();
+                srcRange = srcNode.getParent()->getSourceRange();
+                targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
+                srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
+                if (!Rewrite.RemoveText(targetRange))
+                    modified = true;
+            }
+
         // llvm::outs() << "statement removed" << "\n";
         if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
-        modified = false;
+            modified = false;
         // llvm::outs() << "statement updated" << "\n";
+
     }
 
     return modified;
