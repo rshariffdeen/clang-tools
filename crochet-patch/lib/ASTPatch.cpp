@@ -1033,7 +1033,7 @@ namespace clang {
                 int NumChildren = targetNode.getNumChildren();
                 if (targetNode.getTypeLabel() == "CompoundStmt") {
 
-                    if (insertNode.getTypeLabel() == "BinaryOperator") {
+                    if (insertNode.getTypeLabel() == "BinaryOperator" || insertNode.getTypeLabel() == "ReturnStmt"  ) {
                         size_t start_pos = insertStatement.find(";");
                         if (start_pos == std::string::npos)
                             insertStatement = insertStatement + ";" ;
@@ -1375,6 +1375,7 @@ namespace clang {
                 srcRange = srcNode.getParent()->getSourceRange();
                 targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
                 srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
+                srcValue = translateVariables(srcNode, srcValue);
                 if (!Rewrite.RemoveText(targetRange))
                     modified = true;
             }
