@@ -1103,7 +1103,6 @@ namespace clang {
                         if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
 
-
                     } else {
                         if (Rewrite.InsertTextAfterToken(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
@@ -1111,7 +1110,33 @@ namespace clang {
 
                     modified = true;
 
-                } else if (targetNode.getTypeLabel() == "VarDecl") {
+                }  else if (targetNode.getTypeLabel() == "LabelStmt") {
+
+                    if (insertStatement.find(';') == std::string::npos)
+                        insertStatement = insertStatement + "; ";
+                    // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
+                    auto labelNode = targetNode.ASTNode.get<LabelStmt>();
+
+                    if (Offset == 0) {
+                        NodeRef nearestChildNode = targetNode.getChild(Offset);
+                        insertLoc = nearestChildNode.getSourceRange().getBegin();
+                        if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+
+
+                    } else {
+                        NodeRef nearestChildNode = targetNode.getChild(Offset - 1);
+                        insertLoc = nearestChildNode.getSourceRange().getEnd();
+
+                        if (Rewrite.InsertTextAfterToken(insertLoc, insertStatement))
+                            llvm::errs() << "error inserting\n";
+                        modified = true;
+
+                    }
+
+                    modified = true;
+
+                }  else if (targetNode.getTypeLabel() == "VarDecl") {
 
                     if (insertNode.getTypeLabel() == "InitListExpr") {
                         insertStatement = "= " + insertStatement;
