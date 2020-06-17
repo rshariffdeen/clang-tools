@@ -1506,7 +1506,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         // llvm::outs() << statement << "\n";
 
         if (targetNode.getTypeLabel() == "BinaryOperator") {
-            modified = Rewrite.ReplaceText(range.getBegin(), statement);
+            modified = Rewrite.ReplaceText(range.getBegin(), updateValue);
             return true;
         }
 
