@@ -1029,7 +1029,7 @@ namespace clang {
 
 
             if (!insertStatement.empty()) {
-
+                auto compNode = targetNode.ASTNode.get<CompoundStmt>();
                 int NumChildren = targetNode.getNumChildren();
                 if (targetNode.getTypeLabel() == "CompoundStmt") {
 
@@ -1047,7 +1047,8 @@ namespace clang {
                             modified = true;
 
                         } else {
-                            Rewrite.InsertTextAfter(insertLoc, insertStatement);
+                            insertLoc = compNode->getLBracLoc();
+                            Rewrite.InsertTextAfterToken(insertLoc, insertStatement);
                             modified = true;
                         }
 
