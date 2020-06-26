@@ -846,7 +846,8 @@ namespace clang {
 
                 if (childNode.getTypeLabel() == "DeclRefExpr") {
 
-                    // llvm::outs() << "translating reference \n";
+                    llvm::outs() << "translating reference \n";
+
 
                     auto decRefNode = childNode.ASTNode.get<DeclRefExpr>();
                     auto decNode = decRefNode->getDecl();
@@ -856,17 +857,18 @@ namespace clang {
                     if (LocNodeMap.find(locId) == LocNodeMap.end()) {
                         llvm::errs() << "invalid key referenced: " << locId << "\n";
 
-                    } //else {
+                    } else {
 
-//                        int nodeid = LocNodeMap.at(locId);
-//                        NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
-//                        std::string variableNameInSource = *nodeInDst.getIdentifier();
-////                    llvm::outs() << "before translation: " << variableNameInSource << "\n";
-//                        std::string variableNameInTarget;
-//                        if (varMap.find(variableNameInSource) != varMap.end()) {
-//                            variableNameInTarget = varMap[variableNameInSource];
-//                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//                        } else {
+                        int nodeid = LocNodeMap.at(locId);
+                        NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
+                        std::string variableNameInSource = *nodeInDst.getIdentifier();
+                        llvm::outs() << "before translation: " << variableNameInSource << "\n";
+                        std::string variableNameInTarget;
+                        if (varMap.find(variableNameInSource) != varMap.end()) {
+                            variableNameInTarget = varMap[variableNameInSource];
+                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                            llvm::outs() << "after translation: " << statement << "\n";
+                        } // else {
 //                            int nodeid = LocNodeMap.at(locId);
 //                            NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
 //                            std::string variableNameInSource = *nodeInDst.getIdentifier();
@@ -950,11 +952,17 @@ namespace clang {
                 range.setBegin(startLoc);
             }
 
-            if (deleteNode.getTypeLabel() == "BinaryOperator" && !isMove) {
+            if (deleteNode.getTypeLabel() == "BinaryOperator" ) {
                 auto binOpNode = deleteNode.ASTNode.get<BinaryOperator>();
                 range.setBegin(binOpNode->getOperatorLoc());
-                std::string binOp = binOpNode->getOpcodeStr();
-                Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
+                if (isMove) {
+                    std::string binOp = binOpNode->getOpcodeStr();
+                    Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
+                } else {
+                    range.setBegin(binOpNode->getBeginLoc());
+                    range.setEnd(binOpNode->getRHS()->getEndLoc());
+                    Rewrite.RemoveText(range);
+                }
 
             } else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro") {
                 range = expandRange(range, Target);
