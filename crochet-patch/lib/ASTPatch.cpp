@@ -845,56 +845,16 @@ namespace clang {
                 // llvm::outs() << "child " << childIndex << " type " << childNode.getTypeLabel() << "\n";
 
                 if (childNode.getTypeLabel() == "DeclRefExpr") {
-
                     llvm::outs() << "translating reference \n";
-
-
-                    auto decRefNode = childNode.ASTNode.get<DeclRefExpr>();
-                    auto decNode = decRefNode->getDecl();
-                    SourceLocation loc = decNode->getLocation();
-                    std::string locId = loc.printToString(Dst.getSourceManager());
-
-                    if (LocNodeMap.find(locId) == LocNodeMap.end()) {
-                        llvm::errs() << "invalid key referenced: " << locId << "\n";
-
-                    } else {
-
-                        int nodeid = LocNodeMap.at(locId);
-                        NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
-                        std::string variableNameInSource = *nodeInDst.getIdentifier();
-                        llvm::outs() << "before translation: " << variableNameInSource << "\n";
-                        std::string variableNameInTarget;
-                        if (varMap.find(variableNameInSource) != varMap.end()) {
-                            variableNameInTarget = varMap[variableNameInSource];
-                            replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                            llvm::outs() << "after translation: " << statement << "\n";
-                        } // else {
-//                            int nodeid = LocNodeMap.at(locId);
-//                            NodeRef nodeInDst = Dst.getNode(NodeId(nodeid));
-//                            std::string variableNameInSource = *nodeInDst.getIdentifier();
-//                            // llvm::outs() << "before translation: " << variableNameInSource << "\n";
-//                            if (Diff.getMapped(nodeInDst) != NULL) {
-//                                NodeRef nodeInSrc = *Diff.getMapped(nodeInDst);
-//
-//
-//                                if (TargetDiff.getMapped(nodeInSrc) != NULL) {
-//                                    NodeRef nodeInTarget = *TargetDiff.getMapped(nodeInSrc);
-//                                    std::string variableNameInTarget = *nodeInTarget.getIdentifier();
-//                                    // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-//                                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//
-//                                }
-//
-//                            } //else {
-//                            //    std::string variableNameInTarget = variableNameInSource + "_crochet";
-//                            //    // llvm::outs() << "after translation: " << variableNameInTarget << "\n";
-//                            //    replaceSubString(statement, variableNameInSource, variableNameInTarget);
-//                            // }
-//
-//                        }
-//
+                    llvm::outs() << childNode.getValue() << "\n";
+                    std::string variableNameInSource = childNode.getValue();
+                    llvm::outs() << "before translation: " << variableNameInSource << "\n";
+                    std::string variableNameInTarget;
+                    if (varMap.find(variableNameInSource) != varMap.end()) {
+                        variableNameInTarget = varMap[variableNameInSource];
+                        replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                        llvm::outs() << "after translation: " << statement << "\n";
                     }
-
                 }
 
                 if (childNode.getNumChildren() > 0) {
