@@ -1357,12 +1357,12 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
 
     // llvm::outs() << "update value before translation: "  << updateValue << "\n";
-    if (updateNode.getTypeLabel() == "StringExpr")
+    if (updateNode.getTypeLabel() == "StringLiteral")
         updateValue.erase(std::remove(updateValue.begin(), updateValue.end(), '\n'), updateValue.end()); // replace all new lines to null
 
     updateValue = translateVariables(updateNode, updateValue);
 
-    if (updateNode.getTypeLabel() == "StringExpr")
+    if (updateNode.getTypeLabel() == "StringLiteral")
         std::replace( oldValue.begin(), oldValue.end(), ' ', '_'); // replace all spaces to '_'
     // llvm::outs() << "update value after translation: "  << updateValue << "\n";
 
@@ -1374,7 +1374,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         std::string statement = Lexer::getSourceText(range, Target.getSourceManager(),
                                                      Target.getLangOpts());
 
-        if (targetNode.getTypeLabel() == "StringExpr")
+        if (targetNode.getTypeLabel() == "StringLiteral")
             std::replace( statement.begin(), statement.end(), ' ', '_');
         // llvm::outs() << statement << "\n";
         replaceSubString(statement, oldValue, updateValue);
