@@ -790,6 +790,23 @@ std::string Node::getTypeValue(const TypeLoc *D) const {
   
 }
 
+    std::string Node::getRefType() const {
+        std::string refType;
+
+        if (getTypeLabel() == "DeclRefExpr") {
+            auto decRefNode = ASTNode.get<DeclRefExpr>();
+            auto decNode = decRefNode->getDecl();
+            if (auto *ref = dyn_cast<ParmVarDecl>(decNode))
+                refType = "ParmVarDecl";
+            if (auto *ref = dyn_cast<VarDecl>(decNode))
+                refType = "VarDecl";
+            if (auto *ref = dyn_cast<FunctionDecl>(decNode))
+                refType = "FunctionDecl";
+        }
+        return refType;
+
+    }
+
 std::string Node::getDeclValue(const Decl *D) const {
   std::string Value;
   if (auto *V = dyn_cast<ValueDecl>(D))

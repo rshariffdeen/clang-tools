@@ -740,30 +740,20 @@ namespace clang {
 
             } else if (node.getTypeLabel() == "DeclRefExpr") {
                 // llvm::outs() << "translating reference \n";
-                std::string variableNameInSource = node.getValue();
+                std::string RefType = Node.getRefType();
+                std::string refNameInSource = node.getValue();
+                if (RefType == "FunctionDecl")
+                    refNameInSource = refNameInSource + "(";
+
                 // llvm::outs() << "var name in source: " << variableNameInSource << "\n";
                 //  llvm::outs() << "before translation: " << statement << "\n";
-                std::string variableNameInTarget;
-                if (varMap.find(variableNameInSource) != varMap.end()) {
-                    variableNameInTarget = varMap[variableNameInSource];
-                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                std::string refNameInTarget;
+                if (varMap.find(refNameInSource) != varMap.end()) {
+                    refNameInTarget = varMap[refNameInSource];
+                    replaceSubString(statement, refNameInSource, refNameInTarget);
 
                 }
                 // llvm::outs() << "var name in target: " << variableNameInTarget << "\n";
-                //  llvm::outs() << "after translation: " << statement << "\n";
-            } else if (node.getTypeLabel() == "CallExpr") {
-
-                // llvm::outs() << "translating API call \n";
-                std::string methodNameInSource = node.getValue() + "(";
-                // llvm::outs() << "method name in source: " << methodNameInSource << "\n";
-                //  llvm::outs() << "before translation: " << statement << "\n";
-                std::string methodNameInTarget;
-                if (varMap.find(methodNameInSource) != varMap.end()) {
-                    methodNameInTarget = varMap[methodNameInSource];
-                    replaceSubString(statement, methodNameInSource, methodNameInTarget);
-
-                }
-                // llvm::outs() << "method name in target: " << methodNameInTarget << "\n";
                 //  llvm::outs() << "after translation: " << statement << "\n";
             }
 
