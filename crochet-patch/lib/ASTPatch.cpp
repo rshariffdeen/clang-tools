@@ -1258,29 +1258,31 @@ namespace clang {
         std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
-//        srcValue = translateVariables(srcNode, srcValue);
+        srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
 
 
         if (!srcValue.empty() ) {
-            if (Rewrite.RemoveText(targetRange))
-                modified = false;
-            if (!modified){
-                targetRange = targetNode.getParent()->getSourceRange();
-                srcRange = srcNode.getParent()->getSourceRange();
-                targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
-                srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
-                srcValue = translateVariables(srcNode, srcValue);
-                if (!Rewrite.RemoveText(targetRange))
-                    modified = true;
-            }
+            if (Rewrite.ReplaceText(targetRange, srcValue))
+                modified = true;
+//            if (Rewrite.RemoveText(targetRange))
+//                modified = false;
+//            if (!modified){
+//                targetRange = targetNode.getParent()->getSourceRange();
+//                srcRange = srcNode.getParent()->getSourceRange();
+//                targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
+//                srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
+//                srcValue = translateVariables(srcNode, srcValue);
+//                if (!Rewrite.RemoveText(targetRange))
+//                    modified = true;
+//            }
+//
+//            // llvm::outs() << "statement removed" << "\n";
+//            if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
+//                modified = false;
+//            // llvm::outs() << "statement updated" << "\n";
 
-        // llvm::outs() << "statement removed" << "\n";
-        if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
-            modified = false;
-        // llvm::outs() << "statement updated" << "\n";
-
-    }
+        }
 
     return modified;
 }
