@@ -724,8 +724,8 @@ namespace clang {
             } else if (node.getTypeLabel() == "FieldDecl") {
 
                 // llvm::outs() << "translating field decl \n";
-                int nodeid = LocNodeMap.at(locId);
-                NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
+//                int nodeid = LocNodeMap.at(locId);
+//                NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
                 std::string variableNameInSource = node.getValue() ;
 //               llvm::outs() << "before translation: " << variableNameInSource << "\n";
                 std::string variableNameInTarget;
