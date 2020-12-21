@@ -1263,7 +1263,7 @@ namespace clang {
 
 
         if (!srcValue.empty() ) {
-            if (Rewrite.ReplaceText(targetRange, srcValue))
+            if (!Rewrite.ReplaceText(targetRange, srcValue))
                 modified = true;
 //            if (Rewrite.RemoveText(targetRange))
 //                modified = false;
