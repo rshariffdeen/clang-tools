@@ -691,7 +691,7 @@ namespace clang {
                 // llvm::outs() << "translating member name \n";
                 auto memNode = node.ASTNode.get<MemberExpr>();
                 auto decNode = memNode->getMemberDecl();
-                std::string memberNameInSource = node.getValue().substr(1);
+                std::string memberNameInSource = node.getValue();
                 std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
 //                  llvm::outs() << "member in source: " << memberNameInSource << "\n";
 //                  llvm::outs() << "before translation: " << statement << "\n";
