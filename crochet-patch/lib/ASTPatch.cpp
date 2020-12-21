@@ -751,6 +751,20 @@ namespace clang {
                 }
                 // llvm::outs() << "var name in target: " << variableNameInTarget << "\n";
                 //  llvm::outs() << "after translation: " << statement << "\n";
+            } else if (node.getTypeLabel() == "CallExpr") {
+
+                // llvm::outs() << "translating API call \n";
+                std::string methodNameInSource = node.getValue() + "(";
+                // llvm::outs() << "method name in source: " << variableNameInSource << "\n";
+                //  llvm::outs() << "before translation: " << statement << "\n";
+                std::string methodNameInTarget;
+                if (varMap.find(methodNameInSource) != varMap.end()) {
+                    methodNameInTarget = varMap[methodNameInSource];
+                    replaceSubString(statement, methodNameInSource, methodNameInTarget);
+
+                }
+                // llvm::outs() << "method name in target: " << variableNameInTarget << "\n";
+                //  llvm::outs() << "after translation: " << statement << "\n";
             }
 
             for (unsigned childIndex = 0; childIndex < childNodesInUpdateRange; childIndex++) {
