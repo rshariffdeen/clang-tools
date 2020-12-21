@@ -1336,9 +1336,9 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
     std::string updateValue = updateNode.getValue();
     std::string oldValue = targetNode.getValue();
-    if (updateNode.getTypeLabel() == "StringExpr")
+    if (updateNode.getTypeLabel() == "StringLiteral")
         updateValue = "\"" + updateValue + "\"";
-    if (targetNode.getTypeLabel() == "StringExpr")
+    if (targetNode.getTypeLabel() == "StringLiteral")
         oldValue = "\"" + oldValue + "\"";
 
     if (targetNode.getTypeLabel() == "MemberExpr") {
