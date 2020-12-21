@@ -816,14 +816,14 @@ namespace clang {
             if (deleteNode.getTypeLabel() == "BinaryOperator" ) {
                 auto binOpNode = deleteNode.ASTNode.get<BinaryOperator>();
                 range.setBegin(binOpNode->getOperatorLoc());
-                if (isMove) {
+//                if (isMove) {
                     std::string binOp = binOpNode->getOpcodeStr();
                     Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
-                } else {
-                    range.setBegin(binOpNode->getBeginLoc());
-                    range.setEnd(binOpNode->getRHS()->getEndLoc());
-                    Rewrite.RemoveText(range);
-                }
+//                } else {
+//                    range.setBegin(binOpNode->getBeginLoc());
+//                    range.setEnd(binOpNode->getRHS()->getEndLoc());
+//                    Rewrite.RemoveText(range);
+//                }
 
             } else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro") {
                 range = expandRange(range, Target);
