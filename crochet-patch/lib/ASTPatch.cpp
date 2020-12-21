@@ -726,21 +726,21 @@ namespace clang {
             } else if (node.getTypeLabel() == "FieldDecl") {
 
                 // llvm::outs() << "translating field decl \n";
-//                int nodeid = LocNodeMap.at(locId);
-//                NodeRef nodeInDst = Src.getNode(NodeId(nodeid));
-                std::string variableNameInSource = node.getValue() ;
-//               llvm::outs() << "before translation: " << variableNameInSource << "\n";
-                std::string variableNameInTarget;
-                if (varMap.find(variableNameInSource) != varMap.end()) {
-                    variableNameInTarget = varMap[variableNameInSource];
-                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                std::string fieldNameInSource = node.getValue() ;
+                // llvm::outs() << "field name in source: " << fieldNameInSource << "\n";
+                //  llvm::outs() << "before translation: " << statement << "\n";
+                std::string fieldNameInTarget;
+                if (varMap.find(fieldNameInSource) != varMap.end()) {
+                    fieldNameInTarget = varMap[fieldNameInSource];
+                    replaceSubString(statement, fieldNameInSource, fieldNameInTarget);
                 }
+                // llvm::outs() << "field name in target: " << fieldNameInTarget << "\n";
+                //  llvm::outs() << "after translation: " << statement << "\n";
                 return statement;
 
             } else if (node.getTypeLabel() == "DeclRefExpr") {
-//                llvm::outs() << "translating reference \n";
-//                llvm::outs() << childNode.getValue() << "\n";
-                std::string variableNameInSource = childNode.getValue();
+                // llvm::outs() << "translating reference \n";
+                std::string variableNameInSource = node.getValue();
                 // llvm::outs() << "var name in source: " << variableNameInSource << "\n";
                 //  llvm::outs() << "before translation: " << statement << "\n";
                 std::string variableNameInTarget;
