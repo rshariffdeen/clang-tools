@@ -740,7 +740,7 @@ namespace clang {
 
             } else if (node.getTypeLabel() == "DeclRefExpr") {
                 // llvm::outs() << "translating reference \n";
-                std::string RefType = Node.getRefType();
+                std::string RefType = node.getRefType();
                 std::string refNameInSource = node.getValue();
                 if (RefType == "FunctionDecl")
                     refNameInSource = refNameInSource + "(";
