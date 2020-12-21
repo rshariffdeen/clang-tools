@@ -691,15 +691,17 @@ namespace clang {
                 // llvm::outs() << "translating member name \n";
                 auto memNode = node.ASTNode.get<MemberExpr>();
                 auto decNode = memNode->getMemberDecl();
-
-                std::string variableNameInSource = node.getValue();
-//                  llvm::outs() << "before translation: " << variableNameInSource << "\n";
+                std::string memberNameInSource = node.getValue().substr(1);
+                std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
+//                  llvm::outs() << "member in source: " << memberNameInSource << "\n";
+//                  llvm::outs() << "before translation: " << statement << "\n";
                 std::string variableNameInTarget;
-                if (varMap.find(variableNameInSource) != varMap.end()) {
-                    variableNameInTarget = varMap[variableNameInSource];
-                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
+                if (varMap.find(memberNameInSource) != varMap.end()) {
+                    memberNameInTarget = varMap[memberNameInSource];
+                    replaceSubString(statement, memberNameInSource, memberNameInTarget);
                 }
-
+             //   llvm::outs() << "after translation: " << memberNameInTarget << "\n";
+             //   llvm::outs() << "before translation: " << statement << "\n";
                 return statement;
 
 
@@ -1334,8 +1336,8 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
     if (targetNode.getTypeLabel() == "MemberExpr") {
 
-        updateValue = updateValue.substr(1);
-        oldValue = oldValue.substr(1);
+        updateValue = updateValue.substr(2);
+        oldValue = oldValue.substr(2);
 
     } else if (targetNode.getTypeLabel() == "IntegerLiteral") {
 
@@ -1350,7 +1352,9 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     // llvm::outs() << updateValue << "\n";
     if (updateNode.getTypeLabel() == "StringExpr")
         updateValue.erase(std::remove(updateValue.begin(), updateValue.end(), '\n'), updateValue.end()); // replace all new lines to null
+
     updateValue = translateVariables(updateNode, updateValue);
+
     if (updateNode.getTypeLabel() == "StringExpr")
         std::replace( oldValue.begin(), oldValue.end(), ' ', '_'); // replace all spaces to '_'
 
