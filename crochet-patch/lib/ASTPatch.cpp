@@ -755,7 +755,7 @@ namespace clang {
 
                 // llvm::outs() << "translating API call \n";
                 std::string methodNameInSource = node.getValue() + "(";
-                // llvm::outs() << "method name in source: " << variableNameInSource << "\n";
+                // llvm::outs() << "method name in source: " << methodNameInSource << "\n";
                 //  llvm::outs() << "before translation: " << statement << "\n";
                 std::string methodNameInTarget;
                 if (varMap.find(methodNameInSource) != varMap.end()) {
@@ -763,7 +763,7 @@ namespace clang {
                     replaceSubString(statement, methodNameInSource, methodNameInTarget);
 
                 }
-                // llvm::outs() << "method name in target: " << variableNameInTarget << "\n";
+                // llvm::outs() << "method name in target: " << methodNameInTarget << "\n";
                 //  llvm::outs() << "after translation: " << statement << "\n";
             }
 
