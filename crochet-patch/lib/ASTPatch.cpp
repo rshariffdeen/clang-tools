@@ -698,10 +698,10 @@ namespace clang {
                 std::string memberNameInTarget;
                 if (varMap.find(memberNameInSource) != varMap.end()) {
                     memberNameInTarget = varMap[memberNameInSource];
-                    replaceSubString(statement, memberNameInSource, memberNameInTarget);
+                    replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
                 }
-             //   llvm::outs() << "after translation: " << memberNameInTarget << "\n";
-             //   llvm::outs() << "before translation: " << statement << "\n";
+             //   llvm::outs() << "member in target: " << memberNameInTarget << "\n";
+             //   llvm::outs() << "after translation: " << statement << "\n";
                 return statement;
 
 
@@ -1336,8 +1336,8 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
     if (targetNode.getTypeLabel() == "MemberExpr") {
 
-        updateValue = updateValue.substr(2);
-        oldValue = oldValue.substr(2);
+        updateValue = updateValue.substr(1);
+        oldValue = oldValue.substr(1);
 
     } else if (targetNode.getTypeLabel() == "IntegerLiteral") {
 
@@ -1349,7 +1349,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     }
 
 
-    // llvm::outs() << updateValue << "\n";
+    // llvm::outs() << "update value before translation: "  << updateValue << "\n";
     if (updateNode.getTypeLabel() == "StringExpr")
         updateValue.erase(std::remove(updateValue.begin(), updateValue.end(), '\n'), updateValue.end()); // replace all new lines to null
 
@@ -1357,9 +1357,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
     if (updateNode.getTypeLabel() == "StringExpr")
         std::replace( oldValue.begin(), oldValue.end(), ' ', '_'); // replace all spaces to '_'
-
-    // llvm::outs() << updateValue << "\n";
-    // llvm::outs() << oldValue << "\n";
+    // llvm::outs() << "update value after translation: "  << updateValue << "\n";
 
 //    if (updateValue == oldValue)
 //        return modified;
