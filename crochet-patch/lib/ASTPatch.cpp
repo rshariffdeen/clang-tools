@@ -736,25 +736,27 @@ namespace clang {
                     replaceSubString(statement, variableNameInSource, variableNameInTarget);
                 }
                 return statement;
+
+            } else if (node.getTypeLabel() == "DeclRefExpr") {
+//                llvm::outs() << "translating reference \n";
+//                llvm::outs() << childNode.getValue() << "\n";
+                std::string variableNameInSource = childNode.getValue();
+                // llvm::outs() << "var name in source: " << variableNameInSource << "\n";
+                //  llvm::outs() << "before translation: " << statement << "\n";
+                std::string variableNameInTarget;
+                if (varMap.find(variableNameInSource) != varMap.end()) {
+                    variableNameInTarget = varMap[variableNameInSource];
+                    replaceSubString(statement, variableNameInSource, variableNameInTarget);
+
+                }
+                // llvm::outs() << "var name in target: " << variableNameInTarget << "\n";
+                //  llvm::outs() << "after translation: " << statement << "\n";
             }
 
             for (unsigned childIndex = 0; childIndex < childNodesInUpdateRange; childIndex++) {
                 // llvm::errs() << "child " << childIndex << "\n";
                 NodeRef childNode = node.getChild(childIndex);
                 // llvm::outs() << "child " << childIndex << " type " << childNode.getTypeLabel() << "\n";
-
-                if (childNode.getTypeLabel() == "DeclRefExpr") {
-                    llvm::outs() << "translating reference \n";
-                    llvm::outs() << childNode.getValue() << "\n";
-                    std::string variableNameInSource = childNode.getValue();
-                    llvm::outs() << "before translation: " << variableNameInSource << "\n";
-                    std::string variableNameInTarget;
-                    if (varMap.find(variableNameInSource) != varMap.end()) {
-                        variableNameInTarget = varMap[variableNameInSource];
-                        replaceSubString(statement, variableNameInSource, variableNameInTarget);
-                        llvm::outs() << "after translation: " << statement << "\n";
-                    }
-                }
 
                 if (childNode.getNumChildren() > 0) {
                     statement = translateVariables(childNode, statement);
