@@ -695,7 +695,7 @@ namespace clang {
                 std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
 //                  llvm::outs() << "member in source: " << memberNameInSource << "\n";
 //                  llvm::outs() << "before translation: " << statement << "\n";
-                std::string variableNameInTarget;
+                std::string memberNameInTarget;
                 if (varMap.find(memberNameInSource) != varMap.end()) {
                     memberNameInTarget = varMap[memberNameInSource];
                     replaceSubString(statement, memberNameInSource, memberNameInTarget);
