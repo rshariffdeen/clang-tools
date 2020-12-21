@@ -707,7 +707,7 @@ namespace clang {
 
             } else if (node.getTypeLabel() == "VarDecl") {
 //
-                 llvm::outs() << "translating variable definition \n";
+//                 llvm::outs() << "translating variable definition \n";
 //                auto decNode = node.ASTNode.get<VarDecl>();
 //                SourceLocation loc = decNode->getLocation();
 //                std::string locId = loc.printToString(Dst.getSourceManager());
@@ -757,10 +757,8 @@ namespace clang {
                 // llvm::errs() << "child " << childIndex << "\n";
                 NodeRef childNode = node.getChild(childIndex);
                 // llvm::outs() << "child " << childIndex << " type " << childNode.getTypeLabel() << "\n";
+                statement = translateVariables(childNode, statement);
 
-                if (childNode.getNumChildren() > 0) {
-                    statement = translateVariables(childNode, statement);
-                }
 
             }
 
@@ -887,9 +885,9 @@ namespace clang {
                                                    SourceTree.getLangOpts());
             insertStatement = " " + insertStatement + " ";
 
-            // llvm::outs() << insertStatement << "\n";
+            // llvm::outs() << "statement before translation: " << insertStatement << "\n";
             insertStatement = translateVariables(insertNode, insertStatement);
-            // llvm::outs() << insertStatement << "\n";
+            // llvm::outs() << "statement after translation: " << insertStatement << "\n";
 
             if (insertNode.getTypeLabel() == "FunctionDecl") {
 
