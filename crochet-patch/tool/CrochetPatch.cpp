@@ -40,22 +40,22 @@ static cl::opt<std::string> BuildPath("p", cl::desc("Build path"), cl::init(""),
 static cl::list <std::string> ArgsAfterA(
         "extra-arg-a",
         cl::desc("Additional argument to append to the compiler command line for Pa"),
-        cl::cat(ClangDiffCategory));
+        cl::cat(CrochetPatchCategory));
 
 static cl::list <std::string> ArgsBeforeA(
         "extra-arg-before-a",
         cl::desc("Additional argument to prepend to the compiler command line for Pa"),
-        cl::cat(ClangDiffCategory));
+        cl::cat(CrochetPatchCategory));
 
 static cl::list <std::string> ArgsAfterC(
         "extra-arg-c",
         cl::desc("Additional argument to append to the compiler command line for Pc"),
-        cl::cat(ClangDiffCategory));
+        cl::cat(CrochetPatchCategory));
 
 static cl::list <std::string> ArgsBeforeC(
         "extra-arg-before-c",
         cl::desc("Additional argument to prepend to the compiler command line for Pc"),
-        cl::cat(ClangDiffCategory));
+        cl::cat(CrochetPatchCategory));
 
 
 static void addExtraArgs(std::unique_ptr <CompilationDatabase> &Compilations,
@@ -155,7 +155,7 @@ int main(int argc, const char **argv) {
             FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
     if (!CommonCompilationsC && !ErrorMessage.empty())
         llvm::errs() << ErrorMessage;
-    cl::HideUnrelatedOptions(ClangDiffCategory);
+    cl::HideUnrelatedOptions(CrochetPatchCategory);
     if (!cl::ParseCommandLineOptions(argc, argv)) {
         cl::PrintOptionValues();
         return 1;
@@ -165,9 +165,9 @@ int main(int argc, const char **argv) {
     addExtraArgs(CommonCompilationsC, "C");
  
   
-  std::unique_ptr<ASTUnit> Src = getAST(CommonCompilations, SourcePath);
+  std::unique_ptr<ASTUnit> Src = getAST(CommonCompilationsA, SourcePath);
   // llvm::outs() << "Building AST for destination\n";
-  std::unique_ptr<ASTUnit> Dst = getAST(CommonCompilations, DestinationPath);
+  std::unique_ptr<ASTUnit> Dst = getAST(CommonCompilationsA, DestinationPath);
  
   if (!Src || !Dst){
     if (!Src)
@@ -196,7 +196,7 @@ int main(int argc, const char **argv) {
 
  
   std::unique_ptr<CompilationDatabase> FileCompilations;
-  if (!CommonCompilations)
+  if (!CommonCompilationsC)
     FileCompilations = getCompilationDatabase(TargetPath);
 
   std::array<std::string, 1> Files = {{TargetPath}};
