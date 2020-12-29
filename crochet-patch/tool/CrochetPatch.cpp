@@ -37,10 +37,30 @@ static cl::opt<std::string> StopAfter("stop-diff-after", cl::desc("<topdown|bott
 static cl::opt<int> MaxSize("s", cl::desc("<maxsize>"), cl::Optional, cl::init(-1), cl::cat(CrochetPatchCategory));
 static cl::opt<float> MinSimilarity("min-sim", cl::desc("<minsimilarity>"), cl::Optional, cl::init(-1), cl::cat(CrochetPatchCategory));
 static cl::opt<std::string> BuildPath("p", cl::desc("Build path"), cl::init(""), cl::Optional, cl::cat(CrochetPatchCategory));
-static cl::list<std::string> ArgsAfter("extra-arg", cl::desc("Additional argument to append to the compiler command line"), cl::cat(CrochetPatchCategory));
-static cl::list<std::string> ArgsBefore("extra-arg-before", cl::desc("Additional argument to prepend to the compiler command line"), cl::cat(CrochetPatchCategory));
+static cl::list <std::string> ArgsAfterA(
+        "extra-arg-a",
+        cl::desc("Additional argument to append to the compiler command line for Pa"),
+        cl::cat(ClangDiffCategory));
 
-static void addExtraArgs(std::unique_ptr<CompilationDatabase> &Compilations) {
+static cl::list <std::string> ArgsBeforeA(
+        "extra-arg-before-a",
+        cl::desc("Additional argument to prepend to the compiler command line for Pa"),
+        cl::cat(ClangDiffCategory));
+
+static cl::list <std::string> ArgsAfterC(
+        "extra-arg-c",
+        cl::desc("Additional argument to append to the compiler command line for Pc"),
+        cl::cat(ClangDiffCategory));
+
+static cl::list <std::string> ArgsBeforeC(
+        "extra-arg-before-c",
+        cl::desc("Additional argument to prepend to the compiler command line for Pc"),
+        cl::cat(ClangDiffCategory));
+
+
+static void addExtraArgs(std::unique_ptr <CompilationDatabase> &Compilations,
+                         std::string reference) {
+
     if (!Compilations)
         return;
     auto AdjustingCompilations =
@@ -180,7 +200,7 @@ int main(int argc, const char **argv) {
     FileCompilations = getCompilationDatabase(TargetPath);
 
   std::array<std::string, 1> Files = {{TargetPath}};
-  RefactoringTool TargetTool(CommonCompilations ? *CommonCompilations : *FileCompilations, Files);
+  RefactoringTool TargetTool(CommonCompilationsC ? *CommonCompilationsC : *FileCompilations, Files);
   std::vector<std::unique_ptr<ASTUnit>> TargetASTs;
   TargetTool.buildASTs(TargetASTs);
 
