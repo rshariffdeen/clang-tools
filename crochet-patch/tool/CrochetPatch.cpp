@@ -41,16 +41,26 @@ static cl::list<std::string> ArgsAfter("extra-arg", cl::desc("Additional argumen
 static cl::list<std::string> ArgsBefore("extra-arg-before", cl::desc("Additional argument to prepend to the compiler command line"), cl::cat(CrochetPatchCategory));
 
 static void addExtraArgs(std::unique_ptr<CompilationDatabase> &Compilations) {
-  if (!Compilations)
-    return;
-  auto AdjustingCompilations =
-      std::make_unique<ArgumentsAdjustingCompilations>(
-          std::move(Compilations));
-  AdjustingCompilations->appendArgumentsAdjuster(
-      getInsertArgumentAdjuster(ArgsBefore, ArgumentInsertPosition::BEGIN));
-  AdjustingCompilations->appendArgumentsAdjuster(
-      getInsertArgumentAdjuster(ArgsAfter, ArgumentInsertPosition::END));
-  Compilations = std::move(AdjustingCompilations);
+    if (!Compilations)
+        return;
+    auto AdjustingCompilations =
+            std::make_unique<ArgumentsAdjustingCompilations>(
+                    std::move(Compilations));
+
+
+    if (reference == "A"){
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsBeforeA, ArgumentInsertPosition::BEGIN));
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsAfterA, ArgumentInsertPosition::END));
+    } else{
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsBeforeC, ArgumentInsertPosition::BEGIN));
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsAfterC, ArgumentInsertPosition::END));
+    }
+
+    Compilations = std::move(AdjustingCompilations);
 }
 
 
@@ -68,7 +78,11 @@ getCompilationDatabase(StringRef Filename) {
     Compilations = std::make_unique<clang::tooling::FixedCompilationDatabase>(
         ".", std::vector<std::string>());
   }
-  addExtraArgs(Compilations);
+
+    if (Filename == SourcePath || Filename == DestinationPath)
+        addExtraArgs(Compilations, "A");
+    else
+        addExtraArgs(Compilations, "C");
   return Compilations;
 }
 
@@ -111,19 +125,24 @@ getAST(const std::unique_ptr<CompilationDatabase> &CommonCompilations,
 
 
 int main(int argc, const char **argv) {
- 
-  std::string ErrorMessage;
-  std::unique_ptr<CompilationDatabase> CommonCompilations =
-      FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
-  if (!CommonCompilations && !ErrorMessage.empty())
-    llvm::errs() << ErrorMessage;
-  cl::HideUnrelatedOptions(CrochetPatchCategory);
-  if (!cl::ParseCommandLineOptions(argc, argv)) {
-    cl::PrintOptionValues();
-    return 1;
-  }
-  
-  addExtraArgs(CommonCompilations);
+
+    std::string ErrorMessage;
+    std::unique_ptr <CompilationDatabase> CommonCompilationsA =
+            FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
+    if (!CommonCompilationsA && !ErrorMessage.empty())
+        llvm::errs() << ErrorMessage;
+    std::unique_ptr <CompilationDatabase> CommonCompilationsC =
+            FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
+    if (!CommonCompilationsC && !ErrorMessage.empty())
+        llvm::errs() << ErrorMessage;
+    cl::HideUnrelatedOptions(ClangDiffCategory);
+    if (!cl::ParseCommandLineOptions(argc, argv)) {
+        cl::PrintOptionValues();
+        return 1;
+    }
+
+    addExtraArgs(CommonCompilationsA, "A");
+    addExtraArgs(CommonCompilationsC, "C");
  
   
   std::unique_ptr<ASTUnit> Src = getAST(CommonCompilations, SourcePath);
