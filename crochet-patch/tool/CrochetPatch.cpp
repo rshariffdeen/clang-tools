@@ -219,7 +219,7 @@ int main(int argc, const char **argv) {
   diff::SyntaxTree TgtTree(*Tgt);
 
   
-  if (auto Err = diff::patch(TargetTool, MapPath, SrcTree, DstTree, ScriptPath, Options)) {
+  if (auto Err = diff::patch(TargetTool, MapPath, SrcTree, DstTree, TgtTree, ScriptPath, Options)) {
       llvm::handleAllErrors(
           std::move(Err),
           [](const diff::PatchingError &PE) { PE.log(llvm::errs()); },

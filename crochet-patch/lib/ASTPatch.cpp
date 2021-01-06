@@ -1422,17 +1422,17 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     return modified;
 }
 
-Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src, SyntaxTree &Dst, std::string ScriptFilePath,
+Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src, SyntaxTree &Dst, SyntaxTree &Tgt, std::string ScriptFilePath,
             const ComparisonOptions &Options, bool Debug) {
 
-    std::vector <std::unique_ptr<ASTUnit>> TargetASTs;
-    TargetTool.buildASTs(TargetASTs);
+//    std::vector <std::unique_ptr<ASTUnit>> TargetASTs;
+//    TargetTool.buildASTs(TargetASTs);
+//
+//    if (TargetASTs.size() == 0)
+//        return error(patching_error::failed_to_build_AST);
+//    SyntaxTree Target(*TargetASTs[0]);
 
-    if (TargetASTs.size() == 0)
-        return error(patching_error::failed_to_build_AST);
-    SyntaxTree Target(*TargetASTs[0]);
-
-    Patcher crochetPatcher(Src, Dst, Target, Options, TargetTool, Debug);
+    Patcher crochetPatcher(Src, Dst, Tgt, Options, TargetTool, Debug);
     crochetPatcher.loadVariableMapping(MapFilePath);
 
     std::ifstream infile(ScriptFilePath);
