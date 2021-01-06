@@ -66,6 +66,16 @@ static cl::opt<int> MaxSize("s", cl::desc("<maxsize>"), cl::Optional,
 static cl::opt <std::string> BuildPath("p", cl::desc("Build path"), cl::init(""),
                                        cl::Optional, cl::cat(ClangDiffCategory));
 
+static cl::list <std::string> ArgsAfter(
+        "extra-arg",
+        cl::desc("Additional argument to append to the compiler command"),
+        cl::cat(ClangDiffCategory));
+
+static cl::list <std::string> ArgsBefore(
+        "extra-arg-before",
+        cl::desc("Additional argument to prepend to the compiler command"),
+        cl::cat(ClangDiffCategory));
+
 static cl::list <std::string> ArgsAfterA(
         "extra-arg-a",
         cl::desc("Additional argument to append to the compiler command line for Pa"),
@@ -102,11 +112,16 @@ static void addExtraArgs(std::unique_ptr <CompilationDatabase> &Compilations,
                 getInsertArgumentAdjuster(ArgsBeforeA, ArgumentInsertPosition::BEGIN));
         AdjustingCompilations->appendArgumentsAdjuster(
                 getInsertArgumentAdjuster(ArgsAfterA, ArgumentInsertPosition::END));
-    } else{
+    }else if (reference == "C"){
         AdjustingCompilations->appendArgumentsAdjuster(
                 getInsertArgumentAdjuster(ArgsBeforeC, ArgumentInsertPosition::BEGIN));
         AdjustingCompilations->appendArgumentsAdjuster(
                 getInsertArgumentAdjuster(ArgsAfterC, ArgumentInsertPosition::END));
+    }  else{
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsBefore, ArgumentInsertPosition::BEGIN));
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsAfter, ArgumentInsertPosition::END));
     }
 
     Compilations = std::move(AdjustingCompilations);
@@ -126,10 +141,16 @@ getCompilationDatabase(StringRef Filename) {
         Compilations = std::make_unique<clang::tooling::FixedCompilationDatabase>(
                 ".", std::vector<std::string>());
     }
-    if (Filename == SourcePath)
-        addExtraArgs(Compilations, "A");
-    else
-        addExtraArgs(Compilations, "C");
+
+    if (ASTDumpJson){
+        addExtraArgs(Compilations, "NONE");
+    } else {
+        if (Filename == SourcePath)
+            addExtraArgs(Compilations, "A");
+        else
+            addExtraArgs(Compilations, "C");
+    }
+
     return Compilations;
 }
 
@@ -488,6 +509,10 @@ static void printTree(raw_ostream &OS, diff::SyntaxTree &Tree) {
 
 int main(int argc, const char **argv) {
     std::string ErrorMessage;
+    std::unique_ptr <CompilationDatabase> CommonCompilations =
+            FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
+    if (!CommonCompilations && !ErrorMessage.empty())
+        llvm::errs() << ErrorMessage;
     std::unique_ptr <CompilationDatabase> CommonCompilationsA =
             FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
     if (!CommonCompilationsA && !ErrorMessage.empty())
@@ -502,15 +527,15 @@ int main(int argc, const char **argv) {
         return 1;
     }
 
-    addExtraArgs(CommonCompilationsA, "A");
-    addExtraArgs(CommonCompilationsC, "C");
+
 
     if (ASTDump || ASTDumpJson) {
+        addExtraArgs(CommonCompilations, "NONE");
         if (!DestinationPath.empty()) {
             llvm::errs() << "Error: Please specify exactly one filename.\n";
             return 1;
         }
-        std::unique_ptr <ASTUnit> AST = getAST(CommonCompilationsA, SourcePath);
+        std::unique_ptr <ASTUnit> AST = getAST(CommonCompilations, SourcePath);
         if (!AST)
             return 1;
         diff::SyntaxTree Tree(*AST);
@@ -525,6 +550,9 @@ int main(int argc, const char **argv) {
         llvm::outs() << "}\n";
         return 0;
     }
+
+    addExtraArgs(CommonCompilationsA, "A");
+    addExtraArgs(CommonCompilationsC, "C");
 
     if (DestinationPath.empty()) {
         llvm::errs() << "Error: Exactly two paths are required.\n";
