@@ -58,12 +58,12 @@ static cl::list <std::string> ArgsBeforeC(
         cl::cat(CrochetPatchCategory));
 
 static cl::list <std::string> ArgsAfter(
-        "extra-arg-c",
+        "extra-arg",
         cl::desc("Additional argument to append to the compiler"),
         cl::cat(CrochetPatchCategory));
 
 static cl::list <std::string> ArgsBefore(
-        "extra-arg-before-c",
+        "extra-arg-before",
         cl::desc("Additional argument to prepend to the compiler"),
         cl::cat(CrochetPatchCategory));
 
