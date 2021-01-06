@@ -560,7 +560,7 @@ int main(int argc, const char **argv) {
     }
 
     std::unique_ptr <ASTUnit> Src = getAST(CommonCompilationsA, SourcePath);
-    std::unique_ptr <ASTUnit> Dst = getAST(CommonCompilationsA, DestinationPath);
+    std::unique_ptr <ASTUnit> Dst = getAST(CommonCompilationsC, DestinationPath);
     if (!Src || !Dst)
         return 1;
 
