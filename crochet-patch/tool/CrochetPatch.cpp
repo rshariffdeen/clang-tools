@@ -166,10 +166,6 @@ getAST(const std::unique_ptr<CompilationDatabase> &CommonCompilations,
 int main(int argc, const char **argv) {
 
     std::string ErrorMessage;
-    std::unique_ptr <CompilationDatabase> CommonCompilations =
-            FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
-    if (!CommonCompilations && !ErrorMessage.empty())
-        llvm::errs() << ErrorMessage;
     std::unique_ptr <CompilationDatabase> CommonCompilationsA =
             FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
     if (!CommonCompilationsA && !ErrorMessage.empty())
@@ -183,9 +179,8 @@ int main(int argc, const char **argv) {
         cl::PrintOptionValues();
         return 1;
     }
-    addExtraArgs(CommonCompilations, "SLICE");
+
     addExtraArgs(CommonCompilationsA, "A");
-    addExtraArgs(CommonCompilationsC, "C");
 
     std::unique_ptr<ASTUnit> Src = getAST(CommonCompilationsA, SourcePath);
     // llvm::outs() << "Building AST for destination\n";
@@ -220,7 +215,9 @@ int main(int argc, const char **argv) {
     std::array<std::string, 1> Files = {{TargetPath}};
 
     if (SourcePath == TargetPath){
-        CommonCompilationsC = CommonCompilations;
+        addExtraArgs(CommonCompilationsC, "SLICE");
+    } else {
+        addExtraArgs(CommonCompilationsC, "C");
     }
 
     if (!CommonCompilationsC)
