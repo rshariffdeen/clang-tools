@@ -57,6 +57,16 @@ static cl::list <std::string> ArgsBeforeC(
         cl::desc("Additional argument to prepend to the compiler command line for Pc"),
         cl::cat(CrochetPatchCategory));
 
+static cl::list <std::string> ArgsAfter(
+        "extra-arg-c",
+        cl::desc("Additional argument to append to the compiler"),
+        cl::cat(CrochetPatchCategory));
+
+static cl::list <std::string> ArgsBefore(
+        "extra-arg-before-c",
+        cl::desc("Additional argument to prepend to the compiler"),
+        cl::cat(CrochetPatchCategory));
+
 
 static void addExtraArgs(std::unique_ptr <CompilationDatabase> &Compilations,
                          std::string reference) {
@@ -73,11 +83,16 @@ static void addExtraArgs(std::unique_ptr <CompilationDatabase> &Compilations,
                 getInsertArgumentAdjuster(ArgsBeforeA, ArgumentInsertPosition::BEGIN));
         AdjustingCompilations->appendArgumentsAdjuster(
                 getInsertArgumentAdjuster(ArgsAfterA, ArgumentInsertPosition::END));
-    } else{
+    } else if (reference == "C") {
         AdjustingCompilations->appendArgumentsAdjuster(
                 getInsertArgumentAdjuster(ArgsBeforeC, ArgumentInsertPosition::BEGIN));
         AdjustingCompilations->appendArgumentsAdjuster(
                 getInsertArgumentAdjuster(ArgsAfterC, ArgumentInsertPosition::END));
+    } else{
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsBefore, ArgumentInsertPosition::BEGIN));
+        AdjustingCompilations->appendArgumentsAdjuster(
+                getInsertArgumentAdjuster(ArgsAfter, ArgumentInsertPosition::END));
     }
 
     Compilations = std::move(AdjustingCompilations);
@@ -99,10 +114,14 @@ getCompilationDatabase(StringRef Filename) {
         ".", std::vector<std::string>());
   }
 
-    if (Filename == SourcePath || Filename == DestinationPath)
-        addExtraArgs(Compilations, "A");
-    else
-        addExtraArgs(Compilations, "C");
+    if (SourcePath == TargetPath){
+        addExtraArgs(Compilations, "SLICE");
+    } else {
+        if (Filename == SourcePath || Filename == DestinationPath)
+            addExtraArgs(Compilations, "A");
+        else
+            addExtraArgs(Compilations, "C");
+    }
   return Compilations;
 }
 
@@ -147,6 +166,10 @@ getAST(const std::unique_ptr<CompilationDatabase> &CommonCompilations,
 int main(int argc, const char **argv) {
 
     std::string ErrorMessage;
+    std::unique_ptr <CompilationDatabase> CommonCompilations =
+            FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
+    if (!CommonCompilations && !ErrorMessage.empty())
+        llvm::errs() << ErrorMessage;
     std::unique_ptr <CompilationDatabase> CommonCompilationsA =
             FixedCompilationDatabase::loadFromCommandLine(argc, argv, ErrorMessage);
     if (!CommonCompilationsA && !ErrorMessage.empty())
@@ -160,49 +183,53 @@ int main(int argc, const char **argv) {
         cl::PrintOptionValues();
         return 1;
     }
-
+    addExtraArgs(CommonCompilations, "SLICE");
     addExtraArgs(CommonCompilationsA, "A");
     addExtraArgs(CommonCompilationsC, "C");
- 
-  
-  std::unique_ptr<ASTUnit> Src = getAST(CommonCompilationsA, SourcePath);
-  // llvm::outs() << "Building AST for destination\n";
-  std::unique_ptr<ASTUnit> Dst = getAST(CommonCompilationsA, DestinationPath);
- 
-  if (!Src || !Dst){
-    if (!Src)
-      llvm::errs() << "Error: Could not build AST for source\n";
-    if (!Dst)
-      llvm::errs() << "Error: Could not build AST for destination\n";
 
-    return 1;
-  }
+    std::unique_ptr<ASTUnit> Src = getAST(CommonCompilationsA, SourcePath);
+    // llvm::outs() << "Building AST for destination\n";
+    std::unique_ptr<ASTUnit> Dst = getAST(CommonCompilationsA, DestinationPath);
 
-  diff::ComparisonOptions Options;
-  if (MaxSize != -1)
-    Options.MaxSize = MaxSize;
-  if (!StopAfter.empty()) {
-    if (StopAfter == "topdown")
-      Options.StopAfterTopDown = true;
-    else if (StopAfter == "bottomup")
-      Options.StopAfterBottomUp = true;
-    else {
-      llvm::errs() << "Error: Invalid argument for -stop-diff-after\n";
-      return 1;
+    if (!Src || !Dst){
+        if (!Src)
+            llvm::errs() << "Error: Could not build AST for source\n";
+        if (!Dst)
+            llvm::errs() << "Error: Could not build AST for destination\n";
+
+        return 1;
     }
-  }
+
+
+    diff::ComparisonOptions Options;
+    if (MaxSize != -1)
+        Options.MaxSize = MaxSize;
+    if (!StopAfter.empty()) {
+        if (StopAfter == "topdown")
+            Options.StopAfterTopDown = true;
+        else if (StopAfter == "bottomup")
+            Options.StopAfterBottomUp = true;
+        else {
+            llvm::errs() << "Error: Invalid argument for -stop-diff-after\n";
+            return 1;
+        }
+    }
+
+    std::vector<std::unique_ptr<ASTUnit>> TargetASTs;
+    std::unique_ptr<CompilationDatabase> FileCompilations;
+    std::array<std::string, 1> Files = {{TargetPath}};
+
+    if (SourcePath == TargetPath){
+        CommonCompilationsC = CommonCompilations;
+    }
+
+    if (!CommonCompilationsC)
+        FileCompilations = getCompilationDatabase(TargetPath);
+    RefactoringTool TargetTool(CommonCompilationsC ? *CommonCompilationsC : *FileCompilations, Files);
+    TargetTool.buildASTs(TargetASTs);
+
 
   // llvm::outs() << "Building AST for target\n";
-
- 
-  std::unique_ptr<CompilationDatabase> FileCompilations;
-  if (!CommonCompilationsC)
-    FileCompilations = getCompilationDatabase(TargetPath);
-
-  std::array<std::string, 1> Files = {{TargetPath}};
-  RefactoringTool TargetTool(CommonCompilationsC ? *CommonCompilationsC : *FileCompilations, Files);
-  std::vector<std::unique_ptr<ASTUnit>> TargetASTs;
-  TargetTool.buildASTs(TargetASTs);
 
   if (TargetASTs.size() == 0){
     llvm::errs() << "Error: Could not build AST for target\n";
@@ -210,13 +237,13 @@ int main(int argc, const char **argv) {
   }
     
 
-  std::unique_ptr<ASTUnit> Tgt = std::move(TargetASTs[0]);
+//  std::unique_ptr<ASTUnit> Tgt = std::move(TargetASTs[0]);
 
   // llvm::outs() << "Creating synax trees\n";
 
   diff::SyntaxTree SrcTree(*Src);
   diff::SyntaxTree DstTree(*Dst);
-  diff::SyntaxTree TgtTree(*Tgt);
+  diff::SyntaxTree TgtTree(*TargetASTs[0]);
 
   
   if (auto Err = diff::patch(TargetTool, MapPath, SrcTree, DstTree, TgtTree, ScriptPath, Options)) {
