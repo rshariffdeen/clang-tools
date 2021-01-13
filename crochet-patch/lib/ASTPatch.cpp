@@ -1010,9 +1010,9 @@ namespace clang {
 
                 }  else if (targetNode.getTypeLabel() == "VarDecl") {
 
-                    if (insertNode.getTypeLabel() == "InitListExpr") {
-                        insertStatement = "= " + insertStatement;
-                    }
+//                    if (insertNode.getTypeLabel() == "InitListExpr" || insertNode.getTypeLabel() == "IntegerLiteral") {
+//                        insertStatement = "= " + insertStatement;
+//                    }
 
                     if (Offset == 0) {
                         if (Rewrite.InsertTextBefore(insertLoc, insertStatement))
@@ -1020,7 +1020,10 @@ namespace clang {
 
 
                     } else {
-                        insertLoc = range.getEnd();
+                        insertStatement = "= " + insertStatement;
+                        NodeRef nearestChildNode = targetNode.getChild(0);
+                        insertLoc = nearestChildNode.getSourceRange().getEnd();
+//                        insertLoc = range.getEnd();
                         if (Rewrite.InsertTextAfter(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
                     }
