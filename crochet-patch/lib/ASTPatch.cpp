@@ -694,28 +694,35 @@ namespace clang {
                 NodeRef decNode = node.getChild(0);
                 std::string memberNameInTarget;
                 std::string memberNameInSource;
-                if (decNode.getTypeLabel() == "DeclRefExpr") {
-                    memberNameInSource = node.getValue();
-                    std::string structNameInSource = "." + decNode.getValue();
-                    std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
-                    std::string fullNameInSource = structNameInSource  + memberNameInSource;
-                    if (varMap.find(fullNameInSource) != varMap.end()) {
-                        memberNameInTarget = varMap[fullNameInSource];
-                        std::string structNameInTarget = varMap[structNameInSource];
-                        replaceSubString(memberNameInTarget, structNameInTarget, " ");
-                        std::replace( memberNameInTarget.begin(), memberNameInTarget.end(), '.', ' ');
-                        replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
-                    }
+                memberNameInSource = node.getValue();
+                std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
 
-                } else {
-                    memberNameInSource = node.getValue();
-                    std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
-
-                    if (varMap.find(memberNameInSource) != varMap.end()) {
-                        memberNameInTarget = varMap[memberNameInSource];
-                        replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
-                    }
+                if (varMap.find(memberNameInSource) != varMap.end()) {
+                    memberNameInTarget = varMap[memberNameInSource];
+                    replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
                 }
+//                if (decNode.getTypeLabel() == "DeclRefExpr") {
+//                    memberNameInSource = node.getValue();
+//                    std::string structNameInSource = "." + decNode.getValue();
+//                    std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
+//                    std::string fullNameInSource = structNameInSource  + memberNameInSource;
+//                    if (varMap.find(fullNameInSource) != varMap.end()) {
+//                        memberNameInTarget = varMap[fullNameInSource];
+//                        std::string structNameInTarget = varMap[structNameInSource];
+//                        replaceSubString(memberNameInTarget, structNameInTarget, " ");
+//                        std::replace( memberNameInTarget.begin(), memberNameInTarget.end(), '.', ' ');
+//                        replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
+//                    }
+//
+//                } else {
+//                    memberNameInSource = node.getValue();
+//                    std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
+//
+//                    if (varMap.find(memberNameInSource) != varMap.end()) {
+//                        memberNameInTarget = varMap[memberNameInSource];
+//                        replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
+//                    }
+//                }
 
 //                  llvm::outs() << "member in source: " << memberNameInSource << "\n";
 //                  llvm::outs() << "before translation: " << statement << "\n";
