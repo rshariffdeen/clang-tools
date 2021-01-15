@@ -1020,9 +1020,9 @@ namespace clang {
 
 
                     } else {
-                        insertStatement = "= " + insertStatement;
-                        NodeRef nearestChildNode = targetNode.getChild(0);
-                        insertLoc = nearestChildNode.getSourceRange().getEnd();
+                        insertStatement = " = " + insertStatement;
+//                        NodeRef nearestChildNode = targetNode.getChild(0);
+                        insertLoc = targetNode.getSourceRange().getEnd();
 //                        insertLoc = range.getEnd();
                         if (Rewrite.InsertTextAfter(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
