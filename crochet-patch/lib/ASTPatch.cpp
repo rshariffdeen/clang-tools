@@ -910,7 +910,7 @@ namespace clang {
                             insertStatement = insertStatement + ";" ;
                     }
 
-                    insertStatement = insertStatement + "\n";
+                    insertStatement = "\n" + insertStatement + "\n";
 
                     if (Offset == 0) {
                         if (NumChildren > 0) {
