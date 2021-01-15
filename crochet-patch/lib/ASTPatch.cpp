@@ -692,13 +692,13 @@ namespace clang {
                 auto memNode = node.ASTNode.get<MemberExpr>();
 //                auto decNode = memNode->getMemberDecl();
                 NodeRef decNode = node.getChild(0);
+                std::string memberNameInTarget;
+                std::string memberNameInSource;
                 if (node.getTypeLabel() == "DeclRefExpr") {
-                    std::string memberNameInSource = node.getValue();
+                    memberNameInSource = node.getValue();
                     std::string structNameInSource = "." + decNode.getValue();
                     std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
                     std::string fullNameInSource = structNameInSource  + memberNameInSource;
-
-                    std::string memberNameInTarget;
                     if (varMap.find(fullNameInSource) != varMap.end()) {
                         memberNameInTarget = varMap[fullNameInSource];
                         std::string structNameInTarget = varMap[structNameInSource];
@@ -708,9 +708,9 @@ namespace clang {
                     }
 
                 } else {
-                    std::string memberNameInSource = node.getValue();
+                    memberNameInSource = node.getValue();
                     std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
-                    std::string memberNameInTarget;
+
                     if (varMap.find(memberNameInSource) != varMap.end()) {
                         memberNameInTarget = varMap[memberNameInSource];
                         replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
