@@ -694,7 +694,7 @@ namespace clang {
                 NodeRef decNode = node.getChild(0);
                 std::string memberNameInTarget;
                 std::string memberNameInSource;
-                if (node.getTypeLabel() == "DeclRefExpr") {
+                if (decNode.getTypeLabel() == "DeclRefExpr") {
                     memberNameInSource = node.getValue();
                     std::string structNameInSource = "." + decNode.getValue();
                     std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
