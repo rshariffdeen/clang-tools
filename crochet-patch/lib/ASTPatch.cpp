@@ -1020,11 +1020,13 @@ namespace clang {
 
 
                     } else {
+                        std::replace( insertStatement.begin(), insertStatement.end(), ';', ' ');
+                        std::replace( insertStatement.begin(), insertStatement.end(), ',', ' ');
                         insertStatement = " = " + insertStatement;
-//                        NodeRef nearestChildNode = targetNode.getChild(0);
-                        insertLoc = targetNode.getSourceRange().getEnd();
+                        auto declNode = targetNode.ASTNode.get<VarDecl>()->getInitializingDeclaration();
+                        insertLoc = declNode->getSourceRange().getEnd();
 //                        insertLoc = range.getEnd();
-                        if (Rewrite.InsertTextAfter(insertLoc, insertStatement))
+                        if (Rewrite.InsertTextAfterToken(insertLoc, insertStatement))
                             llvm::errs() << "error inserting\n";
                     }
 
