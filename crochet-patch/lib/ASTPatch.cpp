@@ -691,7 +691,7 @@ namespace clang {
                 // llvm::outs() << "translating member name \n";
                 auto memNode = node.ASTNode.get<MemberExpr>();
 //                auto decNode = memNode->getMemberDecl();
-                NodeRef decNode = node.getChild(0);
+//                NodeRef decNode = node.getChild(0);
                 std::string memberNameInTarget;
                 std::string memberNameInSource;
                 memberNameInSource = node.getValue();
