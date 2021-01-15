@@ -690,16 +690,37 @@ namespace clang {
             if (node.getTypeLabel() == "MemberExpr") {
                 // llvm::outs() << "translating member name \n";
                 auto memNode = node.ASTNode.get<MemberExpr>();
-                auto decNode = memNode->getMemberDecl();
-                std::string memberNameInSource = node.getValue();
-                std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
+//                auto decNode = memNode->getMemberDecl();
+                auto decNode = node.getChild(0);
+                if (node.getTypeLabel() == "DeclRefExpr") {
+                    std::string memberNameInSource = node.getValue();
+                    std::string structNameInSource = "." + decNode.getValue();
+                    std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
+                    std::string fullNameInSource = structNameInSource  + memberNameInSource;
+
+                    std::string memberNameInTarget;
+                    if (varMap.find(fullNameInSource) != varMap.end()) {
+                        memberNameInTarget = varMap[fullNameInSource];
+                        std::string structNameInTarget = varMap[structNameInSource];
+                        std::replace( memberNameInTarget.begin(), memberNameInTarget.end(), structNameInTarget, ' ');
+                        std::replace( memberNameInTarget.begin(), memberNameInTarget.end(), '.', ' ');
+                        replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
+                    }
+
+                } else {
+                    std::string memberNameInSource = node.getValue();
+                    std::replace( memberNameInSource.begin(), memberNameInSource.end(), ':', '.');
+                    std::string memberNameInTarget;
+                    if (varMap.find(memberNameInSource) != varMap.end()) {
+                        memberNameInTarget = varMap[memberNameInSource];
+                        replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
+                    }
+                }
+
 //                  llvm::outs() << "member in source: " << memberNameInSource << "\n";
 //                  llvm::outs() << "before translation: " << statement << "\n";
-                std::string memberNameInTarget;
-                if (varMap.find(memberNameInSource) != varMap.end()) {
-                    memberNameInTarget = varMap[memberNameInSource];
-                    replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
-                }
+
+
              //   llvm::outs() << "member in target: " << memberNameInTarget << "\n";
              //   llvm::outs() << "after translation: " << statement << "\n";
                 return statement;
