@@ -702,7 +702,7 @@ namespace clang {
                     if (varMap.find(fullNameInSource) != varMap.end()) {
                         memberNameInTarget = varMap[fullNameInSource];
                         std::string structNameInTarget = varMap[structNameInSource];
-                        std::replace( memberNameInTarget.begin(), memberNameInTarget.end(), structNameInTarget.c_str(), ' ');
+                        replaceSubString(memberNameInTarget, structNameInTarget, " ");
                         std::replace( memberNameInTarget.begin(), memberNameInTarget.end(), '.', ' ');
                         replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
                     }
