@@ -940,6 +940,8 @@ namespace clang {
                 return UnaryOperator::getOpcodeStr(U->getOpcode());
             if (auto *B = dyn_cast<BinaryOperator>(S))
                 return B->getOpcodeStr();
+            if (auto *G = ASTNode.get<GotoStmt>())
+                return G->getLabel()->getStmt()->getName();
             if (auto *L = ASTNode.get<LabelStmt>())
                 return L->getName();
             if (auto *M = dyn_cast<MemberExpr>(S))

@@ -751,6 +751,21 @@ namespace clang {
                 return statement;
 
 
+            } else if (node.getTypeLabel() == "GotoStmt") {
+
+                // llvm::outs() << "translating field decl \n";
+                std::string labelNameInSource = node.getValue() + ".";
+                // llvm::outs() << "field name in source: " << fieldNameInSource << "\n";
+                //  llvm::outs() << "before translation: " << statement << "\n";
+                std::string labelNameInTarget;
+                if (varMap.find(labelNameInSource) != varMap.end()) {
+                    labelNameInTarget = varMap[labelNameInSource];
+                    replaceSubString(statement, labelNameInSource, labelNameInTarget);
+                }
+                // llvm::outs() << "field name in target: " << fieldNameInTarget << "\n";
+                //  llvm::outs() << "after translation: " << statement << "\n";
+                return statement;
+
             } else if (node.getTypeLabel() == "FieldDecl") {
 
                 // llvm::outs() << "translating field decl \n";
