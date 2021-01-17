@@ -754,12 +754,13 @@ namespace clang {
             } else if (node.getTypeLabel() == "GotoStmt") {
 
                 // llvm::outs() << "translating field decl \n";
-                std::string labelNameInSource = node.getValue() + ".";
+                std::string labelNameInSource = node.getValue();
                 // llvm::outs() << "field name in source: " << fieldNameInSource << "\n";
                 //  llvm::outs() << "before translation: " << statement << "\n";
                 std::string labelNameInTarget;
-                if (varMap.find(labelNameInSource) != varMap.end()) {
-                    labelNameInTarget = varMap[labelNameInSource];
+                if (varMap.find(labelNameInSource + ".") != varMap.end()) {
+                    labelNameInTarget = varMap[labelNameInSource + "."];
+                    std::replace( labelNameInTarget.begin(), labelNameInTarget.end(), '.', ' ');
                     replaceSubString(statement, labelNameInSource, labelNameInTarget);
                 }
                 // llvm::outs() << "field name in target: " << fieldNameInTarget << "\n";
