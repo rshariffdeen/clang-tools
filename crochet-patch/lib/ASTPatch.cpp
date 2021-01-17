@@ -1312,7 +1312,7 @@ namespace clang {
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
             if (srcNode.getTypeLabel() == "ReturnStmt") {
-                srcValue = srcValue + ";"
+                srcValue = srcValue + ";";
             }
         srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
