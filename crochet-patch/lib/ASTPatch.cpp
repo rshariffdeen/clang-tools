@@ -1321,7 +1321,7 @@ namespace clang {
         srcRange = srcNode.getSourceRange();
         auto NodeIndex = targetNode.findPositionInParent();
         NodeRef targetParentNode = targetNode.getParent();
-        int NumChildren = targetParentNode.getNumChildren();
+        int numChildren = targetParentNode.getNumChildren();
 
         if (numChildren > 1) {
             NodeRef neighbor = targetParentNode.getChild(NodeIndex - 1);
