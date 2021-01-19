@@ -907,6 +907,14 @@ namespace clang {
                 Rewrite.RemoveText(parentExpNode->getLParen(),1, delRangeOpts);
                 Rewrite.RemoveText(parentExpNode->getRParen(),1, delRangeOpts);
 
+            } else if (deleteNode.getTypeLabel() == "IfStmt") {
+                auto ifNode = deleteNode.ASTNode.get<IfStmt>();
+                Rewriter::RewriteOptions delRangeOpts;
+                delRangeOpts.RemoveLineIfEmpty = true;
+                range.setBegin(ifNode->getLParenLoc());
+                range.setEnd(ifNode->getRParenLoc());
+                Rewrite.RemoveText(range, delRangeOpts);
+
             } else {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
