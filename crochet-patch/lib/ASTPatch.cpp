@@ -1330,11 +1330,11 @@ namespace clang {
 
 
         if (!srcValue.empty() ) {
-            if (Rewrite.RemoveText(targetRange))
+            if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
                 modified = false;
         modified = true;
         // llvm::outs() << "statement removed" << "\n";
-        if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
+        if (Rewrite.RemoveText(targetRange))
         modified = false;
         // llvm::outs() << "statement updated" << "\n";
     }
