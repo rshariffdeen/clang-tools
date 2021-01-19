@@ -911,8 +911,8 @@ namespace clang {
                 auto ifNode = deleteNode.ASTNode.get<IfStmt>();
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
-                range.setBegin(ifNode->getLParenLoc());
-                range.setEnd(ifNode->getRParenLoc());
+                range.setBegin(ifNode->getBeginLoc());
+                range.setEnd(ifNode->getThen()->getBeginLoc());
                 Rewrite.RemoveText(range, delRangeOpts);
 
             } else {
