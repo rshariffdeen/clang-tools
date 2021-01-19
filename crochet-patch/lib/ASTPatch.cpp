@@ -1350,7 +1350,7 @@ namespace clang {
 
 
         if (!srcValue.empty() ) {
-            if (!Rewrite.InsertText(insertLoc, srcValue))
+            if (!Rewrite.InsertTextBefore(insertLoc, srcValue))
                 modified = true;
             if (!Rewrite.RemoveText(targetRange))
                 modified = true;
