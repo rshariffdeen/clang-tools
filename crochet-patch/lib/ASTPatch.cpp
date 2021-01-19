@@ -1334,7 +1334,7 @@ namespace clang {
         std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
-            if (srcNode.getTypeLabel() == "ReturnStmt") {
+            if (srcNode.getTypeLabel() == "ReturnStmt" or srcNode.getTypeLabel() == "BinaryOperator") {
                 srcValue = srcValue + ";";
             }
         srcValue = translateVariables(srcNode, srcValue);
@@ -1342,14 +1342,14 @@ namespace clang {
 
 
         if (!srcValue.empty() ) {
-            if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
-                modified = false;
-            if (Rewrite.RemoveText(targetRange))
-                modified = false;
+//            if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
+//                modified = false;
+//            if (Rewrite.RemoveText(targetRange))
+//                modified = false;
 
-//            if (!Rewrite.ReplaceText(targetRange, srcValue))
-//                modified = true;
-//
+            if (!Rewrite.ReplaceText(targetRange, srcValue))
+                modified = true;
+
 
 //            if (Rewrite.RemoveText(targetRange))
 //                modified = false;
