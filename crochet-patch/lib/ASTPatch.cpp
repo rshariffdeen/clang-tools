@@ -799,6 +799,21 @@ namespace clang {
                 }
                 // llvm::outs() << "var name in target: " << variableNameInTarget << "\n";
                 //  llvm::outs() << "after translation: " << statement << "\n";
+            } else if (node.getTypeLabel() == "Macro") {
+                // llvm::outs() << "translating reference \n";
+
+                std::string refNameInSource = node.getValue();
+
+                // llvm::outs() << "var name in source: " << variableNameInSource << "\n";
+                //  llvm::outs() << "before translation: " << statement << "\n";
+                std::string refNameInTarget;
+                if (varMap.find(refNameInSource) != varMap.end()) {
+                    refNameInTarget = varMap[refNameInSource];
+                    replaceSubString(statement, refNameInSource, refNameInTarget);
+
+                }
+                // llvm::outs() << "var name in target: " << variableNameInTarget << "\n";
+                //  llvm::outs() << "after translation: " << statement << "\n";
             }
 
             for (unsigned childIndex = 0; childIndex < childNodesInUpdateRange; childIndex++) {
