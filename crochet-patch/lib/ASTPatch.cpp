@@ -1317,10 +1317,18 @@ namespace clang {
         CharSourceRange targetRange;
 
         targetRange = targetNode.getSourceRange();
+        SourceLocation insertLoc = targetRange.getBegin();
         srcRange = srcNode.getSourceRange();
+        auto NodeIndex = targetNode.findPositionInParent();
+        NodeRef targetParentNode = targetNode.getParent();
+        int NumChildren = targetParentNode.getNumChildren();
 
+        if (numChildren > 1) {
+            NodeRef neighbor = targetParentNode.getChild(NodeIndex - 1);
+            CharSourceRange neighborRange = neighbor.getSourceRange();
+            insertLoc = neighborRange.getEnd();
 
-
+        }
 //            SourceLocation startLoc = range.getBegin();
 //            SourceLocation endLoc = range.getEnd();
 //
@@ -1342,13 +1350,13 @@ namespace clang {
 
 
         if (!srcValue.empty() ) {
-//            if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
-//                modified = false;
-//            if (Rewrite.RemoveText(targetRange))
-//                modified = false;
+            if (Rewrite.InsertText(insertLoc, srcValue))
+                modified = false;
+            if (Rewrite.RemoveText(targetRange))
+                modified = false;
 
-            if (!Rewrite.ReplaceText(targetRange, srcValue))
-                modified = true;
+//            if (!Rewrite.ReplaceText(targetRange, srcValue))
+//                modified = true;
 
 
 //            if (Rewrite.RemoveText(targetRange))
