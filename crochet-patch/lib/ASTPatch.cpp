@@ -1342,8 +1342,15 @@ namespace clang {
 
 
         if (!srcValue.empty() ) {
-            if (!Rewrite.ReplaceText(targetRange, srcValue))
-                modified = true;
+            if (Rewrite.InsertText(targetRange.getBegin(), srcValue))
+                modified = false;
+            if (Rewrite.RemoveText(targetRange))
+                modified = false;
+
+//            if (!Rewrite.ReplaceText(targetRange, srcValue))
+//                modified = true;
+//
+
 //            if (Rewrite.RemoveText(targetRange))
 //                modified = false;
 //            if (!modified){
