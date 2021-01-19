@@ -1320,7 +1320,7 @@ namespace clang {
         SourceLocation insertLoc = targetRange.getBegin();
         srcRange = srcNode.getSourceRange();
         auto NodeIndex = targetNode.findPositionInParent();
-        NodeRef targetParentNode = targetNode.getParent();
+        NodeRef targetParentNode = *targetNode.getParent();
         int numChildren = targetParentNode.getNumChildren();
 
         if (numChildren > 1) {
