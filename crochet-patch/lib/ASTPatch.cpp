@@ -1337,7 +1337,7 @@ namespace clang {
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
             if (targetParentNode.getTypeLabel() == "CompoundStmt") {
-                srcValue = srcValue + ";";
+                srcValue = "\n" + srcValue + ";";
             }
         srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
