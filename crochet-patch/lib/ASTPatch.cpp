@@ -1668,6 +1668,8 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
 
             } else {
                 llvm::errs() << "Error: wrong node type for given Id\n";
+                llvm::errs() << "Destination:" << updateNode.getTypeLabel() << "-"  << nodeTypeB;
+                llvm::errs() << "Target:" << targetNode.getTypeLabel() << "-"  << nodeTypeC;
                 return error(patching_error::failed_to_apply_replacements);
 
             }
