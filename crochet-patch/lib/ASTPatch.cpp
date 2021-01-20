@@ -1485,14 +1485,16 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
             return true;
         }
 
-        if (Rewrite.RemoveText(range))
-            modified = false;
-
-        modified = true;
-
-        // llvm::outs() << "statement removed" << "\n";
-        if (Rewrite.InsertText(range.getBegin(), statement))
-            modified = false;
+        if (!Rewrite.ReplaceText(range, statement))
+            modified = true;
+//        if (Rewrite.RemoveText(range))
+//            modified = false;
+//
+//        modified = true;
+//
+//        // llvm::outs() << "statement removed" << "\n";
+//        if (Rewrite.InsertText(range.getBegin(), statement))
+//            modified = false;
         // llvm::outs() << "statement updated" << "\n";
     } else {
         CharSourceRange sourceRange = updateNode.getSourceRange();;
