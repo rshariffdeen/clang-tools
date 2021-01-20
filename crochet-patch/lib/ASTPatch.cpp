@@ -1342,7 +1342,9 @@ namespace clang {
         srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
 
-         if (targetParentNode.getTypeLabel() == "CompoundStmt" ) {
+         if (targetParentNode.getTypeLabel() == "CompoundStmt" &&
+                 targetNode.getTypeLabel() != "Macro"
+                ) {
              if (numChildren > 1) {
                  NodeRef neighbor = targetParentNode.getChild(NodeIndex - 1);
                  CharSourceRange neighborRange = neighbor.getSourceRange();
