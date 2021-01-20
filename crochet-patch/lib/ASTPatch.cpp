@@ -1322,16 +1322,8 @@ namespace clang {
         auto NodeIndex = targetNode.findPositionInParent();
         NodeRef targetParentNode = *targetNode.getParent();
         int numChildren = targetParentNode.getNumChildren();
+        SourceLocation startLoc = range.getBegin();
 
-        if (targetParentNode.getTypeLabel() == "CompoundStmt" ) {
-            if (numChildren > 1) {
-                NodeRef neighbor = targetParentNode.getChild(NodeIndex - 1);
-                CharSourceRange neighborRange = neighbor.getSourceRange();
-                insertLoc = neighborRange.getEnd();
-
-            }
-        }
-//            SourceLocation startLoc = range.getBegin();
 //            SourceLocation endLoc = range.getEnd();
 //
 //            if (startLoc.isMacroID()) {
@@ -1350,15 +1342,27 @@ namespace clang {
         srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
 
+         if (targetParentNode.getTypeLabel() == "CompoundStmt" ) {
+             if (numChildren > 1) {
+                 NodeRef neighbor = targetParentNode.getChild(NodeIndex - 1);
+                 CharSourceRange neighborRange = neighbor.getSourceRange();
+                 insertLoc = neighborRange.getEnd();
 
-        if (!srcValue.empty() ) {
-            if (!Rewrite.InsertTextBefore(insertLoc, srcValue))
-                modified = true;
-            if (!Rewrite.RemoveText(targetRange))
-                modified = true;
+             }
+             if (!srcValue.empty() ) {
+                 if (!Rewrite.InsertTextBefore(insertLoc, srcValue))
+                     modified = true;
+                 if (!Rewrite.RemoveText(targetRange))
+                     modified = true;
+             }
 
-//            if (!Rewrite.ReplaceText(targetRange, srcValue))
-//                modified = true;
+         } else {
+             if (!Rewrite.ReplaceText(targetRange, srcValue))
+                modified = true;
+         }
+
+
+
 
 
 //            if (Rewrite.RemoveText(targetRange))
@@ -1378,7 +1382,7 @@ namespace clang {
 //                modified = false;
 //            // llvm::outs() << "statement updated" << "\n";
 
-        }
+//        }
 
     return modified;
 }
