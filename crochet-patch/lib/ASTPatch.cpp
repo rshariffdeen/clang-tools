@@ -1323,11 +1323,13 @@ namespace clang {
         NodeRef targetParentNode = *targetNode.getParent();
         int numChildren = targetParentNode.getNumChildren();
 
-        if (numChildren > 1) {
-            NodeRef neighbor = targetParentNode.getChild(NodeIndex - 1);
-            CharSourceRange neighborRange = neighbor.getSourceRange();
-            insertLoc = neighborRange.getEnd();
+        if (targetParentNode.getTypeLabel() == "CompoundStmt" ) {
+            if (numChildren > 1) {
+                NodeRef neighbor = targetParentNode.getChild(NodeIndex - 1);
+                CharSourceRange neighborRange = neighbor.getSourceRange();
+                insertLoc = neighborRange.getEnd();
 
+            }
         }
 //            SourceLocation startLoc = range.getBegin();
 //            SourceLocation endLoc = range.getEnd();
