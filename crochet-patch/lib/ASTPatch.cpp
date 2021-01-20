@@ -1336,7 +1336,7 @@ namespace clang {
         std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
-            if (srcNode.getTypeLabel() == "ReturnStmt" or srcNode.getTypeLabel() == "BinaryOperator") {
+            if (targetParentNode.getTypeLabel() == "CompoundStmt") {
                 srcValue = srcValue + ";";
             }
         srcValue = translateVariables(srcNode, srcValue);
