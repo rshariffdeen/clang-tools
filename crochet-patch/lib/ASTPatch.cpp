@@ -1322,9 +1322,9 @@ namespace clang {
         auto NodeIndex = targetNode.findPositionInParent();
         NodeRef targetParentNode = *targetNode.getParent();
         int numChildren = targetParentNode.getNumChildren();
-        SourceLocation startLoc = range.getBegin();
 
-//            SourceLocation endLoc = range.getEnd();
+//        SourceLocation startLoc = range.getBegin();
+//        SourceLocation endLoc = range.getEnd();
 //
 //            if (startLoc.isMacroID()) {
 //                CharSourceRange expansionRange = Rewrite.getSourceMgr().getImmediateExpansionRange(startLoc);
