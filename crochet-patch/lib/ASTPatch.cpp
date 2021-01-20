@@ -878,12 +878,12 @@ namespace clang {
                 auto binOpNode = deleteNode.ASTNode.get<BinaryOperator>();
                 range.setBegin(binOpNode->getOperatorLoc());
                 if (isMove) {
-                                    range.setBegin(binOpNode->getBeginLoc());
-                    range.setEnd(binOpNode->getRHS()->getEndLoc());
+                    range.setBegin(binOpNode->getBeginLoc());
+//                    range.setEnd(binOpNode->getRHS()->getEndLoc());
                     Rewrite.RemoveText(range);
                 } else {
-                std::string binOp = binOpNode->getOpcodeStr();
-                Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
+                    std::string binOp = binOpNode->getOpcodeStr();
+                    Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
 
                 }
 
