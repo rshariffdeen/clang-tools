@@ -1487,17 +1487,17 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
             return true;
         }
 
-        if (!Rewrite.ReplaceText(range, statement))
-            modified = true;
-//        if (Rewrite.RemoveText(range))
-//            modified = false;
-//
-//        modified = true;
-//
-//        // llvm::outs() << "statement removed" << "\n";
-//        if (Rewrite.InsertText(range.getBegin(), statement))
-//            modified = false;
-        // llvm::outs() << "statement updated" << "\n";
+        if (targetNode.getTypeLabel() == "Macro"){
+            if (Rewrite.RemoveText(range))
+                modified = false;
+            if (Rewrite.InsertText(range.getBegin(), statement))
+                modified = false;
+        } else {
+            if (!Rewrite.ReplaceText(range, statement))
+                modified = true;
+        }
+
+
     } else {
         CharSourceRange sourceRange = updateNode.getSourceRange();;
         CharSourceRange targetRange = range;
