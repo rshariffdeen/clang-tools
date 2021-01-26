@@ -877,14 +877,15 @@ namespace clang {
             if (deleteNode.getTypeLabel() == "BinaryOperator" ) {
                 auto binOpNode = deleteNode.ASTNode.get<BinaryOperator>();
                 range.setBegin(binOpNode->getOperatorLoc());
-//                if (isMove) {
+                if (isMove) {
+                    range.setBegin(binOpNode->getBeginLoc());
+//                    range.setEnd(binOpNode->getRHS()->getEndLoc());
+                    Rewrite.RemoveText(range);
+                } else {
                     std::string binOp = binOpNode->getOpcodeStr();
                     Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
-//                } else {
-//                    range.setBegin(binOpNode->getBeginLoc());
-//                    range.setEnd(binOpNode->getRHS()->getEndLoc());
-//                    Rewrite.RemoveText(range);
-//                }
+
+                }
 
             } else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro") {
                 range = expandRange(range, Target);
@@ -1338,6 +1339,8 @@ namespace clang {
 //            llvm::outs() << srcValue << "\n";
             if (targetParentNode.getTypeLabel() == "CompoundStmt") {
                 srcValue = ";\n" + srcValue + ";";
+            } else if (targetParentNode.getTypeLabel() == "IfStmt") {
+                srcValue = "\n" + srcValue + ";";
             }
         srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
@@ -1563,27 +1566,26 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
             std::string nodeTypeC = nodeC.substr(0, nodeC.find("("));
             std::string nodeIdC = nodeC.substr(nodeC.find("(") + 1, nodeC.find(")") - nodeC.find("(") - 1);
 
-            // llvm::outs() << nodeC << "\n";
-            // llvm::outs() << nodeIdC << "\n";
-            // llvm::outs() << nodeTypeC << "\n";
-
-            // llvm::outs() << nodeB << "\n";
-            // llvm::outs() << nodeIdB << "\n";
-            // llvm::outs() << nodeTypeB << "\n";
-
             NodeRef insertNode = Dst.getNode(NodeId(stoi(nodeIdB)));
             NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
-
-
-            // NodeRef targetParentNode = targetNode.getParent();
-            // llvm::outs() << insertNode.getTypeLabel() << "\n";
-            // llvm::outs() << targetNode.getTypeLabel() << "\n";
-
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (insertNode.getTypeLabel() == nodeTypeB)) {
                 modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Dst);
 
             } else {
+
+                 llvm::errs() << nodeC << "\n";
+                 llvm::errs() << nodeIdC << "\n";
+                 llvm::errs() << nodeTypeC << "\n";
+
+                 llvm::errs() << nodeB << "\n";
+                 llvm::errs() << nodeIdB << "\n";
+                 llvm::errs() << nodeTypeB << "\n";
+
+                // NodeRef targetParentNode = targetNode.getParent();
+                 llvm::errs() << insertNode.getTypeLabel() << "\n";
+                 llvm::errs() << targetNode.getTypeLabel() << "\n";
+
                 llvm::errs() << "Error: wrong node type for given Id\n";
                 return error(patching_error::failed_to_apply_replacements);
 
@@ -1607,22 +1609,8 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
             NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
             // NodeRef targetParentNode = targetNode.getParent();
 
-//
-//                     llvm::outs() << nodeC << "\n";
-//                     llvm::outs() << nodeIdC << "\n";
-//                     llvm::outs() << nodeTypeC << "\n";
-//
-//                     llvm::outs() << nodeB << "\n";
-//                     llvm::outs() << nodeIdB << "\n";
-//                     llvm::outs() << nodeTypeB << "\n";
-//
-//                     llvm::outs() << movingNode.getTypeLabel() << "\n";
-//                     llvm::outs() << targetNode.getTypeLabel() << "\n";
-//                     llvm::outs() << movingNode.getValue() << "\n";
-//                     llvm::outs() << targetNode.getValue() << "\n";
-            if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
 
-                // llvm::outs() << "nodes matched\n";
+            if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
                 if (crochetPatcher.deleteCode(movingNode, true)) {
                     modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target);
                 } else {
@@ -1633,6 +1621,19 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
 
 
             } else {
+
+                     llvm::errs() << nodeC << "\n";
+                     llvm::errs() << nodeIdC << "\n";
+                     llvm::errs() << nodeTypeC << "\n";
+
+                     llvm::errs() << nodeB << "\n";
+                     llvm::errs() << nodeIdB << "\n";
+                     llvm::errs() << nodeTypeB << "\n";
+
+                     llvm::errs() << movingNode.getTypeLabel() << "\n";
+                     llvm::errs() << targetNode.getTypeLabel() << "\n";
+                     llvm::errs() << movingNode.getValue() << "\n";
+                     llvm::errs() << targetNode.getValue() << "\n";
                 llvm::errs() << "Error: wrong node type for given Id\n";
                 return error(patching_error::failed_to_apply_replacements);
 
@@ -1652,23 +1653,23 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
             NodeRef updateNode = Dst.getNode(NodeId(stoi(nodeIdB)));
             NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
-//
-//                     llvm::outs() << nodeC << "\n";
-//                     llvm::outs() << nodeIdC << "\n";
-//                     llvm::outs() << nodeTypeC << "\n";
-//
-//                     llvm::outs() << nodeB << "\n";
-//                     llvm::outs() << nodeIdB << "\n";
-//                     llvm::outs() << nodeTypeB << "\n";
-//
-//                     llvm::outs() << updateNode.getTypeLabel() << "\n";
-//                     llvm::outs() << targetNode.getTypeLabel() << "\n";
-
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
                 modified = crochetPatcher.replaceCode(updateNode, targetNode, Dst, Target);
 
             } else {
+
+                 llvm::errs() << nodeC << "\n";
+                 llvm::errs() << nodeIdC << "\n";
+                 llvm::errs() << nodeTypeC << "\n";
+
+                 llvm::errs() << nodeB << "\n";
+                 llvm::errs() << nodeIdB << "\n";
+                 llvm::errs() << nodeTypeB << "\n";
+
+                 llvm::errs() << updateNode.getTypeLabel() << "\n";
+                 llvm::errs() << targetNode.getTypeLabel() << "\n";
+
                 llvm::errs() << "Error: wrong node type for given Id\n";
                 llvm::errs() << "Destination:" << updateNode.getTypeLabel() << "-"  << nodeTypeB;
                 llvm::errs() << "Target:" << targetNode.getTypeLabel() << "-"  << nodeTypeC;
@@ -1693,22 +1694,21 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
             NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
 
-            // llvm::outs() << nodeC << "\n";
-            // llvm::outs() << nodeIdC << "\n";
-            // llvm::outs() << nodeTypeC << "\n";
-
-            // llvm::outs() << nodeB << "\n";
-            // llvm::outs() << nodeIdB << "\n";
-            // llvm::outs() << nodeTypeB << "\n";
-
-            // llvm::outs() << updateNode.getTypeLabel() << "\n";
-            // llvm::outs() << targetNode.getTypeLabel() << "\n";
-
-
             if ((targetNode.getTypeLabel() == nodeTypeC) && (updateNode.getTypeLabel() == nodeTypeB)) {
                 modified = crochetPatcher.updateCode(updateNode, targetNode, Dst, Target);
 
             } else {
+                 llvm::errs() << nodeC << "\n";
+                 llvm::errs() << nodeIdC << "\n";
+                 llvm::errs() << nodeTypeC << "\n";
+
+                 llvm::errs() << nodeB << "\n";
+                 llvm::errs() << nodeIdB << "\n";
+                 llvm::errs() << nodeTypeB << "\n";
+
+                 llvm::errs() << updateNode.getTypeLabel() << "\n";
+                 llvm::errs() << targetNode.getTypeLabel() << "\n";
+
                 llvm::errs() << "Error: wrong node type for given Id\n";
                 return error(patching_error::failed_to_apply_replacements);
 
