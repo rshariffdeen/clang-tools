@@ -1340,7 +1340,8 @@ namespace clang {
             if (targetParentNode.getTypeLabel() == "CompoundStmt") {
                 srcValue = ";\n" + srcValue + ";";
             } else if (targetParentNode.getTypeLabel() == "IfStmt") {
-                srcValue = "\n" + srcValue + ";";
+                if (NodeIndex != 0)
+                    srcValue = "\n" + srcValue + ";";
             }
         srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
