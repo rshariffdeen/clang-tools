@@ -1479,7 +1479,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
         std::string statement = Lexer::getSourceText(range, Target.getSourceManager(),
                                                      Target.getLangOpts());
-
+        std::string oldstatement = statement;
         if (targetNode.getTypeLabel() == "StringLiteral")
             std::replace( statement.begin(), statement.end(), ' ', '_');
         // llvm::outs() << statement << "\n";
@@ -1492,10 +1492,21 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         }
 
         if (targetNode.getTypeLabel() == "Macro"){
-            if (Rewrite.RemoveText(range))
-                modified = false;
-            if (Rewrite.InsertText(range.getBegin(), statement))
-                modified = false;
+            if (!Rewrite.RemoveText(range))
+                modified = true;
+            if (!Rewrite.InsertText(range.getBegin(), statement))
+                modified = modified & true;
+
+            if (!modified){
+                NodeRef parentNode = *targetNode.getParent();
+                range = parentNode.getSourceRange();
+                std::string parentstatement = Lexer::getSourceText(range, Target.getSourceManager(),
+                                                                   Target.getLangOpts());
+                replaceSubString(parentstatement, oldstatement, statement);
+                if (!Rewrite.ReplaceText(range, parentstatement))
+                    modified = true;
+            }
+
         } else {
             if (!Rewrite.ReplaceText(range, statement))
                 modified = true;
