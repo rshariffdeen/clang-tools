@@ -804,6 +804,9 @@ namespace clang {
 
                 std::string refNameInSource = node.getValue();
 
+                if (refNameInSource.find("(")) != std::string::nops)
+                    refNameInSource = refNameInSource.substr(0, refNameInSource.find("(")) + "(";
+
                 // llvm::outs() << "var name in source: " << variableNameInSource << "\n";
                 //  llvm::outs() << "before translation: " << statement << "\n";
                 std::string refNameInTarget;
