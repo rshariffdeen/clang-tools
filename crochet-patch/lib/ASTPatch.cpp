@@ -894,7 +894,7 @@ namespace clang {
                 auto binOpNode = deleteNode.ASTNode.get<CompoundAssignOperator>();
                 range.setBegin(binOpNode->getOperatorLoc());
                 if (isMove) {
-                    range.setBegin(binOpNode->getBeginLoc());
+//                    range.setBegin(binOpNode->getBeginLoc());
 //                    range.setEnd(binOpNode->getRHS()->getEndLoc());
                     Rewrite.RemoveText(range);
                 } else {
@@ -1155,7 +1155,7 @@ namespace clang {
                         if (insertStatement.find(',') == std::string::npos)
                             insertStatement = insertStatement + ", ";
 
-                    } else if (numArgs + 1 == Offset ){
+                    } else if (numArgs == Offset + 1 ){
                         std::replace( insertStatement.begin(), insertStatement.end(), ',', ' ');
                         insertStatement = ", " + insertStatement;
                     } else {
@@ -1678,7 +1678,7 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
                 if (crochetPatcher.deleteCode(movingNode, true)) {
-                    modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Dst, Target);
+                    modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target, Target);
                 } else {
                     llvm::errs() << "Error: couldn't remove code for move\n";
                     return error(patching_error::failed_to_apply_replacements);
