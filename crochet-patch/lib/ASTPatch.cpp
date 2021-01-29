@@ -1155,7 +1155,7 @@ namespace clang {
                         if (insertStatement.find(',') == std::string::npos)
                             insertStatement = insertStatement + ", ";
 
-                    } else if (numArgs == Offset + 1 ){
+                    } else if (numArgs + 1 == Offset  ){
                         std::replace( insertStatement.begin(), insertStatement.end(), ',', ' ');
                         insertStatement = ", " + insertStatement;
                     } else {
@@ -1181,7 +1181,7 @@ namespace clang {
                             llvm::errs() << "error inserting\n";
 
                     } else {
-                        insertLoc = callerNode->getArg(Offset)->getExprLoc();
+                        insertLoc = callerNode->getArg(Offset - 1)->getExprLoc();
                         //std::string locId = insertLoc.printToString(Target.getSourceManager());
                         // llvm::outs() << locId << "\n";
 
