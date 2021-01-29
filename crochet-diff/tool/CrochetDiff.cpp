@@ -438,6 +438,10 @@ static void printNodeAttributes(raw_ostream &OS, diff::SyntaxTree &Tree,
             OS << R"(,"isStatic":")";
             printJsonString(OS, "yes");
             OS << '"';
+        } else{
+            OS << R"(,"isStatic":")";
+            printJsonString(OS, "no");
+            OS << '"';
         }
     }
     std::string DataType = Node.getDataType();
