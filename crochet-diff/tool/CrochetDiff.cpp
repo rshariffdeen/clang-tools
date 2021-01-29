@@ -432,7 +432,14 @@ static void printNodeAttributes(raw_ostream &OS, diff::SyntaxTree &Tree,
             OS << '"';
         }
     }
-
+    if (Node.getTypeLabel() == "VarDecl") {
+        auto memNode = Node.ASTNode.get<VarDecl>();
+        if (memNode->isStaticDataMember()) {
+            OS << R"(,"isStatic":")";
+            printJsonString(OS, "yes");
+            OS << '"';
+        }
+    }
     std::string DataType = Node.getDataType();
     if (DataType != "") {
         OS << R"(,"data_type":")";
