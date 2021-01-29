@@ -1097,8 +1097,8 @@ namespace clang {
                     std::string decl_statement =  Lexer::getSourceText(targetNode.getSourceRange(), TargetTree.getSourceManager(),
                                                                        TargetTree.getLangOpts());
                     std::replace( decl_statement.begin(), decl_statement.end(), ';', ' ');
-                    std::string new_var = insertNode.getIdentifier();
-                    std::string new_decl = decl_statement + ", " + new_var + ";"
+                    std::string new_var = insertNode.getIdentifier()->str();
+                    std::string new_decl = decl_statement + ", " + new_var + ";";
 
                     if (!Rewrite.ReplaceText(targetNode.getSourceRange(), new_decl))
                         modified = true;
