@@ -1338,6 +1338,7 @@ namespace clang {
 
         std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
         std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
+        std::string oldstatement = srcValue;
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
             if (targetParentNode.getTypeLabel() == "CompoundStmt") {
@@ -1368,6 +1369,16 @@ namespace clang {
          } else {
              if (!Rewrite.ReplaceText(targetRange, srcValue))
                 modified = true;
+             if (!modified){
+                 std::string statement = srcValue;
+                 NodeRef parentNode = *targetNode.getParent();
+                 targetRange = parentNode.getSourceRange();
+                 std::string parentstatement = Lexer::getSourceText(targetRange, Target.getSourceManager(),
+                                                                    Target.getLangOpts());
+                 replaceSubString(parentstatement, oldstatement, statement);
+                 if (!Rewrite.ReplaceText(targetRange, parentstatement))
+                     modified = true;
+             }
          }
 
 
