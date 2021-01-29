@@ -137,7 +137,7 @@ namespace clang {
 
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
 
-                bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree);
+                bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
                 void loadVariableMapping(std::string mapFilePath);
                 bool updateCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
 
@@ -943,7 +943,7 @@ namespace clang {
             return modified;
         }
 
-        bool Patcher::insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree) {
+        bool Patcher::insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
 
             bool modified = false;
 
@@ -1621,7 +1621,7 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
             NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (insertNode.getTypeLabel() == nodeTypeB)) {
-                modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Dst);
+                modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Dst, Target);
 
             } else {
 
@@ -1663,7 +1663,7 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
                 if (crochetPatcher.deleteCode(movingNode, true)) {
-                    modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target);
+                    modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Dst, Target);
                 } else {
                     llvm::errs() << "Error: couldn't remove code for move\n";
                     return error(patching_error::failed_to_apply_replacements);
