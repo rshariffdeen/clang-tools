@@ -890,7 +890,20 @@ namespace clang {
 
                 }
 
-            } else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro") {
+            } else if (deleteNode.getTypeLabel() == "CompoundAssignOperator" ) {
+                auto opNode = deleteNode.ASTNode.get<CompoundAssignOperator>();
+                range.setBegin(binOpNode->getOperatorLoc());
+                if (isMove) {
+                    range.setBegin(binOpNode->getBeginLoc());
+//                    range.setEnd(binOpNode->getRHS()->getEndLoc());
+                    Rewrite.RemoveText(range);
+                } else {
+                    std::string binOp = binOpNode->getOpcodeStr();
+                    Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
+
+                }
+
+            }  else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro") {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
