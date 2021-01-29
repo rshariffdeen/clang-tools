@@ -927,6 +927,18 @@ namespace clang {
 
             }
 
+            NodeRef parentNode = *deleteNode.getParent();
+            if (parentNode.getTypeLabel() == "BinaryOperator") {
+                auto binOpNode = deleteNode.ASTNode.get<BinaryOperator>();
+                CharSourceRange range;
+
+                std::string binOp = parentNode.getValue();
+                if (binOp == "="){
+                    range.setBegin(binOpNode->getBeginLoc());
+                    range.setEnd(binOpNode->getRHS()->getExprLoc());
+                    Rewrite.RemoveText(range);
+                }
+            }
             modified = true;
             return modified;
         }
