@@ -1091,7 +1091,20 @@ namespace clang {
 
                     modified = true;
 
-                }  else if (targetNode.getTypeLabel() == "VarDecl") {
+                }  else if (targetNode.getTypeLabel() == "DeclStmt") {
+
+                    auto declNode  = targetNode.ASTNode.get<DeclStmt>();
+                    std::string decl_statement =  Lexer::getSourceText(targetNode.getSourceRange(), TargetTree.getSourceManager(),
+                                                                       TargetTree.getLangOpts());
+                    std::replace( decl_statement.begin(), decl_statement.end(), ';', ' ');
+                    std::string new_var = insertNode.getIdentifier();
+                    std::string new_decl = decl_statement + ", " + new_var + ";"
+
+                    if (!Rewrite.ReplaceText(targetNode.getSourceRange(), new_decl))
+                        modified = true;
+
+
+                } else if (targetNode.getTypeLabel() == "VarDecl") {
 
 //                    if (insertNode.getTypeLabel() == "InitListExpr" || insertNode.getTypeLabel() == "IntegerLiteral") {
 //                        insertStatement = "= " + insertStatement;
