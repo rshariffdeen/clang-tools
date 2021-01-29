@@ -891,7 +891,7 @@ namespace clang {
                 }
 
             } else if (deleteNode.getTypeLabel() == "CompoundAssignOperator" ) {
-                auto opNode = deleteNode.ASTNode.get<CompoundAssignOperator>();
+                auto binOpNode = deleteNode.ASTNode.get<CompoundAssignOperator>();
                 range.setBegin(binOpNode->getOperatorLoc());
                 if (isMove) {
                     range.setBegin(binOpNode->getBeginLoc());
