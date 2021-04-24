@@ -934,6 +934,13 @@ namespace clang {
                 range.setEnd(ifNode->getThen()->getBeginLoc());
                 Rewrite.RemoveText(range, delRangeOpts);
 
+            } else if (deleteNode.getTypeLabel() == "CallExpr") {
+                auto callNode = deleteNode.ASTNode.get<CallExpr>();
+                Rewriter::RewriteOptions delRangeOpts;
+                delRangeOpts.RemoveLineIfEmpty = true;
+                range.setBegin(callNode->getBeginLoc());
+                Rewrite.RemoveText(range, delRangeOpts);
+
             } else {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
@@ -942,18 +949,18 @@ namespace clang {
 
             }
 
-            NodeRef parentNode = *deleteNode.getParent();
-            if (parentNode.getTypeLabel() == "BinaryOperator") {
-                auto binOpNode = deleteNode.ASTNode.get<BinaryOperator>();
-                CharSourceRange range;
-
-                std::string binOp = parentNode.getValue();
-                if (binOp == "="){
-                    range.setBegin(binOpNode->getBeginLoc());
-                    range.setEnd(binOpNode->getRHS()->getExprLoc());
-                    Rewrite.RemoveText(range);
-                }
-            }
+//            NodeRef parentNode = *deleteNode.getParent();
+//            if (parentNode.getTypeLabel() == "BinaryOperator") {
+//                auto binOpNode = deleteNode.ASTNode.get<BinaryOperator>();
+//                CharSourceRange range;
+//
+//                std::string binOp = parentNode.getValue();
+//                if (binOp == "="){
+//                    range.setBegin(binOpNode->getBeginLoc());
+//                    range.setEnd(binOpNode->getRHS()->getExprLoc());
+//                    Rewrite.RemoveText(range);
+//                }
+//            }
             modified = true;
             return modified;
         }
