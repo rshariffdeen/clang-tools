@@ -1385,9 +1385,9 @@ namespace clang {
 //            llvm::outs() << srcValue << "\n";
             if (targetParentNode.getTypeLabel() == "CompoundStmt") {
                 if (numChildren > 1)
-                    srcValue =  srcValue + ";";
-                else
                     srcValue = ";\n" + srcValue + ";";
+                else
+                    srcValue =  srcValue + ";";
             } else if (targetParentNode.getTypeLabel() == "IfStmt") {
                 if (NodeIndex != 0)
                     srcValue = "\n" + srcValue + ";";
