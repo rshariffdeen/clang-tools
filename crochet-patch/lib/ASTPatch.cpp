@@ -786,6 +786,8 @@ namespace clang {
                 // llvm::outs() << "translating reference \n";
                 std::string RefType = node.getRefType();
                 std::string refNameInSource = node.getValue();
+//                std::remove( refNameInSource.begin(), refNameInSource.end(), ',');
+
                 if (RefType == "FunctionDecl")
                     refNameInSource = refNameInSource + "(";
 
@@ -1382,7 +1384,10 @@ namespace clang {
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
             if (targetParentNode.getTypeLabel() == "CompoundStmt") {
-                srcValue = ";\n" + srcValue + ";";
+                if (numChildren > 1)
+                    srcValue =  srcValue + ";";
+                else
+                    srcValue = ";\n" + srcValue + ";";
             } else if (targetParentNode.getTypeLabel() == "IfStmt") {
                 if (NodeIndex != 0)
                     srcValue = "\n" + srcValue + ";";
@@ -1400,9 +1405,9 @@ namespace clang {
 
              }
              if (!srcValue.empty() ) {
-                 if (!Rewrite.InsertTextBefore(insertLoc, srcValue))
-                     modified = true;
                  if (!Rewrite.RemoveText(targetRange))
+                     modified = true;
+                 if (!Rewrite.InsertTextBefore(insertLoc, srcValue))
                      modified = true;
              }
 
