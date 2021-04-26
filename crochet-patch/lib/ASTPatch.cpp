@@ -1028,6 +1028,16 @@ namespace clang {
             if (insertNode.getTypeLabel() == "FunctionDecl") {
 
                 insertStatement = insertStatement + " \n";
+            } else if (insertNode.getTypeLabel() == "IfStmt") {
+
+                auto ifNode = insertNode.ASTNode.get<IfStmt>();
+                auto condNode = ifNode->getCond();
+                extractRange.setBegin(ifNode->getBeginLoc());
+                extractRange.setEnd(ifNode->getThen()->getBeginLoc());
+
+                insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
+                                                       SourceTree.getLangOpts());
+                insertStatement = insertStatement + " \n";
             }
 
 
