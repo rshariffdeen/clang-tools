@@ -944,10 +944,25 @@ namespace clang {
             } else if (deleteNode.getTypeLabel() == "VarDecl") {
                 NodeRef targetParentNode = *deleteNode.getParent();
                 if (targetParentNode.getTypeLabel() == "DeclStmt") {
+                    auto declNode = deleteNode.ASTNode.get<VarDecl>();
                     std::string decl_statement =  Lexer::getSourceText(targetParentNode.getSourceRange(), TargetTree.getSourceManager(),
                                                                        TargetTree.getLangOpts());
                     std::string varName = deleteNode.getIdentifier()->str();
-                    std::replace( decl_statement.begin(), decl_statement.end(), varName, ' ');
+                    std::size_t posDecl = decl_statement.find(varName);
+                    std::size_t posComma = decl_statement.find(",",posDecl);
+
+                    if (posComma !=std::string::npos) {
+                        decl_statement.erase(posDecl, posComma - posDecl);
+                    } else{
+                        posComma = decl_statement.rfind(",",posDecl);
+                        if (posComma !=std::string::npos)
+                            decl_statement.erase(posComma, posDecl + varName.length());
+                    }
+
+                    if (decl_statement.find(";") == std::string::npos)
+                        decl_statement = decl_statement + ";";
+//                    replaceSubString(decl_statement, varName, " ");
+
                     if (!Rewrite.ReplaceText(targetParentNode.getSourceRange(), decl_statement))
                         modified = true;
 
