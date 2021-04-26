@@ -1430,13 +1430,16 @@ namespace clang {
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
             if (targetParentNode.getTypeLabel() == "CompoundStmt") {
+                if (srcNode.getTypeLabel() != "CompoundStmt") {
                 if (NodeIndex > 0)
                     srcValue = ";\n" + srcValue + ";";
                 else
-                    srcValue =  srcValue + ";";
+                    srcValue = srcValue + ";";
+                }
             } else if (targetParentNode.getTypeLabel() == "IfStmt") {
                 if (NodeIndex != 0)
-                    srcValue = "\n" + srcValue + ";";
+                    if (srcNode.getTypeLabel() != "CompoundStmt")
+                        srcValue = "\n" + srcValue + ";";
             }
         srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
