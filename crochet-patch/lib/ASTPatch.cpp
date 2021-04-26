@@ -1021,12 +1021,7 @@ namespace clang {
                                                    SourceTree.getLangOpts());
             insertStatement = " " + insertStatement + " ";
 
-            // llvm::outs() << "statement before translation: " << insertStatement << "\n";
-            insertStatement = translateVariables(insertNode, insertStatement);
-            // llvm::outs() << "statement after translation: " << insertStatement << "\n";
-
             if (insertNode.getTypeLabel() == "FunctionDecl") {
-
                 insertStatement = insertStatement + " \n";
             } else if (insertNode.getTypeLabel() == "IfStmt") {
 
@@ -1039,6 +1034,9 @@ namespace clang {
                                                        SourceTree.getLangOpts());
             }
 
+            // llvm::outs() << "statement before translation: " << insertStatement << "\n";
+            insertStatement = translateVariables(insertNode, insertStatement);
+            // llvm::outs() << "statement after translation: " << insertStatement << "\n";
 
             if (!insertStatement.empty()) {
                 auto compNode = targetNode.ASTNode.get<CompoundStmt>();
