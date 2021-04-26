@@ -1411,6 +1411,7 @@ namespace clang {
         srcRange = srcNode.getSourceRange();
         auto NodeIndex = targetNode.findPositionInParent();
         NodeRef targetParentNode = *targetNode.getParent();
+        NodeRef srcParentNode = *srcNode.getParent();
         int numChildren = targetParentNode.getNumChildren();
 
 //        SourceLocation startLoc = range.getBegin();
@@ -1439,7 +1440,7 @@ namespace clang {
         srcValue = translateVariables(srcNode, srcValue);
 //            llvm::outs() << srcValue << "\n";
 
-         if (targetParentNode.getTypeLabel() == "CompoundStmt" &&
+         if (targetParentNode.getTypeLabel() == "CompoundStmt" && srcParentNode.getTypeLabel() != "IfStmt" &&
                  targetNode.getTypeLabel() != "Macro"
                 ) {
              if (NodeIndex > 0) {
