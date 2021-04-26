@@ -1037,7 +1037,6 @@ namespace clang {
 
                 insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
                                                        SourceTree.getLangOpts());
-                insertStatement = insertStatement + " \n";
             }
 
 
