@@ -1602,7 +1602,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
             return true;
         }
 
-        if (targetNode.getTypeLabel() == "Macro"){
+        else if (targetNode.getTypeLabel() == "Macro"){
             if (!Rewrite.RemoveText(range))
                 modified = true;
             if (!Rewrite.InsertText(range.getBegin(), statement))
@@ -1624,7 +1624,33 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         }
 
 
-    } else {
+    }  else if (targetNode.getTypeLabel() == "IfStmt"){
+        auto targetIf = targetNode.ASTNode.get<IfStmt>();
+        auto srcIf = updateNode.ASTNode.get<IfStmt>();
+
+        CharSourceRange sourceRange = updateNode.getSourceRange();;
+        CharSourceRange targetRange = range;
+
+        sourceRange.setBegin(srcIf->getBeginLoc());
+        sourceRange.setEnd(srcIf->getThen()->getBeginLoc());
+        targetRange.setBegin(targetIf->getBeginLoc());
+        targetRange.setEnd(targetIf->getThen()->getBeginLoc());
+
+
+        std::string oldstatement = Lexer::getSourceText(targetRange, Target.getSourceManager(),
+                                                        Target.getLangOpts());
+
+
+        std::string newstatement = Lexer::getSourceText(sourceRange, SourceTree.getSourceManager(),
+                                                        SourceTree.getLangOpts());
+
+        if (Rewrite.RemoveText(targetRange))
+            modified = false;
+        modified = true;
+        if (Rewrite.InsertText(targetRange.getBegin(), newstatement))
+            modified = false;
+
+    }  else {
         CharSourceRange sourceRange = updateNode.getSourceRange();;
         CharSourceRange targetRange = range;
         std::string oldstatement = Lexer::getSourceText(range, Target.getSourceManager(),
