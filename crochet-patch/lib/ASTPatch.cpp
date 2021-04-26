@@ -1391,7 +1391,7 @@ namespace clang {
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
             if (targetParentNode.getTypeLabel() == "CompoundStmt") {
-                if (numChildren > 1)
+                if (NodeIndex > 0)
                     srcValue = ";\n" + srcValue + ";";
                 else
                     srcValue =  srcValue + ";";
@@ -1405,7 +1405,7 @@ namespace clang {
          if (targetParentNode.getTypeLabel() == "CompoundStmt" &&
                  targetNode.getTypeLabel() != "Macro"
                 ) {
-             if (numChildren > 1) {
+             if (NodeIndex > 0) {
                  NodeRef neighbor = targetParentNode.getChild(NodeIndex - 1);
                  CharSourceRange neighborRange = neighbor.getSourceRange();
                  insertLoc = neighborRange.getEnd();
