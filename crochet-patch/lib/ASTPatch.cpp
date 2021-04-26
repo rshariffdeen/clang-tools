@@ -137,7 +137,7 @@ namespace clang {
 
                 CharSourceRange expandRange(CharSourceRange range, SyntaxTree &Tree);
 
-                bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
+                bool insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree, SyntaxTree &TargetTree, bool isMove);
                 void loadVariableMapping(std::string mapFilePath);
                 bool updateCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
 
@@ -928,11 +928,17 @@ namespace clang {
 
             } else if (deleteNode.getTypeLabel() == "IfStmt") {
                 auto ifNode = deleteNode.ASTNode.get<IfStmt>();
-                Rewriter::RewriteOptions delRangeOpts;
-                delRangeOpts.RemoveLineIfEmpty = true;
-                range.setBegin(ifNode->getBeginLoc());
-                range.setEnd(ifNode->getThen()->getBeginLoc());
-                Rewrite.RemoveText(range, delRangeOpts);
+                if (isMove) {
+                    Rewrite.RemoveText(range);
+                } else {
+                    Rewriter::RewriteOptions delRangeOpts;
+                    delRangeOpts.RemoveLineIfEmpty = true;
+                    range.setBegin(ifNode->getBeginLoc());
+                    range.setEnd(ifNode->getThen()->getBeginLoc());
+                    Rewrite.RemoveText(range, delRangeOpts);
+
+                }
+
 
             } else if (deleteNode.getTypeLabel() == "CallExpr") {
                 auto callNode = deleteNode.ASTNode.get<CallExpr>();
@@ -992,7 +998,7 @@ namespace clang {
             return modified;
         }
 
-        bool Patcher::insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree, SyntaxTree &TargetTree) {
+        bool Patcher::insertCode(NodeRef insertNode, NodeRef targetNode, int Offset, SyntaxTree &SourceTree, SyntaxTree &TargetTree, bool isMove) {
 
             bool modified = false;
 
@@ -1023,7 +1029,7 @@ namespace clang {
 
             if (insertNode.getTypeLabel() == "FunctionDecl") {
                 insertStatement = insertStatement + " \n";
-            } else if (insertNode.getTypeLabel() == "IfStmt") {
+            } else if (insertNode.getTypeLabel() == "IfStmt" && !isMove) {
 
                 auto ifNode = insertNode.ASTNode.get<IfStmt>();
                 auto condNode = ifNode->getCond();
@@ -1687,7 +1693,7 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
             NodeRef targetNode = Target.getNode(NodeId(stoi(nodeIdC)));
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (insertNode.getTypeLabel() == nodeTypeB)) {
-                modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Dst, Target);
+                modified = crochetPatcher.insertCode(insertNode, targetNode, Offset, Dst, Target, false);
 
             } else {
 
@@ -1729,7 +1735,7 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
                 if (crochetPatcher.deleteCode(movingNode, true, Target)) {
-                    modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target, Target);
+                    modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target, Target, true);
                 } else {
                     llvm::errs() << "Error: couldn't remove code for move\n";
                     return error(patching_error::failed_to_apply_replacements);
