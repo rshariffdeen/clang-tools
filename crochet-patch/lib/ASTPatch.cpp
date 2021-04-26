@@ -958,8 +958,8 @@ namespace clang {
                     std::size_t posComma = decl_statement.find(",",posDecl);
 
                     if (posComma !=std::string::npos) {
-                        decl_statement.erase(posDecl, posComma - posDecl);
-                    } else{
+                        decl_statement.erase(posDecl, posComma - posDecl + 1);
+                    } else {
                         posComma = decl_statement.rfind(",",posDecl);
                         if (posComma !=std::string::npos)
                             decl_statement.erase(posComma, posDecl + varName.length());
