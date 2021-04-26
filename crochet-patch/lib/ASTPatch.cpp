@@ -143,7 +143,7 @@ namespace clang {
 
                 bool replaceCode(NodeRef insertNode, NodeRef targetNode, SyntaxTree &SourceTree, SyntaxTree &TargetTree);
 
-                bool deleteCode(NodeRef deleteNode, bool isMove);
+                bool deleteCode(NodeRef deleteNode, bool isMove,  SyntaxTree &TargetTree);
 
                 Patcher(SyntaxTree &Src, SyntaxTree &Dst, SyntaxTree &Target,
                         const ComparisonOptions &Options, RefactoringTool &TargetTool,
@@ -864,7 +864,7 @@ namespace clang {
             return range;
         }
 
-        bool Patcher::deleteCode(NodeRef deleteNode, bool isMove) {
+        bool Patcher::deleteCode(NodeRef deleteNode, bool isMove, SyntaxTree &TargetTree) {
             bool modified = false;
             CharSourceRange range = deleteNode.findRangeForDeletion();
             SourceLocation startLoc = range.getBegin();
@@ -940,6 +940,18 @@ namespace clang {
                 delRangeOpts.RemoveLineIfEmpty = true;
                 range.setBegin(callNode->getBeginLoc());
                 Rewrite.RemoveText(range, delRangeOpts);
+
+            } else if (deleteNode.getTypeLabel() == "VarDecl") {
+                NodeRef targetParentNode = *deleteNode.getParent();
+                if (targetParentNode.getTypeLabel() == "DeclStmt") {
+                    std::string decl_statement =  Lexer::getSourceText(targetParentNode.getSourceRange(), TargetTree.getSourceManager(),
+                                                                       TargetTree.getLangOpts());
+                    std::string varName = deleteNode.getIdentifier()->str();
+                    std::replace( decl_statement.begin(), decl_statement.end(), varName, ' ');
+                    if (!Rewrite.ReplaceText(targetParentNode.getSourceRange(), decl_statement))
+                        modified = true;
+
+                }
 
             } else {
                 range = expandRange(range, Target);
@@ -1689,7 +1701,7 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
 
 
             if ((targetNode.getTypeLabel() == nodeTypeC) && (movingNode.getTypeLabel() == nodeTypeB)) {
-                if (crochetPatcher.deleteCode(movingNode, true)) {
+                if (crochetPatcher.deleteCode(movingNode, true, Target)) {
                     modified = crochetPatcher.insertCode(movingNode, targetNode, Offset, Target, Target);
                 } else {
                     llvm::errs() << "Error: couldn't remove code for move\n";
@@ -1807,7 +1819,7 @@ Error patch(RefactoringTool &TargetTool,std::string MapFilePath, SyntaxTree &Src
             // llvm::outs() << "id: " << nodeId << "\n";
 
             if (deleteNode.getTypeLabel() == nodeType) {
-                modified = crochetPatcher.deleteCode(deleteNode, false);
+                modified = crochetPatcher.deleteCode(deleteNode, false, Target);
 
             } else {
                 llvm::errs() << "Error: wrong node type for given Id\n";
