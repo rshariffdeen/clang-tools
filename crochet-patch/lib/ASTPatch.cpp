@@ -915,7 +915,7 @@ namespace clang {
                 NodeRef targetParentNode = *deleteNode.getParent();
                 if (targetParentNode.getTypeLabel() == "CallExpr") {
                     auto callNode = deleteNode.ASTNode.get<CallExpr>();
-                    SourceRange targetRange;
+                    CharSourceRange targetRange;
                     targetRange.setEnd(callNode->getEndLoc());
                     targetRange.setBegin(callNode->getRParenLoc());
                     std::string call_statement = Lexer::getSourceText(targetRange,
