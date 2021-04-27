@@ -905,11 +905,44 @@ namespace clang {
 
                 }
 
-            }  else if (deleteNode.getTypeLabel() == "DeclStmt" || deleteNode.getTypeLabel() == "Macro") {
+            }  else if (deleteNode.getTypeLabel() == "DeclStmt") {
                 range = expandRange(range, Target);
                 Rewriter::RewriteOptions delRangeOpts;
                 delRangeOpts.RemoveLineIfEmpty = true;
                 Rewrite.RemoveText(range, delRangeOpts);
+
+            } else if (deleteNode.getTypeLabel() == "Macro"){
+                NodeRef targetParentNode = *deleteNode.getParent();
+                if (targetParentNode.getTypeLabel() == "DeclRefExpr") {
+                    NodeRef targetGrandParentNode = *targetParentNode.getParent();
+                    if (targetGrandParentNode.getTypeLabel() == "CallExpr") {
+                        auto callNode = deleteNode.ASTNode.get<CallExpr>();
+                        std::string call_statement = Lexer::getSourceText(targetGrandParentNode.getSourceRange(),
+                                                                          TargetTree.getSourceManager(),
+                                                                          TargetTree.getLangOpts());
+                        std::string argName = deleteNode.getValue();
+                        std::size_t posDecl = call_statement.find(argName);
+                        std::size_t posComma = call_statement.find(",", posDecl);
+
+                        if (posComma != std::string::npos) {
+                            call_statement.erase(posDecl, posComma - posDecl + 1);
+                        } else {
+                            posComma = call_statement.rfind(",", posDecl);
+                            if (posComma != std::string::npos)
+                                call_statement.erase(posComma, posDecl + argName.length());
+                        }
+
+
+                        if (!Rewrite.ReplaceText(targetGrandParentNode.getSourceRange(), call_statement))
+                            modified = true;
+
+                    }
+                } else{
+                    range = expandRange(range, Target);
+                    Rewriter::RewriteOptions delRangeOpts;
+                    delRangeOpts.RemoveLineIfEmpty = true;
+                    Rewrite.RemoveText(range, delRangeOpts);
+                }
 
             } else if (deleteNode.getTypeLabel() == "MemberExpr") {
                 auto memExpNode = deleteNode.ASTNode.get<MemberExpr>();
