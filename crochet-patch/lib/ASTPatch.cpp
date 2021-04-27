@@ -1196,6 +1196,9 @@ namespace clang {
                                                                        TargetTree.getLangOpts());
                     std::replace( decl_statement.begin(), decl_statement.end(), ';', ' ');
                     std::string new_var = insertNode.getIdentifier()->str();
+                    std::string data_type = insertNode.getValue();
+                    if (data_type.find('*') != std::string::npos)
+                        new_var = '*' +  new_var ;
                     std::string new_decl = decl_statement + ", " + new_var + ";";
 
                     if (!Rewrite.ReplaceText(targetNode.getSourceRange(), new_decl))
