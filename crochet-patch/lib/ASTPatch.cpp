@@ -915,7 +915,10 @@ namespace clang {
                 NodeRef targetParentNode = *deleteNode.getParent();
                 if (targetParentNode.getTypeLabel() == "CallExpr") {
                     auto callNode = deleteNode.ASTNode.get<CallExpr>();
-                    std::string call_statement = Lexer::getSourceText(targetParentNode.getSourceRange(),
+                    SourceRange targetRange;
+                    targetRange.setEnd(callNode->getLParenLoc());
+                    targetRange.setBegin(callNode->getRParenLoc());
+                    std::string call_statement = Lexer::getSourceText(targetRange,
                                                                       TargetTree.getSourceManager(),
                                                                       TargetTree.getLangOpts());
                     std::string argName = deleteNode.getValue();
@@ -931,7 +934,7 @@ namespace clang {
                     }
 
 
-                    if (!Rewrite.ReplaceText(targetParentNode.getSourceRange(), call_statement))
+                    if (!Rewrite.ReplaceText(targetRange, call_statement))
                         modified = true;
 
                     }
