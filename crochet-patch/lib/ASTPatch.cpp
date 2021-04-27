@@ -1013,18 +1013,27 @@ namespace clang {
 
             }
 
-//            NodeRef parentNode = *deleteNode.getParent();
-//            if (parentNode.getTypeLabel() == "BinaryOperator") {
-//                auto binOpNode = deleteNode.ASTNode.get<BinaryOperator>();
-//                CharSourceRange range;
-//
-//                std::string binOp = parentNode.getValue();
-//                if (binOp == "="){
-//                    range.setBegin(binOpNode->getBeginLoc());
-//                    range.setEnd(binOpNode->getRHS()->getExprLoc());
-//                    Rewrite.RemoveText(range);
-//                }
-//            }
+            NodeRef parentNode = *deleteNode.getParent();
+            if (parentNode.getTypeLabel() == "VarDecl") {
+                auto declNode = deleteNode.ASTNode.get<VarDecl>();
+                CharSourceRange range;
+                auto NodeIndex = deleteNode.findPositionInParent();
+                if (NodeIndex == 1){
+                    std::string decl_statement = Lexer::getSourceText(parentNode.getSourceRange(), TargetTree.getSourceManager(),
+                                                                      TargetTree.getLangOpts());
+                    std::size_t posInit = decl_statement.find("=");
+
+                    if (posInit != std::string::npos)
+                        decl_statement.erase(posInit, decl_statement.length() - posInit);
+
+                    if (decl_statement.find(";") == std::string::npos)
+                        decl_statement = decl_statement + ";";
+
+                    if (!Rewrite.ReplaceText(parentNode.getSourceRange(), decl_statement))
+                        modified = true;
+
+                }
+            }
             modified = true;
             return modified;
         }
