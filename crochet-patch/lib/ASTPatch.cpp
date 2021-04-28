@@ -699,7 +699,17 @@ namespace clang {
 
                 if (varMap.find(memberNameInSource) != varMap.end()) {
                     memberNameInTarget = varMap[memberNameInSource];
-                    replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
+                    std::size_t pos = statement.find(memberNameInTarget);
+                    if ( pos != std::string::npos){
+                        std::string partial = statement.substr(pos + memberNameInTarget.length() + 1);
+                        if (partial.find(memberNameInSource.substr(1)) != std::string::npos){
+                            replaceSubString(partial, memberNameInSource.substr(1), memberNameInTarget.substr(1));
+                            statement = statement.substr(0, pos + memberNameInTarget.length() + 1) + partial;
+                        }
+
+                    } else {
+                        replaceSubString(statement, memberNameInSource.substr(1), memberNameInTarget.substr(1));
+                    }
                 }
 //                if (decNode.getTypeLabel() == "DeclRefExpr") {
 //                    memberNameInSource = node.getValue();
@@ -915,9 +925,7 @@ namespace clang {
                 NodeRef targetParentNode = *deleteNode.getParent();
                 if (targetParentNode.getTypeLabel() == "CallExpr") {
                     auto callNode = deleteNode.ASTNode.get<CallExpr>();
-                    CharSourceRange targetRange;
-                    targetRange.setEnd(callNode->getEndLoc());
-                    targetRange.setBegin(callNode->getRParenLoc());
+                    CharSourceRange targetRange = targetParentNode.getSourceRange();
                     std::string call_statement = Lexer::getSourceText(targetRange,
                                                                       TargetTree.getSourceManager(),
                                                                       TargetTree.getLangOpts());
@@ -1093,7 +1101,7 @@ namespace clang {
                 if (targetNode.getTypeLabel() == "CompoundStmt") {
                     size_t start_pos = insertStatement.find(";");
                     if (start_pos == std::string::npos)
-                        if (insertNode.getTypeLabel() != "IfStmt")
+                        if (insertNode.getTypeLabel() != "IfStmt" && !isMove)
                         insertStatement = insertStatement + ";" ;
 //                    if (insertNode.getTypeLabel() == "BinaryOperator" || insertNode.getTypeLabel() == "ReturnStmt"  ) {
 //                        size_t start_pos = insertStatement.find(";");
@@ -1568,7 +1576,8 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     bool modified = false;
     // llvm::outs() << "nodes matched\n";
     CharSourceRange range;
-
+    if (targetNode.getTypeLabel() == "VarDecl")
+        return false;
     if (targetNode.getTypeLabel() == "BinaryOperator") {
 
         SourceRange r = targetNode.ASTNode.getSourceRange();
@@ -1665,6 +1674,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
             }
 
         } else {
+
             if (!Rewrite.ReplaceText(range, statement))
                 modified = true;
         }
