@@ -1576,7 +1576,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     // llvm::outs() << "nodes matched\n";
     CharSourceRange range;
     if (targetNode.getTypeLabel() == "VarDecl")
-        return false;
+        return true;
     if (targetNode.getTypeLabel() == "BinaryOperator") {
 
         SourceRange r = targetNode.ASTNode.getSourceRange();
