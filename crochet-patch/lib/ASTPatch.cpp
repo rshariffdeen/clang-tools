@@ -1102,7 +1102,7 @@ namespace clang {
 
                     size_t start_pos = insertStatement.find(";");
                     if (insertNode.getTypeLabel() == "IfStmt"){
-                        if (NumChildren > 1)
+                        if (insertNode.getNumChildren() > 1)
                             if (start_pos == std::string::npos)
                                 insertStatement = insertStatement + ";";
                     } else {
