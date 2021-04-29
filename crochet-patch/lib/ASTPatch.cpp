@@ -1099,9 +1099,16 @@ namespace clang {
                 auto compNode = targetNode.ASTNode.get<CompoundStmt>();
                 int NumChildren = targetNode.getNumChildren();
                 if (targetNode.getTypeLabel() == "CompoundStmt") {
+
                     size_t start_pos = insertStatement.find(";");
-                    if (start_pos == std::string::npos)
-                        insertStatement = insertStatement + ";" ;
+                    if (insertNode.getTypeLabel() == "IfStmt"){
+                        if (NumChildren > 1)
+                            if (start_pos == std::string::npos)
+                                insertStatement = insertStatement + ";";
+                    } else {
+                        if (start_pos == std::string::npos)
+                            insertStatement = insertStatement + ";";
+                    }
 //                    if (insertNode.getTypeLabel() == "BinaryOperator" || insertNode.getTypeLabel() == "ReturnStmt"  ) {
 //                        size_t start_pos = insertStatement.find(";");
 //                        if (start_pos == std::string::npos)
