@@ -806,6 +806,12 @@ namespace clang {
                 std::string refNameInTarget;
                 if (varMap.find(refNameInSource) != varMap.end()) {
                     refNameInTarget = varMap[refNameInSource];
+                    if (RefType == "FunctionDecl") {
+                        if (statement.find("(") == std::string::npos){
+                            refNameInSource = refNameInSource.substr(0, refNameInSource.length() -1 );
+                            refNameInTarget = refNameInTarget.substr(0, refNameInTarget.length() -1);
+                        }
+                    }
                     replaceSubString(statement, refNameInSource, refNameInTarget);
 
                 }
