@@ -1101,10 +1101,10 @@ namespace clang {
                 if (targetNode.getTypeLabel() == "CompoundStmt") {
 
                     size_t start_pos = insertStatement.find(";");
-                    if (insertNode.getTypeLabel() == "IfStmt"){
-                        if (insertNode.getNumChildren() > 1)
-                            if (start_pos == std::string::npos)
-                                insertStatement = insertStatement + ";";
+                    if (insertNode.getTypeLabel() == "IfStmt" && !isMove){
+//                        if (insertNode.getNumChildren() > 1)
+//                            if (start_pos == std::string::npos)
+//                                insertStatement = insertStatement + ";";
                     } else {
                         if (start_pos == std::string::npos)
                             insertStatement = insertStatement + ";";
