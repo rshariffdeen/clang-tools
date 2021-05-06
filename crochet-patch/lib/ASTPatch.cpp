@@ -1222,14 +1222,31 @@ namespace clang {
                 }  else if (targetNode.getTypeLabel() == "DeclStmt") {
 
                     auto declNode  = targetNode.ASTNode.get<DeclStmt>();
-                    std::string decl_statement =  Lexer::getSourceText(targetNode.getSourceRange(), TargetTree.getSourceManager(),
-                                                                       TargetTree.getLangOpts());
+                    std::string decl_statement = Rewrite.getRewrittenText(targetNode.getSourceRange());
+                    int NumChildren = targetNode.getNumChildren();
+                    decl_statement = Rewrite.getRewrittenText(targetNode.getSourceRange());
                     std::replace( decl_statement.begin(), decl_statement.end(), ';', ' ');
                     std::string new_var = insertNode.getIdentifier()->str();
                     std::string data_type = insertNode.getValue();
                     if (data_type.find('*') != std::string::npos)
                         new_var = '*' +  new_var ;
-                    std::string new_decl = decl_statement + ", " + new_var + ";";
+                    std::size_t  pos;
+                    std::string new_decl;
+                    if (Offset >= NumChildren){
+                        new_decl = decl_statement + ", " + new_var;
+                    } else if (Offset == 0){
+                        pos = decl_statement.find(" ");
+                        new_decl = decl_statement.substr(0, pos+1) + new_var + ", " + decl_statement.substr(pos+1);
+
+                    } else {
+                        int j;
+                        pos = 0;
+                        for (j = 0; j < Offset; j++)
+                            pos = decl_statement.find(",", pos);
+                        new_decl = decl_statement.substr(0, pos+1) + new_var + ", " + decl_statement.substr(pos+1);
+                    }
+
+                    new_decl = new_decl + ";";
 
                     if (!Rewrite.ReplaceText(targetNode.getSourceRange(), new_decl))
                         modified = true;
