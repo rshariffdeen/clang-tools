@@ -1106,24 +1106,20 @@ namespace clang {
                 auto compNode = targetNode.ASTNode.get<CompoundStmt>();
                 int NumChildren = targetNode.getNumChildren();
                 if (targetNode.getTypeLabel() == "CompoundStmt") {
-
                     size_t start_pos = insertStatement.find(";");
-                    if (insertNode.getTypeLabel() == "IfStmt" && !isMove){
-//                        if (insertNode.getNumChildren() > 1)
-//                            if (start_pos == std::string::npos)
-//                                insertStatement = insertStatement + ";";
-                    } else {
-                        NodeRef srcParentNode = *insertNode.getParent();
-                        auto nodeIndex = insertNode.findPositionInParent();
-                        if (srcParentNode.getTypeLabel() == "IfStmt" && nodeIndex > 1) {
-                            insertStatement = "\n else " +  insertStatement;
+                    NodeRef srcParentNode = *insertNode.getParent();
+                    auto nodeIndex = insertNode.findPositionInParent();
+                    if (srcParentNode.getTypeLabel() == "IfStmt") {
+                        if (nodeIndex > 1) {
+                            insertStatement = "\n else " + insertStatement;
                             if (insertNode.getTypeLabel() != "IfStmt" && insertNode.getTypeLabel() != "CompoundStmt")
                                 if (start_pos == std::string::npos)
                                     insertStatement = insertStatement + ";";
                         }
-                        else if (start_pos == std::string::npos)
-                            insertStatement = insertStatement + ";";
                     }
+                    else if (start_pos == std::string::npos && insertNode.getTypeLabel() != "IfStmt")
+                        insertStatement = insertStatement + ";";
+
 //                    if (insertNode.getTypeLabel() == "BinaryOperator" || insertNode.getTypeLabel() == "ReturnStmt"  ) {
 //                        size_t start_pos = insertStatement.find(";");
 //                        if (start_pos == std::string::npos)
