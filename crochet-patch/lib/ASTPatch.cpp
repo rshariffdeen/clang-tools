@@ -1113,7 +1113,15 @@ namespace clang {
 //                            if (start_pos == std::string::npos)
 //                                insertStatement = insertStatement + ";";
                     } else {
-                        if (start_pos == std::string::npos)
+                        NodeRef srcParentNode = *insertNode.getParent();
+                        auto nodeIndex = insertNode.findPositionInParent();
+                        if (srcParentNode.getTypeLabel() == "IfStmt" && nodeIndex > 1) {
+                            insertStatement = "\n else " +  insertStatement;
+                            if (insertNode.getTypeLabel() != "IfStmt" && insertNode.getTypeLabel() != "CompoundStmt")
+                                if (start_pos == std::string::npos)
+                                    insertStatement = insertStatement + ";";
+                        }
+                        else if (start_pos == std::string::npos)
                             insertStatement = insertStatement + ";";
                     }
 //                    if (insertNode.getTypeLabel() == "BinaryOperator" || insertNode.getTypeLabel() == "ReturnStmt"  ) {
