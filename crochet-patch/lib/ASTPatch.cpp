@@ -1038,7 +1038,7 @@ namespace clang {
                 if (NodeIndex == 1){
                     std::string decl_statement = Lexer::getSourceText(parentNode.getSourceRange(), TargetTree.getSourceManager(),
                                                                       TargetTree.getLangOpts());
-                    statement = Rewrite.getRewrittenText(range);
+                    decl_statement = Rewrite.getRewrittenText(range);
                     std::size_t posInit = decl_statement.find("=");
 
                     if (posInit != std::string::npos)
@@ -1229,7 +1229,7 @@ namespace clang {
                     auto declNode  = targetNode.ASTNode.get<DeclStmt>();
                     std::string decl_statement = Rewrite.getRewrittenText(targetNode.getSourceRange());
                     int NumChildren = targetNode.getNumChildren();
-                    decl_statement = Rewrite.getRewrittenText(targetNode.getSourceRange());
+//                    decl_statement = Rewrite.getRewrittenText(targetNode.getSourceRange());
                     std::replace( decl_statement.begin(), decl_statement.end(), ';', ' ');
                     std::string new_var = insertNode.getIdentifier()->str();
                     std::string data_type = insertNode.getValue();
