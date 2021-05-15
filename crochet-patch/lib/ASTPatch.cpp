@@ -1038,7 +1038,7 @@ namespace clang {
                 if (NodeIndex == 1){
                     std::string decl_statement = Lexer::getSourceText(parentNode.getSourceRange(), TargetTree.getSourceManager(),
                                                                       TargetTree.getLangOpts());
-                    statement = Rewrite.getReWrittenText(range);
+                    statement = Rewrite.getRewrittenText(range);
                     std::size_t posInit = decl_statement.find("=");
 
                     if (posInit != std::string::npos)
@@ -1679,7 +1679,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
         std::string statement = Lexer::getSourceText(range, Target.getSourceManager(),
                                                      Target.getLangOpts());
-        statement = Rewrite.getReWrittenText(range);
+        statement = Rewrite.getRewrittenText(range);
         std::string oldstatement = statement;
         if (targetNode.getTypeLabel() == "StringLiteral")
             std::replace( statement.begin(), statement.end(), ' ', '_');
