@@ -15,7 +15,15 @@
 
 namespace clang {
 namespace diff {
+namespace ast_type_traits {
+    using DynTypedNode = ::clang::DynTypedNode;
+    using ASTNodeKind = ::clang::ASTNodeKind;
+    using TraversalKind = ::clang::TraversalKind;
 
+    constexpr TraversalKind TK_AsIs = ::clang::TK_AsIs;
+    constexpr TraversalKind TK_IgnoreUnlessSpelledInSource =
+    ::clang::TK_IgnoreUnlessSpelledInSource;
+} // namespace ast_type_traits
 using DynTypedNode = ast_type_traits::DynTypedNode;
 
 class SyntaxTree;

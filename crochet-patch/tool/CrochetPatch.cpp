@@ -142,7 +142,7 @@ bool in_array(const std::string &value, const std::vector<std::string> &array)
 static std::unique_ptr<ASTUnit>
 getAST(const std::unique_ptr<CompilationDatabase> &CommonCompilations,
        const StringRef Filename) {
-  std::array<std::string, 1> Files = {{Filename}};
+  std::array<std::string, 1> Files = {{Filename.str()}};
   std::unique_ptr<CompilationDatabase> FileCompilations;
   if (!CommonCompilations)
     FileCompilations = getCompilationDatabase(Filename);

@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "crochet/ASTDiff.h"
-
+#include "clang/AST/ParentMapContext.h"
 #include "clang/AST/LexicallyOrderedRecursiveASTVisitor.h"
 #include "clang/Lex/Lexer.h"
 #include "llvm/ADT/PriorityQueue.h"
@@ -685,34 +685,34 @@ bool Node::isMacro() const {
   return ASTNode.getSourceRange().getBegin().isMacroID();
 }
 
-llvm::Optional<std::string> Node::getQualifiedIdentifier() const {
+std::optional<std::string> Node::getQualifiedIdentifier() const {
   if (isMacro())
-    return llvm::None;
+    return std::nullopt;
   if (auto *ND = ASTNode.get<NamedDecl>()) {
     if (ND->getDeclName().isIdentifier())
       return ND->getQualifiedNameAsString();
     else
       return std::string();
   }
-  return llvm::None;
+  return std::nullopt;
 }
 
-llvm::Optional<StringRef> Node::getIdentifier() const {
+std::optional<StringRef> Node::getIdentifier() const {
   if (isMacro())
-    return llvm::None;
+    return std::nullopt;
   if (auto *ND = ASTNode.get<NamedDecl>()) {
     if (ND->getDeclName().isIdentifier())
       return ND->getName();
     else
       return StringRef();
   }
-  return llvm::None;
+  return std::nullopt;
 }
 
 
 static std::string getInitializerValue(const CXXCtorInitializer *Init, const PrintingPolicy &TypePP) {
   if (Init->isAnyMemberInitializer())
-    return Init->getAnyMember()->getName();
+    return Init->getAnyMember()->getName().str();
   if (Init->isBaseInitializer())
     return QualType(Init->getBaseClass(), 0).getAsString(TypePP);
   if (Init->isDelegatingInitializer())
@@ -754,8 +754,8 @@ std::string Node::getFileName() const {
   FileID fileID = SM.getFileID(EndLoc);
   const FileEntry *fileEntry = SM.getFileEntryForID(fileID);
   
-  if (fileEntry->isValid())
-    return fileEntry->getName();
+  if (fileEntry)
+    return fileEntry->getName().str();
   return "";
 
 }
@@ -780,13 +780,13 @@ std::string Node::getValue() const {
 
 std::string Node::getMacroValue() const {
   return Lexer::getSourceText(getSourceRange(), Tree.AST.getSourceManager(),
-                                Tree.AST.getLangOpts());
+                                Tree.AST.getLangOpts()).str();
   
 }
 
 std::string Node::getTypeValue(const TypeLoc *D) const {
   return Lexer::getSourceText(getSourceRange(), Tree.AST.getSourceManager(),
-                                Tree.AST.getLangOpts());
+                                Tree.AST.getLangOpts()).str();
   
 }
 
@@ -821,11 +821,11 @@ std::string Node::getDeclValue(const Decl *D) const {
           T->getTypeForDecl()->getCanonicalTypeInternal().getAsString(Tree.TypePP) +
           ";";
   if (auto *U = dyn_cast<UsingDirectiveDecl>(D))
-    return U->getNominatedNamespace()->getName();
+    return U->getNominatedNamespace()->getName().str();
   if (auto *A = dyn_cast<AccessSpecDecl>(D)) {
     CharSourceRange Range(A->getSourceRange(), false);
     return Lexer::getSourceText(Range, Tree.AST.getSourceManager(),
-                                Tree.AST.getLangOpts());
+                                Tree.AST.getLangOpts()).str();
   }
   return Value;
 }
@@ -845,9 +845,9 @@ const DeclContext *Node::getEnclosingDeclContext(ASTContext &AST, const Stmt *S)
 
 std::string Node::getStmtValue(const Stmt *S) const {
   if (auto *U = dyn_cast<UnaryOperator>(S))
-    return UnaryOperator::getOpcodeStr(U->getOpcode());
+    return UnaryOperator::getOpcodeStr(U->getOpcode()).str();
   if (auto *B = dyn_cast<BinaryOperator>(S))
-    return B->getOpcodeStr();
+    return B->getOpcodeStr().str();
   if (auto *G = ASTNode.get<GotoStmt>())
       return G->getLabel()->getStmt()->getName();
   if (auto *M = dyn_cast<MemberExpr>(S))
@@ -855,17 +855,17 @@ std::string Node::getStmtValue(const Stmt *S) const {
   if (auto *I = dyn_cast<IntegerLiteral>(S)) {
     SmallString<256> Str;
     I->getValue().toString(Str, /*Radix=*/10, /*Signed=*/false);
-    return Str.str();
+    return Str.str().str();
   }
   if (auto *F = dyn_cast<FloatingLiteral>(S)) {
     SmallString<256> Str;
     F->getValue().toString(Str);
-    return Str.str();
+    return Str.str().str();
   }
   if (auto *D = dyn_cast<DeclRefExpr>(S))
     return getRelativeName(D->getDecl(), getEnclosingDeclContext(Tree.AST.getASTContext(), S));
   if (auto *String = dyn_cast<StringLiteral>(S))
-    return String->getString();
+    return String->getString().str();
   if (auto *B = dyn_cast<CXXBoolLiteralExpr>(S))
     return B->getValue() ? "true" : "false";
   return "";
@@ -1044,7 +1044,7 @@ CharSourceRange Node::findRangeForDeletion() const {
       CommaLoc = Parent.getChild(SiblingIndex - 1).getSourceRange().getEnd();
       Range.setBegin(CommaLoc);
     } else {
-      Optional<Token> Comma =
+      std::optional <Token> Comma =
           Lexer::findNextToken(Range.getEnd(), SM, LangOpts);
       if (Comma && Comma->is(tok::comma))
         Range.setEnd(Comma->getEndLoc());

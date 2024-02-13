@@ -81,7 +81,7 @@ namespace clang {
                 SmallVector<unsigned, 4> ChildrenOffsets;
 
                 // This contains the text of this node, but not the text of it's children.
-                Optional <std::string> OwnText;
+                std::optional <std::string> OwnText;
 
                 PatchedTreeNode(NodeRef BaseNode) : BaseNode(BaseNode) {}
 
@@ -282,7 +282,7 @@ namespace clang {
                 }
 
                 Error addReplacement(Replacement &&R) {
-                    return TargetTool.getReplacements()[R.getFilePath()].add(R);
+                    return TargetTool.getReplacements()[R.getFilePath().str()].add(R);
                 }
 
                 bool isFromTarget(NodeRef N) const { return &N.getTree() == &Target; }
@@ -561,7 +561,7 @@ namespace clang {
             assert(!Failure);
             return Lexer::getSourceText(
                     CharSourceRange::getCharRange({Loc, NextToken.getLocation()}),
-                    Tree.getSourceManager(), Tree.getLangOpts());
+                    Tree.getSourceManager(), Tree.getLangOpts()).str();
         }
 
         std::string Patcher::buildSourceText(PatchedTreeNode &PatchedNode) {
@@ -575,7 +575,7 @@ namespace clang {
             assert(!isRemoved(PatchedNode));
             if (!PatchedNode.Changed ||
                 (isFromDst(PatchedNode) && AtomicInsertions[PatchedNode.getId()])) {
-                std::string Text = Lexer::getSourceText(Range, MySM, MyLangOpts);
+                std::string Text = Lexer::getSourceText(Range, MySM, MyLangOpts).str();
                 // TODO why
                 if (!isFromDst(PatchedNode))
                     Text += trailingText(Range.getEnd(), Tree);
@@ -628,7 +628,7 @@ namespace clang {
                     llvm_unreachable("Not implemented.");
                 } else {
                     *OwnText += Lexer::getSourceText(MySubRange, Tree.getSourceManager(),
-                                                     Tree.getLangOpts());
+                                                     Tree.getLangOpts()).str();
                 }
             }
             while (ChildIndex++ < NumChildren)
@@ -903,7 +903,7 @@ namespace clang {
 //                    range.setEnd(binOpNode->getRHS()->getEndLoc());
                     Rewrite.RemoveText(range);
                 } else {
-                    std::string binOp = binOpNode->getOpcodeStr();
+                    std::string binOp = binOpNode->getOpcodeStr().str();
                     Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
 
                 }
@@ -916,7 +916,7 @@ namespace clang {
 //                    range.setEnd(binOpNode->getRHS()->getEndLoc());
                     Rewrite.RemoveText(range);
                 } else {
-                    std::string binOp = binOpNode->getOpcodeStr();
+                    std::string binOp = binOpNode->getOpcodeStr().str();
                     Rewrite.RemoveText(binOpNode->getOperatorLoc(), binOp.length());
 
                 }
@@ -934,7 +934,7 @@ namespace clang {
                     CharSourceRange targetRange = targetParentNode.getSourceRange();
                     std::string call_statement = Lexer::getSourceText(targetRange,
                                                                       TargetTree.getSourceManager(),
-                                                                      TargetTree.getLangOpts());
+                                                                      TargetTree.getLangOpts()).str();
                     std::string argName = deleteNode.getValue();
                     std::size_t posDecl = call_statement.find(argName);
                     std::size_t posComma = call_statement.find(",", posDecl);
@@ -1000,7 +1000,7 @@ namespace clang {
                 if (targetParentNode.getTypeLabel() == "DeclStmt") {
                     auto declNode = deleteNode.ASTNode.get<VarDecl>();
                     std::string decl_statement =  Lexer::getSourceText(targetParentNode.getSourceRange(), TargetTree.getSourceManager(),
-                                                                       TargetTree.getLangOpts());
+                                                                       TargetTree.getLangOpts()).str();
                     std::string varName = deleteNode.getIdentifier()->str();
                     std::size_t posDecl = decl_statement.find(varName);
                     std::size_t posComma = decl_statement.find(",",posDecl);
@@ -1037,7 +1037,7 @@ namespace clang {
                 auto NodeIndex = deleteNode.findPositionInParent();
                 if (NodeIndex == 1){
                     std::string decl_statement = Lexer::getSourceText(parentNode.getSourceRange(), TargetTree.getSourceManager(),
-                                                                      TargetTree.getLangOpts());
+                                                                      TargetTree.getLangOpts()).str();
                     decl_statement = Rewrite.getRewrittenText(range);
                     std::size_t posInit = decl_statement.find("=");
 
@@ -1082,7 +1082,7 @@ namespace clang {
 
             extractRange = expandRange(extractRange, SourceTree);
             insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
-                                                   SourceTree.getLangOpts());
+                                                   SourceTree.getLangOpts()).str();
             insertStatement = " " + insertStatement + " ";
 
             if (insertNode.getTypeLabel() == "FunctionDecl") {
@@ -1095,7 +1095,7 @@ namespace clang {
                 extractRange.setEnd(ifNode->getThen()->getBeginLoc());
 
                 insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
-                                                       SourceTree.getLangOpts());
+                                                       SourceTree.getLangOpts()).str();
             }
 
             // llvm::outs() << "statement before translation: " << insertStatement << "\n";
@@ -1334,7 +1334,7 @@ namespace clang {
                     int numChildren = targetNode.getNumChildren();
                     extractRange = insertNode.getSourceRange();
                     insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
-                                                           SourceTree.getLangOpts());
+                                                           SourceTree.getLangOpts()).str();
 
                     // llvm::outs() << insertStatement << "\n";
                     // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
@@ -1370,7 +1370,7 @@ namespace clang {
                     int numChildren = targetNode.getNumChildren();
                     extractRange = insertNode.getSourceRange();
                     insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
-                                                           SourceTree.getLangOpts());
+                                                           SourceTree.getLangOpts()).str();
 
                     if (Offset < numChildren) {
                         insertStatement = insertStatement + " \n";
@@ -1400,7 +1400,7 @@ namespace clang {
                     int numChildren = targetNode.getNumChildren();
                     extractRange = insertNode.getSourceRange();
                     insertStatement = Lexer::getSourceText(extractRange, SourceTree.getSourceManager(),
-                                                           SourceTree.getLangOpts());
+                                                           SourceTree.getLangOpts()).str();
 
                     // llvm::outs() << insertStatement << "\n";
                     // llvm::outs() << insertLoc.printToString(Target.getSourceManager()) << "\n";
@@ -1515,8 +1515,8 @@ namespace clang {
 //                range.setBegin(startLoc);
 //            }
 
-        std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts());
-        std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts());
+        std::string targetValue = Lexer::getSourceText(targetRange, TargetTree.getSourceManager(), TargetTree.getLangOpts()).str();
+        std::string srcValue = Lexer::getSourceText(srcRange, SourceTree.getSourceManager(), SourceTree.getLangOpts()).str();
         std::string oldstatement = targetValue;
 //            llvm::outs() << targetValue << "\n";
 //            llvm::outs() << srcValue << "\n";
@@ -1559,7 +1559,7 @@ namespace clang {
                  NodeRef parentNode = *targetNode.getParent();
                  targetRange = parentNode.getSourceRange();
                  std::string parentstatement = Lexer::getSourceText(targetRange, Target.getSourceManager(),
-                                                                    Target.getLangOpts());
+                                                                    Target.getLangOpts()).str();
                  replaceSubString(parentstatement, oldstatement, statement);
                  if (!Rewrite.ReplaceText(targetRange, parentstatement))
                      modified = true;
@@ -1655,9 +1655,9 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     } else if (targetNode.getTypeLabel() == "IntegerLiteral") {
 
         updateValue = Lexer::getSourceText(updateNode.getSourceRange(), SourceTree.getSourceManager(),
-                                           SourceTree.getLangOpts());
+                                           SourceTree.getLangOpts()).str();
         oldValue = Lexer::getSourceText(targetNode.getSourceRange(), TargetTree.getSourceManager(),
-                                        TargetTree.getLangOpts());
+                                        TargetTree.getLangOpts()).str();
 
     }
 
@@ -1678,7 +1678,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
     if (!updateValue.empty()) {
 
         std::string statement = Lexer::getSourceText(range, Target.getSourceManager(),
-                                                     Target.getLangOpts());
+                                                     Target.getLangOpts()).str();
         statement = Rewrite.getRewrittenText(range);
         std::string oldstatement = statement;
         if (targetNode.getTypeLabel() == "StringLiteral")
@@ -1702,7 +1702,7 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
                 NodeRef parentNode = *targetNode.getParent();
                 range = parentNode.getSourceRange();
                 std::string parentstatement = Lexer::getSourceText(range, Target.getSourceManager(),
-                                                                   Target.getLangOpts());
+                                                                   Target.getLangOpts()).str();
                 replaceSubString(parentstatement, oldstatement, statement);
                 if (!Rewrite.ReplaceText(range, parentstatement))
                     modified = true;
@@ -1729,11 +1729,11 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
 
 
         std::string oldstatement = Lexer::getSourceText(targetRange, Target.getSourceManager(),
-                                                        Target.getLangOpts());
+                                                        Target.getLangOpts()).str();
 
 
         std::string newstatement = Lexer::getSourceText(sourceRange, SourceTree.getSourceManager(),
-                                                        SourceTree.getLangOpts());
+                                                        SourceTree.getLangOpts()).str();
 
         if (Rewrite.RemoveText(targetRange))
             modified = false;
@@ -1745,12 +1745,12 @@ bool Patcher::updateCode(NodeRef updateNode, NodeRef targetNode, SyntaxTree &Sou
         CharSourceRange sourceRange = updateNode.getSourceRange();;
         CharSourceRange targetRange = range;
         std::string oldstatement = Lexer::getSourceText(range, Target.getSourceManager(),
-                                                        Target.getLangOpts());
+                                                        Target.getLangOpts()).str();
 
         // llvm::outs() << "old statement" << "\n";
         // llvm::outs() << oldstatement << "\n";
         std::string newstatement = Lexer::getSourceText(sourceRange, SourceTree.getSourceManager(),
-                                                        SourceTree.getLangOpts());
+                                                        SourceTree.getLangOpts()).str();
         // llvm::outs() << "new statement" << "\n";
         // llvm::outs() << newstatement << "\n";
 
