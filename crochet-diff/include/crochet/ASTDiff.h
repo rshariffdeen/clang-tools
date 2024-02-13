@@ -133,8 +133,8 @@ struct Node {
   StringRef getTypeLabel() const;
   bool isLeaf() const { return Children.empty(); }
   bool isMacro() const;
-  llvm::Optional<StringRef> getIdentifier() const;
-  llvm::Optional<std::string> getQualifiedIdentifier() const;
+  std::optional<StringRef> getIdentifier() const;
+  std::optional<std::string> getQualifiedIdentifier() const;
 
   NodeRefIterator begin() const;
   NodeRefIterator end() const;

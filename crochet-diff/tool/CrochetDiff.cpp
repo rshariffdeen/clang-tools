@@ -157,7 +157,7 @@ getCompilationDatabase(StringRef Filename) {
 static std::unique_ptr <ASTUnit>
 getAST(const std::unique_ptr <CompilationDatabase> &CommonCompilations,
        const StringRef Filename) {
-    std::array<std::string, 1> Files = {{Filename}};
+    std::array<std::string, 1> Files = {{Filename.str()}};
     std::unique_ptr <CompilationDatabase> FileCompilations;
     if (!CommonCompilations)
         FileCompilations = getCompilationDatabase(Filename);
@@ -347,7 +347,7 @@ static unsigned printHtmlForNode(raw_ostream &OS, const diff::ASTDiff &Diff,
     }
     unsigned Begin, End;
     std::tie(Begin, End) = Node.getSourceRangeOffsets();
-    auto Code = SM.getBuffer(SM.getMainFileID())->getBuffer();
+    // auto Code = SM.getBuffer(SM.getMainFileID())->getBuffer();
     for (; Offset < Begin; ++Offset)
         printHtml(OS, Code[Offset]);
     OS << "<span id='" << MyTag << Node.getId() << "' "
