@@ -347,7 +347,7 @@ static unsigned printHtmlForNode(raw_ostream &OS, const diff::ASTDiff &Diff,
     }
     unsigned Begin, End;
     std::tie(Begin, End) = Node.getSourceRangeOffsets();
-    // auto Code = SM.getBuffer(SM.getMainFileID())->getBuffer();
+    auto Code = SM.getBufferorNone(SM.getMainFileID())->getBuffer();
     for (; Offset < Begin; ++Offset)
         printHtml(OS, Code[Offset]);
     OS << "<span id='" << MyTag << Node.getId() << "' "
